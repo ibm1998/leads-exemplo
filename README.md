@@ -1,97 +1,217 @@
-# Agentic Lead Management System
+# 🤖 Agentic Lead Management System
 
-An autonomous AI team system designed to function as a complete sales, customer service, and marketing organization for real estate businesses.
+> An autonomous AI team system that functions as a complete sales, customer service, and marketing organization for real estate businesses.
 
-## Project Structure
+## 🎯 Overview
+
+This system creates an **autonomous AI team** with specialized agents that manage the entire customer journey - from lead capture to post-sale retention - while continuously optimizing performance through machine learning feedback loops.
+
+### Key Capabilities
+
+- **⚡ 60-Second Response Time** - Virtual Sales Assistant calls hot leads within 60 seconds
+- **🧠 Intelligent Routing** - AI Head Agent analyzes and routes leads to specialized workflows
+- **🔄 Continuous Optimization** - System learns and improves conversion rates automatically
+- **📞 Multi-Channel Communication** - Voice, SMS, Email, WhatsApp integration
+- **📊 Deep CRM Integration** - Real-time GoHighLevel synchronization
+- **🎯 Specialized AI Agents** - Each agent handles specific aspects of the customer journey
+
+## 🏗️ System Architecture
+
+### Command Structure
+
+- **Chief Agent** - System overseer and human interface
+- **AI Head Agent** - Operational manager and lead dispatcher
+
+### Specialized Agents
+
+- **Virtual Sales Assistant** - Voice qualification and appointment booking
+- **Customer Retention Agent** - Re-engagement of inactive customers
+- **Review & Feedback Collector** - Post-sale feedback and reputation management
+- **Lead Generation Agent** - Cold/warm lead outreach
+- **Appointment Coordinator** - Complex workflow and booking management
+- **CRM Management Agent** - Data synchronization and pipeline management
+- **Customer Analytics Agent** - Performance tracking and optimization insights
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 14+
+- Redis 6+
+- GoHighLevel API access
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd agentic-lead-management
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your API keys and configuration
+
+# Set up database
+npm run db:migrate
+npm run db:seed
+
+# Start development server
+npm run dev
+```
+
+## 🛠️ Tech Stack
+
+| Component         | Technology                          |
+| ----------------- | ----------------------------------- |
+| **Runtime**       | Node.js + TypeScript                |
+| **Database**      | PostgreSQL + Redis                  |
+| **CRM**           | GoHighLevel API                     |
+| **Orchestration** | n8n Workflows                       |
+| **Voice AI**      | ElevenLabs                          |
+| **Communication** | Twilio, SendGrid, WhatsApp Business |
+| **Testing**       | Vitest                              |
+| **Deployment**    | Docker + CI/CD                      |
+
+## 📁 Project Structure
 
 ```
 src/
-├── config/           # Environment configuration and validation
-├── database/         # Database management, migrations, and seeding
-├── types/           # TypeScript type definitions and schemas
-├── utils/           # Utility functions (logging, etc.)
-└── index.ts         # Main application entry point
+├── config/              # Environment configuration
+├── database/            # Database management & migrations
+├── integrations/        # External service integrations
+│   └── gohighlevel/    # GoHighLevel CRM integration
+├── types/              # TypeScript definitions
+├── utils/              # Shared utilities
+└── index.ts            # Application entry point
+
+.kiro/specs/agentic-lead-management/
+├── requirements.md     # Detailed system requirements
+├── design.md          # Technical architecture design
+└── tasks.md           # Implementation task breakdown
 ```
 
-## Setup
+## 🔧 Development Commands
 
-1. **Install Dependencies**
+```bash
+npm run dev          # Start development server with hot reload
+npm run build        # Build for production
+npm run test         # Run test suite
+npm run test:watch   # Run tests in watch mode
+npm run db:migrate   # Run database migrations
+npm run db:seed      # Seed initial data
+```
 
-   ```bash
-   npm install
-   ```
+## 🎯 Implementation Roadmap
 
-2. **Environment Configuration**
+The system is built through 20 carefully sequenced tasks:
 
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database and service credentials
-   ```
+1. **Foundation** (Tasks 1-6) - Core infrastructure and AI Head Agent
+2. **Specialized Agents** (Tasks 7-11) - Voice AI, retention, outbound processing
+3. **Support Systems** (Tasks 12-14) - CRM management and analytics
+4. **Integration** (Tasks 15-20) - Communication channels and deployment
 
-3. **Database Setup**
+See [tasks.md](.kiro/specs/agentic-lead-management/tasks.md) for detailed implementation plan.
 
-   - Ensure PostgreSQL is running
-   - Ensure Redis is running
-   - Run migrations:
+## 🔐 Environment Variables
 
-   ```bash
-   npm run db:migrate
-   ```
+```bash
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/agentic_leads
+REDIS_URL=redis://localhost:6379
 
-4. **Seed Sample Data** (optional)
-   ```bash
-   npm run db:seed
-   ```
+# GoHighLevel CRM
+GHL_API_KEY=your_ghl_api_key
+GHL_BASE_URL=https://rest.gohighlevel.com/v1
 
-## Development
+# Voice AI
+ELEVENLABS_API_KEY=your_elevenlabs_key
 
-- **Build**: `npm run build`
-- **Development**: `npm run dev`
-- **Test**: `npm test`
-- **Test Watch**: `npm run test:watch`
+# Communication
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+SENDGRID_API_KEY=your_sendgrid_key
+WHATSAPP_TOKEN=your_whatsapp_token
 
-## Database Schema
+# n8n Orchestration
+N8N_WEBHOOK_URL=your_n8n_webhook_url
+```
 
-### Tables Created:
+## 📊 Key Features
 
-- **leads**: Core lead information with contact details and qualification data
-- **interactions**: All agent-lead interactions with outcomes and sentiment
-- **agent_performance**: Performance metrics and optimization data
-- **migrations**: Database migration tracking
+### Inbound Workflows
 
-### Key Features:
+- **Hot Lead Processing** - Immediate voice qualification within 60 seconds
+- **Customer Re-engagement** - Automated outreach to inactive customers (60+ days)
+- **Post-Sale Feedback** - Review collection and issue escalation
 
-- UUID primary keys for all entities
-- Comprehensive indexing for performance
-- Automatic timestamp management
-- Data validation constraints
-- Foreign key relationships
+### Outbound Workflows
 
-## Configuration
+- **Cold Lead Follow-up** - Personalized sequences for non-responsive leads
+- **Campaign Outreach** - Automated promotion and event marketing
+- **Warm Lead Re-engagement** - Context-aware follow-ups based on history
 
-The system uses environment variables for configuration with validation via Zod schemas:
+### Optimization Engine
 
-- Database connection settings
-- Redis configuration
-- API keys for external services
-- System performance parameters
-- Logging configuration
+- **Performance Analytics** - Conversion rates, script effectiveness, timing optimization
+- **Automatic Adjustments** - Self-improving routing rules and agent scripts
+- **A/B Testing** - Continuous optimization of messaging and timing
 
-## Requirements Addressed
+## 🧪 Testing
 
-- **Requirement 9.1**: CRM integration foundation with PostgreSQL schema
-- **Requirement 12.1**: Basic configuration management and environment setup
-- **Requirement 12.4**: Data validation and error handling infrastructure
+```bash
+# Run all tests
+npm test
 
-## Next Steps
+# Run specific test suites
+npm test -- --grep "GoHighLevel"
+npm test -- --grep "Lead Processing"
 
-This foundation provides:
+# Run tests with coverage
+npm test -- --coverage
+```
 
-- ✅ TypeScript project structure
-- ✅ Database schema for leads, interactions, and performance data
-- ✅ Configuration management with validation
-- ✅ Logging infrastructure
-- ✅ Basic testing setup
-- ✅ Migration and seeding utilities
+## 🚀 Deployment
 
-Ready for implementing core data models and validation (Task 2).
+The system supports containerized deployment:
+
+```bash
+# Build Docker image
+docker build -t agentic-lead-management .
+
+# Run with docker-compose
+docker-compose up -d
+```
+
+## 📈 Monitoring
+
+- **Real-time Dashboards** - Agent performance and system health
+- **Automated Alerts** - Critical failure notifications
+- **Performance Metrics** - Conversion tracking and optimization insights
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For questions about implementation or deployment, please refer to:
+
+- [Requirements Document](.kiro/specs/agentic-lead-management/requirements.md)
+- [Design Document](.kiro/specs/agentic-lead-management/design.md)
+- [Implementation Tasks](.kiro/specs/agentic-lead-management/tasks.md)
+
+---
+
+**Built with ❤️ for autonomous AI-driven business growth**
