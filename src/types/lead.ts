@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   ValidationResult,
   validateData,
-  validateOrThrow,
   generateUUID,
   isValidEmail,
   isValidPhone,
@@ -51,7 +50,14 @@ export const ContactInfoSchema = z.object({
   }),
 });
 
-export type ContactInfo = z.infer<typeof ContactInfoSchema>;
+// Define the actual ContactInfo type with required defaults
+export type ContactInfo = {
+  name: string;
+  email?: string;
+  phone?: string;
+  preferredChannel: "email" | "sms" | "voice" | "whatsapp";
+  timezone: string;
+};
 
 // Budget range schema
 export const BudgetRangeSchema = z
@@ -74,7 +80,14 @@ export const QualificationDataSchema = z.object({
   qualificationScore: z.number().min(0).max(1).default(0),
 });
 
-export type QualificationData = z.infer<typeof QualificationDataSchema>;
+// Define the actual QualificationData type with required defaults
+export type QualificationData = {
+  budget?: BudgetRange;
+  location?: string;
+  propertyType?: string;
+  timeline?: string;
+  qualificationScore: number;
+};
 
 // Lead status enum
 export const LeadStatusSchema = z.enum([
@@ -133,28 +146,44 @@ export const LeadValidation = {
    * Validate a complete lead object
    */
   validateLead(data: unknown): ValidationResult<Lead> {
-    return validateData(LeadSchema, data, "Lead validation");
+    return validateData(
+      LeadSchema,
+      data,
+      "Lead validation"
+    ) as ValidationResult<Lead>;
   },
 
   /**
    * Validate lead creation data
    */
   validateCreateLead(data: unknown): ValidationResult<CreateLead> {
-    return validateData(CreateLeadSchema, data, "Create lead validation");
+    return validateData(
+      CreateLeadSchema,
+      data,
+      "Create lead validation"
+    ) as ValidationResult<CreateLead>;
   },
 
   /**
    * Validate lead update data
    */
   validateUpdateLead(data: unknown): ValidationResult<UpdateLead> {
-    return validateData(UpdateLeadSchema, data, "Update lead validation");
+    return validateData(
+      UpdateLeadSchema,
+      data,
+      "Update lead validation"
+    ) as ValidationResult<UpdateLead>;
   },
 
   /**
    * Validate contact information
    */
   validateContactInfo(data: unknown): ValidationResult<ContactInfo> {
-    return validateData(ContactInfoSchema, data, "Contact info validation");
+    return validateData(
+      ContactInfoSchema,
+      data,
+      "Contact info validation"
+    ) as ValidationResult<ContactInfo>;
   },
 
   /**
@@ -167,7 +196,7 @@ export const LeadValidation = {
       QualificationDataSchema,
       data,
       "Qualification data validation"
-    );
+    ) as ValidationResult<QualificationData>;
   },
 
   /**
