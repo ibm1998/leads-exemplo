@@ -470,7 +470,7 @@ describe("AIAppointmentWorkflowCoordinator", () => {
       const reminderSequences = (coordinator as any).reminderSequences;
       const sequence = Array.from(reminderSequences.values()).find(
         (rs: any) => rs.appointmentId === appointment.id
-      );
+      ) as any;
 
       expect(sequence).toBeDefined();
       expect(sequence.status).toBe("active");

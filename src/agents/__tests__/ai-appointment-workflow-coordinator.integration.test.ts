@@ -26,6 +26,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       },
       leadType: "hot",
       urgencyLevel: 8,
+      intentSignals: ["property_inquiry", "budget_discussed"],
       qualificationData: {
         budget: { min: 100000, max: 500000 },
         location: "New York",
@@ -124,7 +125,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       const reminderSequences = (coordinator as any).reminderSequences;
       const sequence = Array.from(reminderSequences.values()).find(
         (rs: any) => rs.appointmentId === appointment.id
-      );
+      ) as any;
 
       expect(sequence).toBeDefined();
       expect(sequence.status).toBe("active");
@@ -485,7 +486,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
         .mockImplementation(() => {});
 
       // Execute campaign steps
-      const results = [];
+      const results: boolean[] = [];
       for (const step of campaign.steps) {
         const success = await coordinator.executeCampaignStep(
           campaign.id,
@@ -541,7 +542,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
 
       // Execute all campaigns concurrently for multiple leads
       const leads = ["lead-1", "lead-2", "lead-3"];
-      const promises = [];
+      const promises: Promise<boolean>[] = [];
 
       for (const campaign of campaigns) {
         for (const leadId of leads) {
