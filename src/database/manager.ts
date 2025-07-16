@@ -179,6 +179,21 @@ export class DatabaseManager {
         )
       `);
 
+      // Create audit_logs table for comprehensive audit trail
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS audit_logs (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          entity_type VARCHAR(50) NOT NULL CHECK (entity_type IN ('lead', 'interaction', 'sync')),
+          entity_id VARCHAR(255) NOT NULL,
+          action VARCHAR(50) NOT NULL CHECK (action IN ('create', 'update', 'delete', 'sync')),
+          changes JSONB NOT NULL,
+          user_id VARCHAR(100),
+          agent_id VARCHAR(100) NOT NULL,
+          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          metadata JSONB DEFAULT '{}'::jsonb
+        )
+      `);
+
       // Create indexes for better performance
       await client.query(
         "CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source)"
@@ -206,6 +221,15 @@ export class DatabaseManager {
       );
       await client.query(
         "CREATE INDEX IF NOT EXISTS idx_agent_performance_period ON agent_performance(period_start, period_end)"
+      );
+      await client.query(
+        "CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id)"
+      );
+      await client.query(
+        "CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp)"
+      );
+      await client.query(
+        "CREATE INDEX IF NOT EXISTS idx_audit_logs_agent_id ON audit_logs(agent_id)"
       );
 
       // Create updated_at trigger function
