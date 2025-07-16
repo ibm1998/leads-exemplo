@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { CustomerRetentionAgent } from "../customer-retention-agent";
+import {
+  CustomerRetentionAgent,
+  EngagementAnalysis,
+} from "../customer-retention-agent";
 import { Lead, LeadModel } from "../../types/lead";
 import { Interaction, InteractionModel } from "../../types/interaction";
 
@@ -269,8 +272,15 @@ describe("CustomerRetentionAgent", () => {
         },
       };
 
-      const analysis = {
+      const analysis: EngagementAnalysis = {
+        leadId: "test-lead-id",
         daysSinceLastInteraction: 65,
+        totalInteractions: 1,
+        preferredChannel: "email",
+        bestContactTime: "10:00 AM",
+        engagementScore: 0.7,
+        personalizedFactors: ["Interested in Downtown", "Looking for Condo"],
+        riskLevel: "medium",
       };
 
       const personalizedMessage = await agent.personalizeMessage(
