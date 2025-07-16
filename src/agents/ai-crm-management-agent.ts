@@ -2,7 +2,7 @@ import { DatabaseManager } from "../database/manager";
 import { GoHighLevelSync } from "../integrations/gohighlevel/sync";
 import { GoHighLevelClient } from "../integrations/gohighlevel/client";
 import { Lead, LeadModel, LeadStatus } from "../types/lead";
-import { Interaction, InteractionModel } from "../types/interaction";
+import { Interaction } from "../types/interaction";
 import { logger } from "../utils/logger";
 
 export interface CRMSyncResult {
@@ -384,6 +384,8 @@ export class AICRMManagementAgent {
   private async performInteractionSync(
     interaction: Interaction
   ): Promise<CRMSyncResult> {
+    const syncStartTime = Date.now();
+
     // Store interaction in database
     await this.storeInteractionInDatabase(interaction);
 
@@ -401,9 +403,12 @@ export class AICRMManagementAgent {
     // Sync interaction to GoHighLevel
     await this.ghlSync.syncInteractionToGHL(interaction, contactId);
 
+    const syncTime = Date.now() - syncStartTime;
+
     return {
       success: true,
       contactId,
+      syncTime,
     };
   }
 
