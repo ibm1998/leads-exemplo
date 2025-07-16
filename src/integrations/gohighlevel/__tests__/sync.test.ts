@@ -9,7 +9,7 @@ vi.mock("../client");
 
 describe("GoHighLevelSync", () => {
   let sync: GoHighLevelSync;
-  let mockClient: vi.Mocked<GoHighLevelClient>;
+  let mockClient: any;
 
   beforeEach(() => {
     mockClient = {
@@ -44,13 +44,12 @@ describe("GoHighLevelSync", () => {
       urgencyLevel: 8,
       intentSignals: ["ready-to-buy", "budget-confirmed"],
       qualificationData: {
-        budget: "300k",
+        budget: { min: 250000, max: 350000 },
         location: "New York",
         propertyType: "condo",
         timeline: "3 months",
-        qualificationScore: 85,
+        qualificationScore: 0.85,
       },
-      interactionHistory: [],
       status: "new",
       assignedAgent: "agent-1",
       createdAt: new Date("2024-01-01"),
@@ -118,9 +117,11 @@ describe("GoHighLevelSync", () => {
     });
 
     it("should handle leads without qualification data", async () => {
-      const leadWithoutQualification = {
+      const leadWithoutQualification: Lead = {
         ...mockLead,
-        qualificationData: undefined,
+        qualificationData: {
+          qualificationScore: 0,
+        },
       };
 
       mockClient.get.mockResolvedValueOnce({ data: { contacts: [] } });
@@ -280,7 +281,9 @@ describe("GoHighLevelSync", () => {
         leadType: "hot",
         urgencyLevel: 8,
         intentSignals: [],
-        interactionHistory: [],
+        qualificationData: {
+          qualificationScore: 0.8,
+        },
         status: "new",
         assignedAgent: "agent-1",
         createdAt: new Date(),
@@ -288,7 +291,7 @@ describe("GoHighLevelSync", () => {
       },
       {
         id: "lead-2",
-        source: "social",
+        source: "third_party",
         contactInfo: {
           name: "Jane Smith",
           email: "jane@example.com",
@@ -298,7 +301,9 @@ describe("GoHighLevelSync", () => {
         leadType: "warm",
         urgencyLevel: 6,
         intentSignals: [],
-        interactionHistory: [],
+        qualificationData: {
+          qualificationScore: 0.6,
+        },
         status: "new",
         assignedAgent: "agent-2",
         createdAt: new Date(),
@@ -314,7 +319,9 @@ describe("GoHighLevelSync", () => {
 
       mockClient.post
         .mockResolvedValueOnce({ data: { id: "contact-1" } }) // create contact for lead-1
-        .mockResolvedValueOnce({ data: { id: "contact-2" } }); // create contact for lead-2
+        .mockResolvedValueOnce({ data: { id: "opp-1" } }) // create opportunity for lead-1
+        .mockResolvedValueOnce({ data: { id: "contact-2" } }) // create contact for lead-2
+        .mockResolvedValueOnce({ data: { id: "opp-2" } }); // create opportunity for lead-2
 
       const result = await sync.batchSyncLeads(mockLeads);
 
@@ -328,7 +335,9 @@ describe("GoHighLevelSync", () => {
         .mockResolvedValueOnce({ data: { contacts: [] } }) // lead-1 not found
         .mockRejectedValueOnce(new Error("API Error")); // lead-2 fails
 
-      mockClient.post.mockResolvedValueOnce({ data: { id: "contact-1" } }); // create contact for lead-1
+      mockClient.post
+        .mockResolvedValueOnce({ data: { id: "contact-1" } }) // create contact for lead-1
+        .mockResolvedValueOnce({ data: { id: "opp-1" } }); // create opportunity for lead-1
 
       const result = await sync.batchSyncLeads(mockLeads);
 
