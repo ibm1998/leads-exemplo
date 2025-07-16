@@ -83,7 +83,7 @@ export class GoHighLevelSync {
       }
 
       return contactId;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to sync lead ${lead.id} to GoHighLevel`, error);
       throw error;
     }
@@ -106,7 +106,7 @@ export class GoHighLevelSync {
       logger.info(
         `Created note for interaction ${interaction.id} in GoHighLevel`
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to sync interaction ${interaction.id} to GoHighLevel`,
         error
@@ -151,7 +151,7 @@ export class GoHighLevelSync {
       );
 
       return response.data.contacts?.[0] || null;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 404) {
         return null;
       }
@@ -171,7 +171,7 @@ export class GoHighLevelSync {
       );
 
       return response.data.contacts?.[0] || null;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 404) {
         return null;
       }
@@ -276,23 +276,14 @@ export class GoHighLevelSync {
     return stageMap[status] || "New Lead";
   }
 
-  private estimateOpportunityValue(budget?: string): number {
+  private estimateOpportunityValue(budget?: {
+    min?: number;
+    max?: number;
+  }): number {
     if (!budget) return 0;
 
-    // Simple budget parsing - in real implementation, this would be more sophisticated
-    const budgetLower = budget.toLowerCase();
-    if (budgetLower.includes("100k") || budgetLower.includes("100,000"))
-      return 100000;
-    if (budgetLower.includes("200k") || budgetLower.includes("200,000"))
-      return 200000;
-    if (budgetLower.includes("300k") || budgetLower.includes("300,000"))
-      return 300000;
-    if (budgetLower.includes("500k") || budgetLower.includes("500,000"))
-      return 500000;
-    if (budgetLower.includes("1m") || budgetLower.includes("1,000,000"))
-      return 1000000;
-
-    return 0;
+    // Use the max value if available, otherwise use min, otherwise return 0
+    return budget.max || budget.min || 0;
   }
 
   private formatInteractionNote(interaction: Interaction): string {
@@ -356,13 +347,19 @@ export class GoHighLevelSync {
     success: string[];
     failed: { leadId: string; error: string }[];
   }> {
-    const results = { success: [], failed: [] };
+    const results: {
+      success: string[];
+      failed: { leadId: string; error: string }[];
+    } = {
+      success: [],
+      failed: [],
+    };
 
     for (const lead of leads) {
       try {
         const contactId = await this.syncLeadToGHL(lead);
         results.success.push(contactId);
-      } catch (error) {
+      } catch (error: any) {
         results.failed.push({
           leadId: lead.id,
           error: error.message || "Unknown error",
@@ -382,13 +379,19 @@ export class GoHighLevelSync {
     success: number;
     failed: { interactionId: string; error: string }[];
   }> {
-    const results = { success: 0, failed: [] };
+    const results: {
+      success: number;
+      failed: { interactionId: string; error: string }[];
+    } = {
+      success: 0,
+      failed: [],
+    };
 
     for (const { interaction, contactId } of interactions) {
       try {
         await this.syncInteractionToGHL(interaction, contactId);
         results.success++;
-      } catch (error) {
+      } catch (error: any) {
         results.failed.push({
           interactionId: interaction.id,
           error: error.message || "Unknown error",
