@@ -42,13 +42,12 @@ describe("GoHighLevel Integration Tests", () => {
       urgencyLevel: 9,
       intentSignals: ["ready-to-buy", "budget-confirmed", "timeline-urgent"],
       qualificationData: {
-        budget: "500k",
+        budget: { min: 400000, max: 500000 },
         location: "Manhattan, NY",
         propertyType: "luxury-condo",
         timeline: "2 weeks",
-        qualificationScore: 95,
+        qualificationScore: 0.95,
       },
-      interactionHistory: [],
       status: "qualified",
       assignedAgent: "agent-premium",
       createdAt: new Date("2024-01-15T10:00:00Z"),
@@ -336,7 +335,7 @@ describe("GoHighLevel Integration Tests", () => {
 
       const complexLead: Lead = {
         id: "complex-lead-123",
-        source: "meta-ads",
+        source: "meta_ads",
         contactInfo: {
           name: "María José González-Smith",
           email: "maria.jose@example.com",
@@ -352,14 +351,13 @@ describe("GoHighLevel Integration Tests", () => {
           "first-time-buyer",
         ],
         qualificationData: {
-          budget: "250k-300k",
+          budget: { min: 250000, max: 300000 },
           location: "Los Angeles County",
           propertyType: "single-family",
           timeline: "6-12 months",
-          qualificationScore: 72,
+          qualificationScore: 0.72,
         },
-        interactionHistory: [],
-        status: "nurturing",
+        status: "contacted",
         assignedAgent: "agent-bilingual",
         createdAt: new Date("2024-01-10T08:30:00Z"),
         updatedAt: new Date("2024-01-12T16:45:00Z"),
@@ -389,8 +387,8 @@ describe("GoHighLevel Integration Tests", () => {
         leadId: "complex-lead-123",
         leadType: "warm",
         urgencyLevel: 7,
-        qualificationScore: 72,
-        budget: "250k-300k",
+        qualificationScore: 0.72,
+        budget: { min: 250000, max: 300000 },
         location: "Los Angeles County",
         propertyType: "single-family",
         timeline: "6-12 months",
@@ -401,7 +399,7 @@ describe("GoHighLevel Integration Tests", () => {
       // Verify tags
       expect(contactData.tags).toEqual([
         "warm",
-        "meta-ads",
+        "meta_ads",
         "price-sensitive",
         "location-flexible",
         "first-time-buyer",
@@ -426,7 +424,7 @@ describe("GoHighLevel Integration Tests", () => {
       // Lead with minimal data
       const minimalLead: Lead = {
         id: "minimal-lead-123",
-        source: "unknown",
+        source: "other",
         contactInfo: {
           name: "John",
           preferredChannel: "email",
@@ -435,7 +433,9 @@ describe("GoHighLevel Integration Tests", () => {
         leadType: "cold",
         urgencyLevel: 1,
         intentSignals: [],
-        interactionHistory: [],
+        qualificationData: {
+          qualificationScore: 0,
+        },
         status: "new",
         assignedAgent: "auto-assign",
         createdAt: new Date(),

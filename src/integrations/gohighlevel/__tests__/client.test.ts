@@ -4,7 +4,7 @@ import { GoHighLevelClient } from "../client";
 
 // Mock axios
 vi.mock("axios");
-const mockedAxios = vi.mocked(axios);
+const mockedAxios = axios as any;
 
 describe("GoHighLevelClient", () => {
   let client: GoHighLevelClient;
