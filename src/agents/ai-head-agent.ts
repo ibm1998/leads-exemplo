@@ -744,4 +744,103 @@ export class AIHeadAgent {
     this.performanceHistory.clear();
     this.routingHistory.clear();
   }
+
+  /**
+   * Receive optimization feedback and apply improvements
+   * This method is called by the ContinuousOptimizationLoop
+   */
+  async receiveOptimizationFeedback(feedback: {
+    routingAdjustments?: {
+      urgencyThresholds?: { high: number; medium: number };
+      intentThresholds?: { high: number; medium: number };
+      sourceQualityWeights?: Partial<Record<LeadSource, number>>;
+    };
+    newRoutingRules?: RoutingRule[];
+    ruleUpdates?: Array<{ ruleId: string; updates: Partial<RoutingRule> }>;
+    ruleRemovals?: string[];
+  }): Promise<void> {
+    try {
+      // Apply routing adjustments
+      if (feedback.routingAdjustments) {
+        const updates: Partial<AIHeadAgentConfig> = {};
+
+        if (feedback.routingAdjustments.urgencyThresholds) {
+          updates.urgencyThresholds =
+            feedback.routingAdjustments.urgencyThresholds;
+        }
+
+        if (feedback.routingAdjustments.intentThresholds) {
+          updates.intentThresholds =
+            feedback.routingAdjustments.intentThresholds;
+        }
+
+        if (feedback.routingAdjustments.sourceQualityWeights) {
+          updates.sourceQualityWeights = {
+            ...this.config.sourceQualityWeights,
+            ...feedback.routingAdjustments.sourceQualityWeights,
+          };
+        }
+
+        this.updateConfig(updates);
+      }
+
+      // Add new routing rules
+      if (feedback.newRoutingRules) {
+        for (const rule of feedback.newRoutingRules) {
+          this.addRoutingRule(rule);
+        }
+      }
+
+      // Update existing routing rules
+      if (feedback.ruleUpdates) {
+        for (const update of feedback.ruleUpdates) {
+          const existingRule = this.config.routingRules.find(
+            (r) => r.id === update.ruleId
+          );
+          if (existingRule) {
+            const updatedRule = { ...existingRule, ...update.updates };
+            this.addRoutingRule(updatedRule); // This will replace the existing rule
+          }
+        }
+      }
+
+      // Remove routing rules
+      if (feedback.ruleRemovals) {
+        for (const ruleId of feedback.ruleRemovals) {
+          this.removeRoutingRule(ruleId);
+        }
+      }
+
+      console.log("Applied optimization feedback to AI Head Agent");
+    } catch (error) {
+      console.error("Error applying optimization feedback:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current routing configuration for optimization analysis
+   */
+  getRoutingConfiguration(): {
+    urgencyThresholds: { high: number; medium: number };
+    intentThresholds: { high: number; medium: number };
+    sourceQualityWeights: Record<LeadSource, number>;
+    routingRules: RoutingRule[];
+    optimizationEnabled: boolean;
+  } {
+    return {
+      urgencyThresholds: { ...this.config.urgencyThresholds },
+      intentThresholds: { ...this.config.intentThresholds },
+      sourceQualityWeights: { ...this.config.sourceQualityWeights },
+      routingRules: [...this.config.routingRules],
+      optimizationEnabled: this.config.optimizationEnabled,
+    };
+  }
+
+  /**
+   * Enable or disable optimization
+   */
+  setOptimizationEnabled(enabled: boolean): void {
+    this.config.optimizationEnabled = enabled;
+  }
 }
