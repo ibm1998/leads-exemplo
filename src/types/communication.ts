@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { ValidationResult, validateData, generateUUID } from "./validation";
-import { InteractionType } from "./interaction";
+import { ValidationResult, validateData } from "./validation";
 
 // Communication channel enum
 export const CommunicationChannelSchema = z.enum([
@@ -99,7 +98,7 @@ export const CommunicationValidation = {
       CommunicationPreferenceSchema,
       data,
       "Communication preference validation"
-    );
+    ) as ValidationResult<CommunicationPreference>;
   },
 
   validateCommunicationAttempt(
