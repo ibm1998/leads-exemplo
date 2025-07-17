@@ -8,6 +8,7 @@ import {
 import {
   errorMonitoringService,
   AlertChannel,
+  AlertMessage,
 } from "../../monitoring/error-monitoring";
 import {
   gracefulDegradationService,
@@ -15,7 +16,9 @@ import {
 } from "../graceful-degradation";
 
 describe("Error System Integration", () => {
-  let mockAlertCallback: ReturnType<typeof vi.fn>;
+  let mockAlertCallback: ReturnType<
+    typeof vi.fn<[AlertMessage], Promise<void>>
+  >;
 
   beforeEach(() => {
     // Clear all systems
@@ -413,7 +416,11 @@ describe("Error System Integration", () => {
       const errorCount = 100;
 
       // Generate many errors quickly
-      const promises = [];
+      const promises: Promise<{
+        success: boolean;
+        result?: any;
+        escalated: boolean;
+      }>[] = [];
       for (let i = 0; i < errorCount; i++) {
         const context: ErrorContext = {
           operation: `operation_${i % 10}`,
