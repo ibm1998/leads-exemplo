@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: agentic
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports: ['5432:5432']
+
+  redis:
+    image: redis:6
+    ports: ['6379:6379']
