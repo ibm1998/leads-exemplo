@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+=======
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+>>>>>>> d420466e54a991fe6bafba4bc9825fa68b0808dc
 
 html,
 body {
