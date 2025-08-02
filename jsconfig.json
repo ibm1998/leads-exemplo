@@ -1,0 +1,23 @@
+{
+  "watchOptions_legacy": {
+    "excludeFiles": ["**/node_modules/**", "**/pg/**"]
+  },
+  "watchOptions": {
+    "excludeFiles": ["**/node_modules/**"]
+  },
+  "exclude": ["node_modules/**/*"],
+  "include": ["**/*"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/firebase/*": ["utils/firebase/*"]
+      "@/firebase-client": ["utils/firebase/firebaseClient.js"],
+      "@/firebase-admin": ["utils/firebase/firebaseAdmin.js"],
+      "@/auth": ["next-firebase-starter/utils/firebase/auth/initAuth.js"],
+      "@/messaging/*": ["next-firebase-starter/utils/firebase/messaging/*"],
+      "@/FS-admin-functions": ["utils/firebase/firestore/fsAdminFunctions.js"],
+      "@/FS-admin-refs": ["utils/firebase/firestore/adminReferences.js"]
+    },
+    "exclude": ["node_modules"]
+  }
+}
