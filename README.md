@@ -39,7 +39,9 @@ This system creates an **autonomous AI team** with specialized agents that manag
 - Node.js 18+
 - PostgreSQL 14+
 - Redis 6+
-- GoHighLevel API access
+- Firebase account and project
+- GoHighLevel API access (optional)
+- Cal.com account (for scheduling)
 
 ### Installation
 
@@ -51,8 +53,12 @@ cd agentic-lead-management
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env
+# Configure environment variables
+cp .env.example .env.local
+# Edit .env.local with your Firebase credentials and other settings
+
+# Start development servers (API + Next.js frontend)
+npm run dev
 # Edit .env with your API keys and configuration
 
 # Set up database
