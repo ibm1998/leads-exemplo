@@ -1,6 +1,5 @@
 import { DatabaseManager } from "../database/manager";
-import { GoHighLevelSync } from "../integrations/gohighlevel/sync";
-import { GoHighLevelClient } from "../integrations/gohighlevel/client";
+
 import { Lead, LeadModel, LeadStatus } from "../types/lead";
 import { Interaction } from "../types/interaction";
 import { logger } from "../utils/logger";
@@ -40,9 +39,29 @@ export interface CRMManagementConfig {
   duplicateThreshold: number;
 }
 
+const N8N_WEBHOOK_URL = "http://localhost:5678/webhook-test/lead";
+const N8N_API_KEY = process.env.N8N_API_KEY;
+
+async function syncLeadToN8n(lead: Lead) {
+  await axios.post(N8N_WEBHOOK_URL, lead, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-N8N-API-KEY": N8N_API_KEY,
+    },
+  });
+}
+
+async function syncInteractionToN8n(interaction: Interaction, contactId: string) {
+  await axios.post(N8N_WEBHOOK_URL, { interaction, contactId }, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-N8N-API-KEY": N8N_API_KEY,
+    },
+  });
+}
+
 export class AICRMManagementAgent {
   private dbManager: DatabaseManager;
-  private ghlSync: GoHighLevelSync;
   private config: CRMManagementConfig;
   private syncQueue: Map<
     string,
@@ -51,11 +70,10 @@ export class AICRMManagementAgent {
 
   constructor(
     dbManager: DatabaseManager,
-    ghlClient: GoHighLevelClient,
+    
     config: Partial<CRMManagementConfig> = {}
   ) {
     this.dbManager = dbManager;
-    this.ghlSync = new GoHighLevelSync(ghlClient);
     this.config = {
       syncTimeoutMs: 5000, // 5-second SLA
       maxRetries: 3,
@@ -154,8 +172,8 @@ export class AICRMManagementAgent {
       leadModel.update({ status: newStatus });
       await this.updateLeadInDatabase(leadModel.data);
 
-      // Sync to GoHighLevel
-      const contactId = await this.ghlSync.syncLeadToGHL(leadModel.data);
+      // Sync to n8n
+      await syncLeadToN8n(leadModel.data);
 
       const syncTime = Date.now() - startTime;
 
@@ -176,7 +194,6 @@ export class AICRMManagementAgent {
 
       return {
         success: true,
-        contactId,
         syncTime,
       };
     } catch (error: any) {
@@ -352,22 +369,38 @@ export class AICRMManagementAgent {
 
       // Get all leads that need syncing
       const pendingLeads = await this.getPendingLeadsForSync();
-      const leadSyncResults = await this.ghlSync.batchSyncLeads(pendingLeads);
+      let leadSuccess = 0;
+      let leadFailed = 0;
+      for (const lead of pendingLeads) {
+        try {
+          await syncLeadToN8n(lead);
+          leadSuccess++;
+        } catch {
+          leadFailed++;
+        }
+      }
 
       // Get all interactions that need syncing
       const pendingInteractions = await this.getPendingInteractionsForSync();
-      const interactionSyncResults = await this.ghlSync.batchSyncInteractions(
-        pendingInteractions
-      );
+      let interactionSuccess = 0;
+      let interactionFailed = 0;
+      for (const { interaction, contactId } of pendingInteractions) {
+        try {
+          await syncInteractionToN8n(interaction, contactId);
+          interactionSuccess++;
+        } catch {
+          interactionFailed++;
+        }
+      }
 
       const results = {
         leads: {
-          success: leadSyncResults.success.length,
-          failed: leadSyncResults.failed.length,
+          success: leadSuccess,
+          failed: leadFailed,
         },
         interactions: {
-          success: interactionSyncResults.success,
-          failed: interactionSyncResults.failed.length,
+          success: interactionSuccess,
+          failed: interactionFailed,
         },
       };
 
@@ -398,16 +431,16 @@ export class AICRMManagementAgent {
     }
 
     // Sync lead first if needed
-    const contactId = await this.ghlSync.syncLeadToGHL(lead);
+    await syncLeadToN8n(lead);
 
-    // Sync interaction to GoHighLevel
-    await this.ghlSync.syncInteractionToGHL(interaction, contactId);
+    // Sync interaction to n8n
+    await syncInteractionToN8n(interaction, lead.id);
 
     const syncTime = Date.now() - syncStartTime;
 
     return {
       success: true,
-      contactId,
+      contactId: lead.id,
       syncTime,
     };
   }

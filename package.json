@@ -5,13 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:front\"",
-<<<<<<< HEAD
-    "dev:api": "cd packages/api && npm run dev",
-=======
-    "dev:api": "tsx watch src/index.ts",
->>>>>>> d420466e54a991fe6bafba4bc9825fa68b0808dc
-    "dev:front": "next dev",
+    "dev": "npm run dev:api & npm run dev:web",
+    "dev:web": "npm --prefix . run dev",
+    "dev:api": "npm --prefix packages/api run dev",
     "start": "node dist/index.js",
     "test": "vitest --run",
     "test:watch": "vitest",
@@ -26,28 +22,18 @@
   ],
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "@types/express": "^5.0.3",
+  "dependencies": {    "@types/express": "^5.0.3",
     "axios": "^1.10.0",
-<<<<<<< HEAD
-=======
     "calcom-react": "^1.0.0",
->>>>>>> d420466e54a991fe6bafba4bc9825fa68b0808dc
     "concurrently": "^8.2.2",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
     "firebase": "^12.0.0",
-<<<<<<< HEAD
-    "google-auth-library": "^10.1.0",
-    "googleapis": "^152.0.0",
-    "next": "^14.0.4",
-=======
     "firebase-admin": "^11.11.1",
     "google-auth-library": "^10.1.0",
     "googleapis": "^152.0.0",
     "next": "^14.0.4",
     "next-firebase-auth": "^1.0.0",
->>>>>>> d420466e54a991fe6bafba4bc9825fa68b0808dc
     "pg": "^8.11.3",
     "rate-limiter-flexible": "^7.1.1",
     "react": "^18.2.0",

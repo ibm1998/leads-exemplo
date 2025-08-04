@@ -22,25 +22,21 @@ async function seed() {
 
     const leadIds = leadResult.rows.map(row => row.id);
 
-    // Insert sample interactions
-    await pool.query(`
-      INSERT INTO interactions (lead_id, type, channel, content)
-      VALUES 
-        ($1, 'message', 'email', 'Primeiro contato sobre imóvel'),
-        ($1, 'message', 'whatsapp', 'Agendamento de visita'),
-        ($2, 'message', 'email', 'Informações sobre financiamento'),
-        ($3, 'call', 'phone', 'Ligação para esclarecer dúvidas'),
-        ($4, 'message', 'email', 'Solicitação de mais informações');
-    `, [leadIds[0]]);
+    // Insert sample interactions - usando separate queries para evitar problemas com parâmetros
+    for (const [index, leadId] of leadIds.entries()) {
+      await pool.query(`
+        INSERT INTO interactions (lead_id, type, channel, content)
+        VALUES ($1, $2, $3, $4)
+      `, [leadId, 'message', 'email', `Interação de teste ${index + 1}`]);
+    }
 
-    // Insert sample appointments
-    await pool.query(`
-      INSERT INTO appointments (lead_id, date, status, notes)
-      VALUES 
-        ($1, NOW() + INTERVAL '2 days', 'scheduled', 'Visita ao imóvel na Rua das Flores'),
-        ($2, NOW() + INTERVAL '3 days', 'scheduled', 'Reunião para discutir financiamento'),
-        ($3, NOW() + INTERVAL '1 day', 'completed', 'Visita já realizada, cliente interessado');
-    `, [leadIds[0]]);
+    // Insert sample appointments - usando separate queries
+    for (let i = 0; i < 3; i++) {
+      await pool.query(`
+        INSERT INTO appointments (lead_id, date, status, notes)
+        VALUES ($1, NOW() + INTERVAL '${i + 1} days', $2, $3)
+      `, [leadIds[i], 'scheduled', `Appointment de teste ${i + 1}`]);
+    }
 
     console.log('Seed completed successfully!');
   } catch (error) {

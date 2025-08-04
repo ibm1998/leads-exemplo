@@ -10,11 +10,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-<<<<<<< HEAD
-      "@/firebase/*": ["utils/firebase/*"]
-=======
       "@/firebase/*": ["utils/firebase/*"],
->>>>>>> d420466e54a991fe6bafba4bc9825fa68b0808dc
       "@/firebase-client": ["utils/firebase/firebaseClient.js"],
       "@/firebase-admin": ["utils/firebase/firebaseAdmin.js"],
       "@/auth": ["next-firebase-starter/utils/firebase/auth/initAuth.js"],

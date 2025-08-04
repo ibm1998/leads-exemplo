@@ -3,44 +3,15 @@ services:
   postgres:
     image: postgres:14
     environment:
-      POSTGRES_DB: agentic
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: lead_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports: ['5432:5432']
 
   redis:
     image: redis:6
-    ports: ['6379:6379']
+    ports: 
+      - "6379:6379"
 
-  n8n:
-    image: n8nio/n8n
-    ports: ['5678:5678']
-    environment:
-      N8N_BASIC_AUTH_ACTIVE: 'true'
-      N8N_BASIC_AUTH_USER: user
-      N8N_BASIC_AUTH_PASSWORD: pass
-      N8N_HOST: 'localhost'
-      N8N_ENCRYPTION_KEY: 'your-encryption-key'
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: agentic
-      POSTGRES_HOST: postgres
-      REDIS_HOST: redis
-      N8N_EMAIL_MODE: smtp
-      N8N_SMTP_HOST: smtp.gmail.com
-      N8N_SMTP_PORT: 587
-      N8N_SMTP_USER: your-email@gmail.com
-      N8N_SMTP_PASS: your-gmail-app-password
-      HUBSPOT_API_KEY: your-hubspot-api-key
-      WHATSAPP_API_TOKEN: your-whatsapp-token
-      TELEGRAM_BOT_TOKEN: your-telegram-bot-token
-      GOOGLE_CALENDAR_CREDENTIALS: your-google-calendar-credentials
-      CAL_COM_API_KEY: your-calcom-api-key
-      N8N_EDITOR_BASE_URL: 'http://localhost:5678'
-      N8N_PROTOCOL: 'http'
-      WEBHOOK_URL: 'http://localhost:5678'
-      DB_TYPE: 'postgresdb'
-      DB_POSTGRESDB_HOST: postgres
-      DB_POSTGRESDB_DATABASE: agentic
-      DB_POSTGRESDB_USER: user
-      DB_POSTGRESDB_PASSWORD: pass
+volumes:
+  postgres_data:
