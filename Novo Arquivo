@@ -1,0 +1,17 @@
+{
+  "name": "agentic-lead-management",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/api",
+    "next-firebase-starter"
+  ],
+  "scripts": {
+    "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npm --prefix packages/api run dev",
+    "dev:web": "npm --prefix next-firebase-starter run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

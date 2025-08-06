@@ -190,3 +190,5 @@ dev_data/
 test_data/
 mock_data/
 .vs/
+# Ignore arquivos de IDE e snapshots do Copilot
+.vs/
