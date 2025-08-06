@@ -93,10 +93,10 @@ export async function batchSyncLeads(leads: Lead[]): Promise<void> {
 export function checkRateLimit(): void {
   const status = client.getRateLimitStatus();
   logger.info(
-    `Rate limit status: ${status.remaining} requests remaining, resets at ${status.resetTime}`
+    `Rate limit status: ${status.remainingPoints} requests remaining, next in ${status.resetTime.getTime() - Date.now()} ms`
   );
 
-  if (status.remaining < 10) {
+  if (status.remainingPoints < 10) {
     logger.warn("Rate limit is low, consider throttling requests");
   }
 }
@@ -140,7 +140,7 @@ export async function syncLeadLifecycle(
 
       // Check rate limit between requests
       const rateLimitStatus = client.getRateLimitStatus();
-      if (rateLimitStatus.remaining < 5) {
+      if (rateLimitStatus.remainingPoints < 5) {
         logger.info("Rate limit low, waiting before next request...");
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }

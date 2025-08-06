@@ -26,9 +26,6 @@ async function demonstrateCRMAgent() {
   // Create CRM Management Agent with configuration
   const crmAgent = new AICRMManagementAgent(dbManager, ghlClient, {
     syncTimeoutMs: 5000, // 5-second SLA for real-time sync
-    maxRetries: 3,
-    batchSize: 50,
-    auditRetentionDays: 365,
     duplicateThreshold: 0.8,
   });
 

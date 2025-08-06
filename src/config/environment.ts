@@ -1,43 +1,77 @@
+// src/config/environment.ts
+
 import dotenv from "dotenv";
 import { z } from "zod";
 
-// Load environment variables
 dotenv.config();
 
-// Environment schema validation
-const envSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
-  PORT: z.string().transform(Number).default("3000"),
+const envSchema = z
+  .object({
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
 
-  // Database configuration
-  DATABASE_URL: z.string().default("postgresql://localhost:5432/agentic_leads"),
-  DATABASE_HOST: z.string().default("localhost"),
-  DATABASE_PORT: z.string().transform(Number).default("5432"),
-  DATABASE_NAME: z.string().default("agentic_leads"),
-  DATABASE_USER: z.string().default("postgres"),
-  DATABASE_PASSWORD: z.string().default(""),
+    API_PORT: z
+      .string()
+      .transform((val) => Number(val))
+      .default("3000"),
 
-  // Redis configuration
-  REDIS_URL: z.string().default("redis://localhost:6379"),
-  REDIS_HOST: z.string().default("localhost"),
-  REDIS_PORT: z.string().transform(Number).default("6379"),
+    DATABASE_HOST: z
+      .string()
+      .default("localhost"),
 
-  // API Keys (optional for now)
-  OPENAI_API_KEY: z.string().optional(),
-  GOHIGHLEVEL_API_KEY: z.string().optional(),
-  TWILIO_ACCOUNT_SID: z.string().optional(),
-  TWILIO_AUTH_TOKEN: z.string().optional(),
+    DATABASE_PORT: z
+      .string()
+      .transform((val) => Number(val))
+      .default("5432"),
 
-  // System configuration
-  LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
-  MAX_RETRY_ATTEMPTS: z.string().transform(Number).default("3"),
-  RESPONSE_TIMEOUT_MS: z.string().transform(Number).default("60000"),
-});
+    DATABASE_NAME: z
+      .string()
+      .default("agentic_leads"),
 
-// Validate and export configuration
+    DATABASE_USER: z
+      .string()
+      .default("postgres"),
+
+    DATABASE_PASSWORD: z
+      .string()
+      .default("y_VNCBbFVy!79EP"),
+
+    REDIS_URL: z
+      .string()
+      .default("redis://localhost:6379"),
+
+    OPENAI_API_KEY: z
+      .string()
+      .optional(),
+
+    GOHIGHLEVEL_API_KEY: z
+      .string()
+      .optional(),
+
+    TWILIO_ACCOUNT_SID: z
+      .string()
+      .optional(),
+
+    TWILIO_AUTH_TOKEN: z
+      .string()
+      .optional(),
+
+    LOG_LEVEL: z
+      .enum(["error", "warn", "info", "debug"])
+      .default("info"),
+
+    MAX_RETRY_ATTEMPTS: z
+      .string()
+      .transform((val) => Number(val))
+      .default("3"),
+
+    RESPONSE_TIMEOUT_MS: z
+      .string()
+      .transform((val) => Number(val))
+      .default("60000"),
+  })
+  .passthrough();
+
 export const config = envSchema.parse(process.env);
-
-// Type for configuration
 export type Config = z.infer<typeof envSchema>;

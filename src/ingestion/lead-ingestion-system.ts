@@ -5,6 +5,7 @@ import { LeadNormalizer } from "./normalizer";
 import { LeadDeduplicator } from "./deduplicator";
 import { WebhookServer, WebhookConfig } from "./webhook-server";
 import { GmailClient, GmailConfig } from "../integrations/gmail/client";
+import { OAuth2Client } from "google-auth-library";
 import { MetaClient, MetaConfig } from "../integrations/meta/client";
 import { RawLeadData, NormalizedLeadData, IngestionResult } from "./types";
 import { LeadModel, CreateLead } from "../types/lead";
@@ -56,7 +57,10 @@ export class LeadIngestionSystem extends EventEmitter {
 
     // Initialize Gmail client
     if (this.config.gmail) {
-      this.gmailClient = new GmailClient(this.config.gmail);
+      const { clientId, clientSecret, redirectUri, refreshToken } = this.config.gmail;
+      const oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUri);
+      oauth2Client.setCredentials({ refresh_token: refreshToken });
+      this.gmailClient = new GmailClient(oauth2Client);
     }
 
     // Initialize Meta client

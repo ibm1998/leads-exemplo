@@ -1,5 +1,13 @@
+// src/integration/gohighlevel/client.ts
+
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { RateLimiterMemory } from "rate-limiter-flexible";
+
+type RateLimiterRes = {
+  remainingPoints: number;
+  msBeforeNext: number;
+  consumedPoints?: number;
+};
 import { logger } from "../../utils/logger";
 
 export interface GoHighLevelConfig {
@@ -7,32 +15,48 @@ export interface GoHighLevelConfig {
   baseUrl?: string;
   timeout?: number;
   maxRetries?: number;
+  rateLimit?: RateLimitConfig;
 }
 
 export interface RateLimitConfig {
-  points: number; // Number of requests
-  duration: number; // Per duration in seconds
+  points: number;   // number of requests
+  duration: number; // per duration in seconds
 }
 
+interface RetryAxiosConfig extends AxiosRequestConfig {
+  __retryCount?: number;
+}
+
+export interface RateLimitStatus {
+  remainingPoints: number;
+  resetTime: Date;
+}
+
+/**
+ * HTTP client for GoHighLevel REST API with built-in
+ * rate limiting, retries, and logging.
+ */
 export class GoHighLevelClient {
   private client: AxiosInstance;
   private rateLimiter: RateLimiterMemory;
-  private config: Required<GoHighLevelConfig>;
+  private readonly config: Required<GoHighLevelConfig>;
 
   constructor(config: GoHighLevelConfig) {
     this.config = {
       baseUrl: "https://rest.gohighlevel.com/v1",
-      timeout: 30000,
+      timeout: 30_000,
       maxRetries: 3,
+      rateLimit: { points: 100, duration: 60 },
       ...config,
     };
 
-    // GoHighLevel rate limit: 100 requests per minute
+    // initialize in‐memory rate limiter
     this.rateLimiter = new RateLimiterMemory({
-      points: 100,
-      duration: 60, // 60 seconds
+      points: this.config.rateLimit.points,
+      duration: this.config.rateLimit.duration,
     });
 
+    // create Axios instance
     this.client = axios.create({
       baseURL: this.config.baseUrl,
       timeout: this.config.timeout,
@@ -46,122 +70,169 @@ export class GoHighLevelClient {
     this.setupInterceptors();
   }
 
+  /**
+   * Configure Axios request/response interceptors
+   * for rate-limiting, logging, and retries.
+   */
   private setupInterceptors(): void {
-    // Request interceptor for rate limiting
+    // rate-limit on each request
     this.client.interceptors.request.use(
-      async (config) => {
+      async (reqConfig) => {
         try {
           await this.rateLimiter.consume("ghl-api");
-          logger.debug("GoHighLevel API request rate limit check passed");
-          return config;
-        } catch (rateLimiterRes: any) {
-          const msBeforeNext = rateLimiterRes?.msBeforeNext || 1000;
-          logger.warn(
-            `GoHighLevel API rate limit exceeded. Waiting ${msBeforeNext}ms`
-          );
-          await new Promise((resolve) => setTimeout(resolve, msBeforeNext));
-          return config;
+          logger.debug("GHL rate-limit check passed");
+          return reqConfig;
+        } catch (rlRes: any) {
+          const delay = (rlRes as RateLimiterRes).msBeforeNext || 1_000;
+          logger.warn(`Rate limit exceeded, delaying ${delay}ms`);
+          await new Promise((r) => setTimeout(r, delay));
+          return reqConfig;
         }
       },
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor for error handling and retries
+    // log responses and retry on 5xx
     this.client.interceptors.response.use(
       (response) => {
         logger.debug(
-          `GoHighLevel API response: ${
-            response.status
-          } ${response.config.method?.toUpperCase()} ${response.config.url}`
+          `GHL ${response.status} ${response.config.method?.toUpperCase()} ${
+            response.config.url
+          }`
         );
         return response;
       },
       async (error) => {
-        const config = error.config;
+        const cfg = error.config as RetryAxiosConfig;
+        cfg.__retryCount = (cfg.__retryCount || 0) + 1;
 
-        if (!config || config.__retryCount >= this.config.maxRetries) {
-          logger.error("GoHighLevel API request failed after max retries", {
-            url: config?.url,
-            method: config?.method,
+        // give up after maxRetries
+        if (
+          !cfg ||
+          cfg.__retryCount > this.config.maxRetries ||
+          (error.response && error.response.status < 500)
+        ) {
+          logger.error("GHL request failed", {
+            url: cfg.url,
+            method: cfg.method,
             status: error.response?.status,
             message: error.message,
           });
           return Promise.reject(error);
         }
 
-        config.__retryCount = (config.__retryCount || 0) + 1;
-
-        // Retry on 5xx errors or network errors
-        if (!error.response || error.response.status >= 500) {
-          const delay = Math.pow(2, config.__retryCount) * 1000; // Exponential backoff
-          logger.warn(
-            `GoHighLevel API request failed, retrying in ${delay}ms (attempt ${config.__retryCount}/${this.config.maxRetries})`
-          );
-
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          return this.client(config);
-        }
-
-        return Promise.reject(error);
+        // exponential backoff
+        const backoff = 2 ** (cfg.__retryCount - 1) * 1_000;
+        logger.warn(
+          `Retrying GHL request in ${backoff}ms (attempt ${cfg.__retryCount}/${this.config.maxRetries})`
+        );
+        await new Promise((r) => setTimeout(r, backoff));
+        return this.client(cfg);
       }
     );
   }
 
+  /**
+   * Perform GET request.
+   */
   async get<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
+    path: string,
+    cfg?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    return this.client.get<T>(url, config);
+    return this.client.get<T>(path, cfg);
   }
 
+  /**
+   * Perform POST request.
+   */
   async post<T = any>(
-    url: string,
+    path: string,
     data?: any,
-    config?: AxiosRequestConfig
+    cfg?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    return this.client.post<T>(url, data, config);
+    return this.client.post<T>(path, data, cfg);
   }
 
+  /**
+   * Perform PUT request.
+   */
   async put<T = any>(
-    url: string,
+    path: string,
     data?: any,
-    config?: AxiosRequestConfig
+    cfg?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    return this.client.put<T>(url, data, config);
+    return this.client.put<T>(path, data, cfg);
   }
 
+  /**
+   * Perform PATCH request.
+   */
   async patch<T = any>(
-    url: string,
+    path: string,
     data?: any,
-    config?: AxiosRequestConfig
+    cfg?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    return this.client.patch<T>(url, data, config);
+    return this.client.patch<T>(path, data, cfg);
   }
 
+  /**
+   * Perform DELETE request.
+   */
   async delete<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
+    path: string,
+    cfg?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    return this.client.delete<T>(url, config);
+    return this.client.delete<T>(path, cfg);
   }
 
-  // Health check method
+  /**
+   * Ping the GoHighLevel `/ping` endpoint to verify health.
+   */
   async healthCheck(): Promise<boolean> {
     try {
       await this.get("/ping");
       return true;
-    } catch (error) {
-      logger.error("GoHighLevel API health check failed", error);
+    } catch (err) {
+      logger.error("GHL health check failed", err as Error);
       return false;
     }
   }
 
-  // Get current rate limit status
-  getRateLimitStatus(): { remaining: number; resetTime: Date } {
-    const res = this.rateLimiter.get("ghl-api");
+  /**
+   * Returns current rate-limit consumption state.
+   */
+  getRateLimitStatus(): RateLimitStatus {
+    const rlRes = (this.rateLimiter as any).get("ghl-api") as RateLimiterRes | null;
+    const pointsLeft =
+      rlRes && typeof rlRes === "object" && typeof rlRes.consumedPoints === "number"
+        ? this.config.rateLimit.points - rlRes.consumedPoints
+        : this.config.rateLimit.points;
+    const resetInMs = rlRes && typeof rlRes === "object" && typeof rlRes.msBeforeNext === "number"
+        ? rlRes.msBeforeNext
+        : this.config.rateLimit.duration * 1_000;
     return {
-      remaining: 100, // Simplified - in production you'd track actual usage
-      resetTime: new Date(Date.now() + 60000), // Reset in 1 minute
+      remainingPoints: pointsLeft,
+      resetTime: new Date(Date.now() + resetInMs),
     };
+  }
+
+  /**
+   * Update the API key at runtime.
+   */
+  setApiKey(key: string): void {
+    this.config.apiKey = key;
+    this.client.defaults.headers.Authorization = `Bearer ${key}`;
+    logger.info("GHL API key rotated");
+  }
+
+  /**
+   * Reconfigure rate-limiting parameters.
+   */
+  setRateLimit(config: RateLimitConfig): void {
+    this.rateLimiter = new RateLimiterMemory({
+      points: config.points,
+      duration: config.duration,
+    });
+    logger.info(`GHL rate limit set to ${config.points}/${config.duration}s`);
   }
 }

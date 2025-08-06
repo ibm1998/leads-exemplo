@@ -5,7 +5,7 @@ import cors from 'cors'
 import { config } from './config'
 
 const app = express()
-const PORT = config.port ?? 4000
+const PORT = config.port;
 
 // ---------------------------
 // Middlewares

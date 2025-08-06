@@ -1,5 +1,6 @@
+import axios from "axios";
 import { DatabaseManager } from "../database/manager";
-
+import { GoHighLevelClient } from "../integrations/gohighlevel/client";
 import { Lead, LeadModel, LeadStatus } from "../types/lead";
 import { Interaction } from "../types/interaction";
 import { logger } from "../utils/logger";
@@ -17,6 +18,11 @@ export interface DataQualityIssue {
   description: string;
   affectedRecords: string[];
   suggestedAction: string;
+}
+
+export interface AICRMOptions {
+  syncTimeoutMs?: number;
+  duplicateThreshold?: number;
 }
 
 export interface AuditLogEntry {
@@ -61,7 +67,9 @@ async function syncInteractionToN8n(interaction: Interaction, contactId: string)
 }
 
 export class AICRMManagementAgent {
-  private dbManager: DatabaseManager;
+  private db: DatabaseManager;
+  private ghl: GoHighLevelClient;
+  private opts: AICRMOptions;
   private config: CRMManagementConfig;
   private syncQueue: Map<
     string,
@@ -69,18 +77,19 @@ export class AICRMManagementAgent {
   >;
 
   constructor(
-    dbManager: DatabaseManager,
-    
-    config: Partial<CRMManagementConfig> = {}
+    db: DatabaseManager,
+    ghl: GoHighLevelClient,
+    opts: AICRMOptions = {}
   ) {
-    this.dbManager = dbManager;
+    this.db = db;
+    this.ghl = ghl;
+    this.opts = opts;
     this.config = {
-      syncTimeoutMs: 5000, // 5-second SLA
+      syncTimeoutMs: opts.syncTimeoutMs || 5000, // 5-second SLA
       maxRetries: 3,
       batchSize: 50,
       auditRetentionDays: 365,
-      duplicateThreshold: 0.8,
-      ...config,
+      duplicateThreshold: opts.duplicateThreshold || 0.8,
     };
     this.syncQueue = new Map();
   }
@@ -330,7 +339,7 @@ export class AICRMManagementAgent {
         id: this.generateUUID(),
       };
 
-      await this.dbManager.query(
+      await this.db.query(
         `INSERT INTO audit_logs (
           id, entity_type, entity_id, action, changes, user_id, agent_id, 
           timestamp, metadata
@@ -448,7 +457,7 @@ export class AICRMManagementAgent {
   private async storeInteractionInDatabase(
     interaction: Interaction
   ): Promise<void> {
-    await this.dbManager.query(
+    await this.db.query(
       `INSERT INTO interactions (
         id, lead_id, agent_id, type, direction, content, outcome_status,
         appointment_booked, qualification_updated, escalation_required,
@@ -476,7 +485,7 @@ export class AICRMManagementAgent {
   }
 
   private async getLeadFromDatabase(leadId: string): Promise<Lead | null> {
-    const result = await this.dbManager.query(
+    const result = await this.db.query(
       "SELECT * FROM leads WHERE id = $1",
       [leadId]
     );
@@ -490,7 +499,7 @@ export class AICRMManagementAgent {
   }
 
   private async updateLeadInDatabase(lead: Lead): Promise<void> {
-    await this.dbManager.query(
+    await this.db.query(
       `UPDATE leads SET 
         source = $2, name = $3, email = $4, phone = $5, preferred_channel = $6,
         timezone = $7, lead_type = $8, urgency_level = $9, intent_signals = $10,
@@ -575,7 +584,7 @@ export class AICRMManagementAgent {
   }
 
   private async findDuplicatesByEmail(): Promise<string[][]> {
-    const result = await this.dbManager.query(`
+    const result = await this.db.query(`
       SELECT email, array_agg(id) as lead_ids
       FROM leads 
       WHERE email IS NOT NULL AND email != ''
@@ -587,7 +596,7 @@ export class AICRMManagementAgent {
   }
 
   private async findDuplicatesByPhone(): Promise<string[][]> {
-    const result = await this.dbManager.query(`
+    const result = await this.db.query(`
       SELECT phone, array_agg(id) as lead_ids
       FROM leads 
       WHERE phone IS NOT NULL AND phone != ''
@@ -600,7 +609,7 @@ export class AICRMManagementAgent {
 
   private async findDuplicatesByName(): Promise<string[][]> {
     // This is a simplified implementation - in production you'd use more sophisticated fuzzy matching
-    const result = await this.dbManager.query(`
+    const result = await this.db.query(`
       SELECT LOWER(TRIM(name)) as normalized_name, array_agg(id) as lead_ids
       FROM leads 
       GROUP BY LOWER(TRIM(name))
@@ -611,7 +620,7 @@ export class AICRMManagementAgent {
   }
 
   private async findLeadsWithMissingContactInfo(): Promise<string[]> {
-    const result = await this.dbManager.query(`
+    const result = await this.db.query(`
       SELECT id FROM leads 
       WHERE (email IS NULL OR email = '') AND (phone IS NULL OR phone = '')
     `);
@@ -620,7 +629,7 @@ export class AICRMManagementAgent {
   }
 
   private async findLeadsWithInvalidEmails(): Promise<string[]> {
-    const result = await this.dbManager.query(`
+    const result = await this.db.query(`
       SELECT id FROM leads 
       WHERE email IS NOT NULL 
       AND email != '' 
@@ -632,7 +641,7 @@ export class AICRMManagementAgent {
 
   private async findDataInconsistencies(): Promise<string[]> {
     // Check for leads with qualification score but no qualification data
-    const result = await this.dbManager.query(`
+    const result = await this.db.query(`
       SELECT id FROM leads 
       WHERE qualification_score > 0 
       AND (budget_min IS NULL AND budget_max IS NULL)
@@ -645,7 +654,7 @@ export class AICRMManagementAgent {
   }
 
   private async getPendingLeadsForSync(): Promise<Lead[]> {
-    const result = await this.dbManager.query(
+    const result = await this.db.query(
       `
       SELECT * FROM leads 
       WHERE updated_at > NOW() - INTERVAL '1 hour'
@@ -662,7 +671,7 @@ export class AICRMManagementAgent {
     { interaction: Interaction; contactId: string }[]
   > {
     // This is a simplified implementation - in production you'd track sync status
-    const result = await this.dbManager.query(
+    const result = await this.db.query(
       `
       SELECT i.*, l.id as lead_id FROM interactions i
       JOIN leads l ON i.lead_id = l.id

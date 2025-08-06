@@ -1,14 +1,42 @@
-import { Pool, PoolClient } from "pg";
+// src/database/manager.ts
+
+
+import { Pool, PoolClient, QueryResult } from "pg";
 import { createClient, RedisClientType } from "redis";
 import { config } from "../config/environment";
 import { logger } from "../utils/logger";
+
+export interface LeadPayload {
+  source: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  preferred_channel?: string;
+  timezone?: string;
+  lead_type: "hot" | "warm" | "cold";
+  urgency_level?: number;
+  intent_signals?: string[];
+  budget_min?: number;
+  budget_max?: number;
+  location?: string;
+  property_type?: string;
+  timeline?: string;
+  qualification_score?: number;
+  status?: string;
+  assigned_agent?: string;
+}
+
+export interface LeadRecord extends LeadPayload {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+}
 
 export class DatabaseManager {
   private pgPool: Pool;
   private redisClient: RedisClientType;
 
   constructor() {
-    // Initialize PostgreSQL connection pool
     this.pgPool = new Pool({
       host: config.DATABASE_HOST,
       port: config.DATABASE_PORT,
@@ -20,7 +48,6 @@ export class DatabaseManager {
       connectionTimeoutMillis: 2000,
     });
 
-    // Initialize Redis client
     this.redisClient = createClient({
       url: config.REDIS_URL,
     });
@@ -28,16 +55,13 @@ export class DatabaseManager {
 
   async initialize(): Promise<void> {
     try {
-      // Test PostgreSQL connection
       const client = await this.pgPool.connect();
       logger.info("PostgreSQL connection established");
       client.release();
 
-      // Connect to Redis
       await this.redisClient.connect();
       logger.info("Redis connection established");
 
-      // Run database migrations
       await this.runMigrations();
     } catch (error) {
       logger.error("Database initialization failed:", error);
@@ -63,41 +87,113 @@ export class DatabaseManager {
     return this.redisClient;
   }
 
-  async query(text: string, params?: any[]): Promise<any> {
-    const client = await this.pgPool.connect();
+  async query(text: string, params?: any[]): Promise<QueryResult> {
+    const client: PoolClient = await this.pgPool.connect();
     try {
-      const result = await client.query(text, params);
-      return result;
+      return await client.query(text, params);
     } finally {
       client.release();
     }
+  }
+
+  /**
+   * Inserts a new lead into the leads table and returns it.
+   */
+  async createLead(payload: LeadPayload): Promise<LeadRecord> {
+    const {
+      source,
+      name,
+      email,
+      phone,
+      preferred_channel,
+      timezone,
+      lead_type,
+      urgency_level,
+      intent_signals,
+      budget_min,
+      budget_max,
+      location,
+      property_type,
+      timeline,
+      qualification_score,
+      status,
+      assigned_agent,
+    } = payload;
+
+    const result = await this.query(
+      `
+      INSERT INTO leads (
+        source,
+        name,
+        email,
+        phone,
+        preferred_channel,
+        timezone,
+        lead_type,
+        urgency_level,
+        intent_signals,
+        budget_min,
+        budget_max,
+        location,
+        property_type,
+        timeline,
+        qualification_score,
+        status,
+        assigned_agent
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+        $11, $12, $13, $14, $15, $16, $17
+      )
+      RETURNING *;
+    `,
+      [
+        source,
+        name,
+        email,
+        phone,
+        preferred_channel,
+        timezone,
+        lead_type,
+        urgency_level,
+        intent_signals,
+        budget_min,
+        budget_max,
+        location,
+        property_type,
+        timeline,
+        qualification_score,
+        status,
+        assigned_agent,
+      ]
+    );
+
+    return result.rows[0] as LeadRecord;
   }
 
   private async runMigrations(): Promise<void> {
     try {
       logger.info("Running database migrations...");
 
-      // Create migrations table if it doesn't exist
       await this.query(`
         CREATE TABLE IF NOT EXISTS migrations (
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) NOT NULL UNIQUE,
           executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
       `);
 
-      // Run initial schema migration
       const migrationName = "001_initial_schema";
-      const migrationExists = await this.query(
+      const check = await this.query(
         "SELECT 1 FROM migrations WHERE name = $1",
         [migrationName]
       );
 
-      if (migrationExists.rows.length === 0) {
+      if (check.rows.length === 0) {
         await this.createInitialSchema();
-        await this.query("INSERT INTO migrations (name) VALUES ($1)", [
-          migrationName,
-        ]);
+        await this.query(
+          "INSERT INTO migrations (name) VALUES ($1)",
+          [migrationName]
+        );
         logger.info("Initial schema migration completed");
       } else {
         logger.info("Database schema is up to date");
@@ -136,7 +232,7 @@ export class DatabaseManager {
           assigned_agent VARCHAR(100),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
       `);
 
       // Create interactions table
@@ -157,7 +253,7 @@ export class DatabaseManager {
           next_action TEXT,
           next_action_scheduled_at TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
       `);
 
       // Create agent_performance table
@@ -176,10 +272,10 @@ export class DatabaseManager {
           optimization_suggestions TEXT[],
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(agent_id, period_start, period_end)
-        )
+        );
       `);
 
-      // Create audit_logs table for comprehensive audit trail
+      // Create audit_logs table
       await client.query(`
         CREATE TABLE IF NOT EXISTS audit_logs (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -191,48 +287,24 @@ export class DatabaseManager {
           agent_id VARCHAR(100) NOT NULL,
           timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           metadata JSONB DEFAULT '{}'::jsonb
-        )
+        );
       `);
 
-      // Create indexes for better performance
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_leads_type ON leads(lead_type)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_interactions_lead_id ON interactions(lead_id)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_interactions_agent_id ON interactions(agent_id)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON interactions(created_at)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_agent_performance_agent_id ON agent_performance(agent_id)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_agent_performance_period ON agent_performance(period_start, period_end)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp)"
-      );
-      await client.query(
-        "CREATE INDEX IF NOT EXISTS idx_audit_logs_agent_id ON audit_logs(agent_id)"
-      );
+      // Indexes for performance
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_type ON leads(lead_type);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_interactions_lead_id ON interactions(lead_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_interactions_agent_id ON interactions(agent_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON interactions(created_at);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_agent_performance_agent_id ON agent_performance(agent_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_agent_performance_period ON agent_performance(period_start, period_end);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_audit_logs_agent_id ON audit_logs(agent_id);`);
 
-      // Create updated_at trigger function
+      // Trigger to update updated_at on modifications
       await client.query(`
         CREATE OR REPLACE FUNCTION update_updated_at_column()
         RETURNS TRIGGER AS $$
@@ -240,16 +312,15 @@ export class DatabaseManager {
           NEW.updated_at = CURRENT_TIMESTAMP;
           RETURN NEW;
         END;
-        $$ language 'plpgsql'
+        $$ LANGUAGE plpgsql;
       `);
 
-      // Create trigger for leads table
       await client.query(`
         DROP TRIGGER IF EXISTS update_leads_updated_at ON leads;
         CREATE TRIGGER update_leads_updated_at
           BEFORE UPDATE ON leads
           FOR EACH ROW
-          EXECUTE FUNCTION update_updated_at_column()
+          EXECUTE FUNCTION update_updated_at_column();
       `);
 
       await client.query("COMMIT");
