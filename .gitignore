@@ -192,3 +192,5 @@ mock_data/
 .vs/
 # Ignore arquivos de IDE e snapshots do Copilot
 .vs/
+next-firebase-starter/node_modules.zip
+bfg.jar
