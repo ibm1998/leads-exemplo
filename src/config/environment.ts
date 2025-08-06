@@ -7,6 +7,8 @@ dotenv.config();
 
 const envSchema = z
   .object({
+    FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
+    FIREBASE_DATABASE_URL: z.string().optional(),
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),

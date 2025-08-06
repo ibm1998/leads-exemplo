@@ -11,10 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Debug Environment Variables
+        run: |
+          echo "--- Printing all environment variables ---"
+          env
+          echo "--- Checking for specific variables in the project directory ---"
+          cd next-firebase-starter
+          echo "NEXT_PUBLIC_FIREBASE_API_KEY exists: $([ -n "$NEXT_PUBLIC_FIREBASE_API_KEY" ] && echo "Yes" || echo "No")"
+          echo "COOKIE_SECRET_CURRENT exists: $([ -n "$COOKIE_SECRET_CURRENT" ] && echo "Yes" || echo "No")"
       - run: cd next-firebase-starter && npm ci && npm run build
+      - name: Export env for Firebase
+        run: |
+          echo "FIREBASE_SERVICE_ACCOUNT_JSON=${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" >> $GITHUB_ENV
+          echo "FIREBASE_DATABASE_URL=${{ secrets.FIREBASE_DATABASE_URL }}" >> $GITHUB_ENV
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CURRICULO_D1DC4 }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           channelId: live
           projectId: curriculo-d1dc4

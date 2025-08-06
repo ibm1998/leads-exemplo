@@ -4,7 +4,7 @@
   "description": "API for Agentic Lead Management System",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "node --max-old-space-size=4096 ./node_modules/.bin/tsc",
     "dev:api": "tsx watch src/index.ts",
     "dev:n8n": "n8n start",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:n8n\"",
