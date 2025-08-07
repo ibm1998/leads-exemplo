@@ -22,6 +22,7 @@
     "firebase": "^11.10.0",
     "googleapis": "^155.0.0",
     "next-firebase-auth": "^1.4.0",
+    "node.js": "^0.0.1-security",
     "pg": "^8.11.3",
     "rate-limiter-flexible": "^7.2.0",
     "redis": "^5.8.0",
@@ -35,6 +36,7 @@
     "@types/pg": "^8.10.7",
     "@types/redis": "^4.0.10",
     "concurrently": "^8.0.0",
+    "n8n": "^1.17.0",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

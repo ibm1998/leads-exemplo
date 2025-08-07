@@ -188,16 +188,16 @@ export class DatabaseManager {
         [migrationName]
       );
 
-      if (check.rows.length === 0) {
-        await this.createInitialSchema();
-        await this.query(
-          "INSERT INTO migrations (name) VALUES ($1)",
-          [migrationName]
-        );
-        logger.info("Initial schema migration completed");
-      } else {
-        logger.info("Database schema is up to date");
-      }
+        if (check.rows.length === 0) {
+          await this.createInitialSchema();
+          await this.query(
+            "INSERT INTO migrations (name, executed_at) VALUES ($1, CURRENT_TIMESTAMP)",
+            [migrationName]
+          );
+          logger.info("Initial schema migration completed");
+        } else {
+          logger.info("Database schema is up to date");
+        }
     } catch (error) {
       logger.error("Migration failed:", error);
       throw error;
