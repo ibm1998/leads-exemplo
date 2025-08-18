@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import * as admin from 'firebase-admin';
 
 if (!admin.apps.length) {
   try {
@@ -11,7 +11,7 @@ if (!admin.apps.length) {
       databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     });
   } catch (e) {
-    console.log("Failed to initialize App: " + e);
+    console.log('Failed to initialize App: ' + e);
   }
 }
 

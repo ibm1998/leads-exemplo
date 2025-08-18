@@ -5,10 +5,10 @@ import {
   ConversationContext,
   ChannelSelectionCriteria,
   CommunicationValidation,
-} from "../types/communication";
-import { Lead } from "../types/lead";
-import { Interaction, InteractionType } from "../types/interaction";
-import { generateUUID } from "../types/validation";
+} from '../types/communication';
+import { Lead } from '../types/lead';
+import { Interaction, InteractionType } from '../types/interaction';
+import { generateUUID } from '../types/validation';
 
 /**
  * Multi-channel communication manager
@@ -26,7 +26,7 @@ export class MultiChannelCommunicationManager {
    */
   async setCommunicationPreferences(
     preferences: Partial<
-      Omit<CommunicationPreference, "createdAt" | "updatedAt">
+      Omit<CommunicationPreference, 'createdAt' | 'updatedAt'>
     > & {
       leadId: string;
       preferredChannels: CommunicationChannel[];
@@ -40,7 +40,7 @@ export class MultiChannelCommunicationManager {
       preferredChannels:
         preferences.preferredChannels.length > 0
           ? preferences.preferredChannels
-          : ["email" as CommunicationChannel], // Ensure at least one preferred channel
+          : ['email' as CommunicationChannel], // Ensure at least one preferred channel
       optedOutChannels: preferences.optedOutChannels || [],
       bestTimeToContact: preferences.bestTimeToContact,
       frequencyLimits: preferences.frequencyLimits || {
@@ -79,7 +79,7 @@ export class MultiChannelCommunicationManager {
       // Create default preferences with opt-out
       await this.setCommunicationPreferences({
         leadId,
-        preferredChannels: ["email", "sms", "voice", "whatsapp"].filter(
+        preferredChannels: ['email', 'sms', 'voice', 'whatsapp'].filter(
           (c) => c !== channel
         ) as CommunicationChannel[],
         optedOutChannels: [channel],
@@ -99,7 +99,7 @@ export class MultiChannelCommunicationManager {
 
     // Ensure at least one preferred channel remains
     if (preferences.preferredChannels.length === 0) {
-      preferences.preferredChannels = ["email"]; // Default fallback
+      preferences.preferredChannels = ['email']; // Default fallback
     }
 
     await this.setCommunicationPreferences(preferences);
@@ -151,7 +151,7 @@ export class MultiChannelCommunicationManager {
           (channel) =>
             !CommunicationValidation.isChannelOptedOut(preferences, channel)
         )
-      : (["email", "sms", "voice", "whatsapp"] as CommunicationChannel[]);
+      : (['email', 'sms', 'voice', 'whatsapp'] as CommunicationChannel[]);
 
     if (availableChannels.length === 0) {
       return null;
@@ -184,45 +184,45 @@ export class MultiChannelCommunicationManager {
 
       // Urgency-based scoring
       switch (criteria.urgency) {
-        case "high":
-          if (channel === "voice" || channel === "sms") score += 40;
+        case 'high':
+          if (channel === 'voice' || channel === 'sms') score += 40;
           break;
-        case "medium":
-          if (channel === "sms" || channel === "whatsapp") score += 20;
+        case 'medium':
+          if (channel === 'sms' || channel === 'whatsapp') score += 20;
           break;
-        case "low":
-          if (channel === "email") score += 10;
+        case 'low':
+          if (channel === 'email') score += 10;
           break;
       }
 
       // Message type scoring
       switch (criteria.messageType) {
-        case "urgent":
-          if (channel === "voice") score += 30;
-          if (channel === "sms") score += 20;
+        case 'urgent':
+          if (channel === 'voice') score += 30;
+          if (channel === 'sms') score += 20;
           break;
-        case "promotional":
-          if (channel === "email") score += 20;
-          if (channel === "whatsapp") score += 15;
+        case 'promotional':
+          if (channel === 'email') score += 20;
+          if (channel === 'whatsapp') score += 15;
           break;
-        case "follow_up":
-          if (channel === "sms" || channel === "whatsapp") score += 15;
+        case 'follow_up':
+          if (channel === 'sms' || channel === 'whatsapp') score += 15;
           break;
-        case "informational":
-          if (channel === "email") score += 10;
+        case 'informational':
+          if (channel === 'email') score += 10;
           break;
       }
 
       // Lead type scoring
       switch (criteria.leadProfile.leadType) {
-        case "hot":
-          if (channel === "voice") score += 25;
+        case 'hot':
+          if (channel === 'voice') score += 25;
           break;
-        case "warm":
-          if (channel === "sms" || channel === "whatsapp") score += 15;
+        case 'warm':
+          if (channel === 'sms' || channel === 'whatsapp') score += 15;
           break;
-        case "cold":
-          if (channel === "email") score += 10;
+        case 'cold':
+          if (channel === 'email') score += 10;
           break;
       }
 
@@ -230,10 +230,10 @@ export class MultiChannelCommunicationManager {
       const currentHour = criteria.contextualFactors.timeOfDay;
       if (currentHour >= 9 && currentHour <= 17) {
         // Business hours - voice calls are more acceptable
-        if (channel === "voice") score += 15;
+        if (channel === 'voice') score += 15;
       } else if (currentHour >= 18 && currentHour <= 21) {
         // Evening - text-based preferred
-        if (channel === "sms" || channel === "whatsapp") score += 10;
+        if (channel === 'sms' || channel === 'whatsapp') score += 10;
       }
 
       channelScores.set(channel, score);
@@ -285,7 +285,7 @@ export class MultiChannelCommunicationManager {
       const nextContactTime = this.calculateNextContactTime(preferences);
       return {
         allowed: false,
-        reason: "Outside of preferred contact hours",
+        reason: 'Outside of preferred contact hours',
         nextAllowedTime: nextContactTime,
       };
     }

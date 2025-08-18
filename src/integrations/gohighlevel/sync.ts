@@ -1,7 +1,7 @@
-import { GoHighLevelClient } from "./client";
-import { Lead } from "../../types/lead";
-import { Interaction } from "../../types/interaction";
-import { logger } from "../../utils/logger";
+import { GoHighLevelClient } from './client';
+import { Lead } from '../../types/lead';
+import { Interaction } from '../../types/interaction';
+import { logger } from '../../utils/logger';
 
 export interface GHLContact {
   id?: string;
@@ -117,7 +117,7 @@ export class GoHighLevelSync {
 
   // Contact management methods
   async createContact(contact: GHLContact): Promise<GHLContact> {
-    const response = await this.client.post<GHLContact>("/contacts", contact);
+    const response = await this.client.post<GHLContact>('/contacts', contact);
     return response.data;
   }
 
@@ -144,7 +144,7 @@ export class GoHighLevelSync {
 
     try {
       const response = await this.client.get<{ contacts: GHLContact[] }>(
-        "/contacts",
+        '/contacts',
         {
           params: { email },
         }
@@ -164,7 +164,7 @@ export class GoHighLevelSync {
 
     try {
       const response = await this.client.get<{ contacts: GHLContact[] }>(
-        "/contacts",
+        '/contacts',
         {
           params: { phone },
         }
@@ -184,7 +184,7 @@ export class GoHighLevelSync {
     opportunity: GHLOpportunity
   ): Promise<GHLOpportunity> {
     const response = await this.client.post<GHLOpportunity>(
-      "/opportunities",
+      '/opportunities',
       opportunity
     );
     return response.data;
@@ -203,15 +203,15 @@ export class GoHighLevelSync {
 
   // Note management methods
   async createNote(note: GHLNote): Promise<GHLNote> {
-    const response = await this.client.post<GHLNote>("/contacts/notes", note);
+    const response = await this.client.post<GHLNote>('/contacts/notes', note);
     return response.data;
   }
 
   // Utility methods
   private mapLeadToGHLContact(lead: Lead): GHLContact {
-    const nameParts = lead.contactInfo.name.split(" ");
-    const firstName = nameParts[0] || "";
-    const lastName = nameParts.slice(1).join(" ") || "";
+    const nameParts = lead.contactInfo.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
 
     return {
       firstName,
@@ -244,9 +244,9 @@ export class GoHighLevelSync {
   ): Promise<void> {
     const opportunity: GHLOpportunity = {
       title: `${lead.contactInfo.name} - ${
-        lead.qualificationData?.propertyType || "Real Estate"
+        lead.qualificationData?.propertyType || 'Real Estate'
       } Opportunity`,
-      status: "open",
+      status: 'open',
       stage: this.mapLeadStatusToStage(lead.status),
       value: this.estimateOpportunityValue(lead.qualificationData?.budget),
       contactId,
@@ -263,17 +263,17 @@ export class GoHighLevelSync {
 
   private mapLeadStatusToStage(status: string): string {
     const stageMap: Record<string, string> = {
-      new: "New Lead",
-      contacted: "Contacted",
-      qualified: "Qualified",
-      appointment_scheduled: "Appointment Scheduled",
-      proposal_sent: "Proposal Sent",
-      closed_won: "Closed Won",
-      closed_lost: "Closed Lost",
-      nurturing: "Nurturing",
+      new: 'New Lead',
+      contacted: 'Contacted',
+      qualified: 'Qualified',
+      appointment_scheduled: 'Appointment Scheduled',
+      proposal_sent: 'Proposal Sent',
+      closed_won: 'Closed Won',
+      closed_lost: 'Closed Lost',
+      nurturing: 'Nurturing',
     };
 
-    return stageMap[status] || "New Lead";
+    return stageMap[status] || 'New Lead';
   }
 
   private estimateOpportunityValue(budget?: {
@@ -292,7 +292,7 @@ export class GoHighLevelSync {
       `Direction: ${interaction.direction}`,
       `Agent: ${interaction.agentId}`,
       `Timestamp: ${interaction.timestamp.toISOString()}`,
-      "",
+      '',
     ];
 
     if (interaction.duration) {
@@ -302,44 +302,44 @@ export class GoHighLevelSync {
     if (interaction.sentiment) {
       const sentimentLabel =
         interaction.sentiment.score > 0
-          ? "positive"
+          ? 'positive'
           : interaction.sentiment.score < 0
-          ? "negative"
-          : "neutral";
+          ? 'negative'
+          : 'neutral';
       lines.push(
         `Sentiment: ${sentimentLabel} (${interaction.sentiment.score})`
       );
     }
 
-    lines.push("", "Content:", interaction.content);
+    lines.push('', 'Content:', interaction.content);
 
     if (interaction.outcome) {
-      lines.push("", "Outcome:", `Status: ${interaction.outcome.status}`);
+      lines.push('', 'Outcome:', `Status: ${interaction.outcome.status}`);
 
       if (interaction.outcome.appointmentBooked) {
-        lines.push("✓ Appointment booked");
+        lines.push('✓ Appointment booked');
       }
 
       if (interaction.outcome.qualificationUpdated) {
-        lines.push("✓ Qualification updated");
+        lines.push('✓ Qualification updated');
       }
 
       if (interaction.outcome.escalationRequired) {
-        lines.push("⚠️ Escalation required");
+        lines.push('⚠️ Escalation required');
       }
     }
 
     if (interaction.nextAction) {
       lines.push(
-        "",
-        "Next Action:",
+        '',
+        'Next Action:',
         `${
           interaction.nextAction.action
         } scheduled for ${interaction.nextAction.scheduledAt.toISOString()}`
       );
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 
   // Batch synchronization methods
@@ -362,7 +362,7 @@ export class GoHighLevelSync {
       } catch (error: any) {
         results.failed.push({
           leadId: lead.id,
-          error: error.message || "Unknown error",
+          error: error.message || 'Unknown error',
         });
       }
     }
@@ -394,7 +394,7 @@ export class GoHighLevelSync {
       } catch (error: any) {
         results.failed.push({
           interactionId: interaction.id,
-          error: error.message || "Unknown error",
+          error: error.message || 'Unknown error',
         });
       }
     }

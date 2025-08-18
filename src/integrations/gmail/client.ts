@@ -1,9 +1,9 @@
 // src/ingestion/gmail/client.ts
 
-import { google, gmail_v1 } from "googleapis";
-import { OAuth2Client } from "google-auth-library";
-import { logger } from "../../utils/logger";
-import { RawLeadData } from "../../ingestion/types";
+import { google, gmail_v1 } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
+import { logger } from '../../utils/logger';
+import { RawLeadData } from '../../ingestion/types';
 
 export interface GmailConfig {
   clientId: string;
@@ -43,7 +43,7 @@ export class GmailClient {
 
   constructor(oauth2Client: OAuth2Client) {
     this.oauth2Client = oauth2Client;
-    this.gmail = google.gmail({ version: "v1", auth: this.oauth2Client as any });
+    this.gmail = google.gmail({ version: 'v1', auth: this.oauth2Client as any });
   }
 
   /**
@@ -51,10 +51,10 @@ export class GmailClient {
    */
   async initialize(): Promise<void> {
     try {
-      const profile = await this.gmail.users.getProfile({ userId: "me" });
+      const profile = await this.gmail.users.getProfile({ userId: 'me' });
       logger.info(`Gmail client initialized for ${profile.data.emailAddress}`);
     } catch (error) {
-      logger.error("Gmail client initialization failed:", error);
+      logger.error('Gmail client initialization failed:', error);
       throw new Error(`Failed to initialize Gmail client: ${error}`);
     }
   }
@@ -68,17 +68,17 @@ export class GmailClient {
     since?: Date;
   } = {}): Promise<ParsedEmail[]> {
     try {
-      const { maxResults = 50, query = "is:unread -from:me", since } = options;
+      const { maxResults = 50, query = 'is:unread -from:me', since } = options;
       let searchQuery = query;
 
       if (since) {
-        const dateStr = since.toISOString().split("T")[0];
+        const dateStr = since.toISOString().split('T')[0];
         searchQuery += ` after:${dateStr}`;
       }
 
       logger.info(`Fetching emails with query: ${searchQuery}`);
       const resp = await this.gmail.users.messages.list({
-        userId: "me",
+        userId: 'me',
         q: searchQuery,
         maxResults,
       });
@@ -90,9 +90,9 @@ export class GmailClient {
       for (const msg of msgs) {
         try {
           const full = await this.gmail.users.messages.get({
-            userId: "me",
+            userId: 'me',
             id: msg.id!,
-            format: "full",
+            format: 'full',
           });
           const parsed = this.parseEmail(full.data as GmailMessage);
           if (parsed && this.isLeadEmail(parsed)) {
@@ -106,7 +106,7 @@ export class GmailClient {
       logger.info(`Parsed ${emails.length} potential lead emails`);
       return emails;
     } catch (error) {
-      logger.error("Failed to get recent emails:", error);
+      logger.error('Failed to get recent emails:', error);
       throw new Error(`Failed to fetch emails: ${error}`);
     }
   }
@@ -117,8 +117,8 @@ export class GmailClient {
   private parseEmail(message: GmailMessage): ParsedEmail | null {
     try {
       const headers = this.extractHeaders(message.payload.headers || []);
-      const from = this.parseFromHeader(headers.from || "");
-      const subject = headers.subject || "";
+      const from = this.parseFromHeader(headers.from || '');
+      const subject = headers.subject || '';
       const body = this.extractBody(message.payload);
 
       return {
@@ -132,7 +132,7 @@ export class GmailClient {
         headers,
       };
     } catch (error) {
-      logger.warn("Failed to parse email:", error);
+      logger.warn('Failed to parse email:', error);
       return null;
     }
   }
@@ -160,33 +160,33 @@ export class GmailClient {
     const nameEmailMatch = fromHeader.match(/^(.+?)\s*<(.+?)>$/);
     if (nameEmailMatch) {
       return {
-        name: nameEmailMatch[1].trim().replace(/^["']|["']$/g, ""),
+        name: nameEmailMatch[1].trim().replace(/^["']|["']$/g, ''),
         email: nameEmailMatch[2].trim(),
       };
     }
     const emailOnly = fromHeader.trim();
     return {
       email: emailOnly,
-      name: emailOnly.split("@")[0],
+      name: emailOnly.split('@')[0],
     };
   }
 
  
   private extractBody(part: gmail_v1.Schema$MessagePart): string {
-    let text = "";
+    let text = '';
 
     if (part.body?.data) {
-      text = Buffer.from(part.body.data, "base64").toString("utf-8");
+      text = Buffer.from(part.body.data, 'base64').toString('utf-8');
     } else if (part.parts) {
       for (const p of part.parts) {
-        if (p.mimeType === "text/plain" && p.body?.data) {
-          text += Buffer.from(p.body.data, "base64").toString("utf-8");
+        if (p.mimeType === 'text/plain' && p.body?.data) {
+          text += Buffer.from(p.body.data, 'base64').toString('utf-8');
         } else if (
-          p.mimeType === "text/html" &&
+          p.mimeType === 'text/html' &&
           p.body?.data &&
           !text
         ) {
-          const html = Buffer.from(p.body.data, "base64").toString("utf-8");
+          const html = Buffer.from(p.body.data, 'base64').toString('utf-8');
           text = this.stripHtml(html);
         }
       }
@@ -199,7 +199,7 @@ export class GmailClient {
    * Strip HTML tags from text
    */
   private stripHtml(html: string): string {
-    return html.replace(/<[^>]*>/g, "").replace(/&[^;]+;/g, " ").trim();
+    return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
   }
 
   /**
@@ -210,13 +210,13 @@ export class GmailClient {
     if (this.isAutomatedEmail(email)) return false;
 
     const realEstateTerms = [
-      "property","house","home","real estate","buy","sell","rent",
-      "listing","agent","realtor","mortgage","investment","condo",
-      "apartment","commercial","residential","valuation","appraisal",
+      'property','house','home','real estate','buy','sell','rent',
+      'listing','agent','realtor','mortgage','investment','condo',
+      'apartment','commercial','residential','valuation','appraisal',
     ];
     const inquiryTerms = [
-      "interested","inquiry","question","help","looking for","need",
-      "want","contact","information","quote","price",
+      'interested','inquiry','question','help','looking for','need',
+      'want','contact','information','quote','price',
     ];
 
     const hasRE = realEstateTerms.some(t => content.includes(t));
@@ -231,15 +231,15 @@ export class GmailClient {
     const from = email.from.email.toLowerCase();
     const subj = email.subject.toLowerCase();
     const patterns = [
-      "noreply","no-reply","donotreply","notification","newsletter",
-      "alert","marketing","support","system","admin","automated",
+      'noreply','no-reply','donotreply','notification','newsletter',
+      'alert','marketing','support','system','admin','automated',
     ];
 
     const autoFrom = patterns.some(p => from.includes(p));
     const autoSubj =
-      subj.includes("unsubscribe") ||
-      subj.includes("newsletter") ||
-      subj.includes("notification");
+      subj.includes('unsubscribe') ||
+      subj.includes('newsletter') ||
+      subj.includes('notification');
 
     return autoFrom || autoSubj;
   }
@@ -249,7 +249,7 @@ export class GmailClient {
    */
   emailToRawLeadData(email: ParsedEmail): RawLeadData {
     return {
-      source: "gmail",
+      source: 'gmail',
       sourceId: email.messageId,
       rawData: {
         messageId: email.messageId,
@@ -271,9 +271,9 @@ export class GmailClient {
   async markAsRead(messageId: string): Promise<void> {
     try {
       await this.gmail.users.messages.modify({
-        userId: "me",
+        userId: 'me',
         id: messageId,
-        requestBody: { removeLabelIds: ["UNREAD"] },
+        requestBody: { removeLabelIds: ['UNREAD'] },
       });
       logger.debug(`Marked message ${messageId} as read`);
     } catch (error) {
@@ -287,17 +287,17 @@ export class GmailClient {
   async addLabel(messageId: string, labelName: string): Promise<void> {
     try {
       // fetch existing labels
-      const { data } = await this.gmail.users.labels.list({ userId: "me" });
+      const { data } = await this.gmail.users.labels.list({ userId: 'me' });
       let label = data.labels?.find(l => l.name === labelName);
 
       // create label if not exists
       if (!label) {
         const created = await this.gmail.users.labels.create({
-          userId: "me",
+          userId: 'me',
           requestBody: {
             name: labelName,
-            labelListVisibility: "labelShow",
-            messageListVisibility: "show",
+            labelListVisibility: 'labelShow',
+            messageListVisibility: 'show',
           },
         });
         label = created.data;
@@ -309,7 +309,7 @@ export class GmailClient {
       // Add the label to the message
       // Explicitly type params for type safety
       const params: gmail_v1.Params$Resource$Users$Messages$Modify = {
-        userId: "me",
+        userId: 'me',
         id: String(messageId),
         requestBody: {
           addLabelIds: [label.id!], // non-null assertion for id

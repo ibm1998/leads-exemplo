@@ -1,6 +1,6 @@
-import firebase from "@/firebase-client";
-import "firebase/firestore";
-import { docRef, user, now } from "@/FS-client-refs";
+import firebase from '@/firebase-client';
+import 'firebase/firestore';
+import { docRef, user, now } from '@/FS-client-refs';
 
 const db = firebase.firestore(); // mostly for transactions or batches
 
@@ -19,7 +19,7 @@ export const getDocByID = async (id) => {
     .get()
     .then((doc) => {
       if (doc.exists) Promise.resolve(doc.data());
-      else return Promise.reject("No such document");
+      else return Promise.reject('No such document');
     });
   return data;
 };

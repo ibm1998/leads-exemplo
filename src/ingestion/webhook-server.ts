@@ -1,8 +1,8 @@
-import express, { Request, Response, NextFunction } from "express";
-import { createServer, Server } from "http";
-import { logger } from "../utils/logger";
-import { WebhookPayload, RawLeadData } from "./types";
-import { MetaClient } from "../integrations/meta/client";
+import express, { Request, Response, NextFunction } from 'express';
+import { createServer, Server } from 'http';
+import { logger } from '../utils/logger';
+import { WebhookPayload, RawLeadData } from './types';
+import { MetaClient } from '../integrations/meta/client';
 
 export interface WebhookConfig {
   port: number;
@@ -47,25 +47,25 @@ export class WebhookServer {
    */
   private setupMiddleware(): void {
     // Raw body parser for webhook signature verification
-    this.app.use("/webhook", express.raw({ type: "application/json" }));
+    this.app.use('/webhook', express.raw({ type: 'application/json' }));
 
     // JSON parser for other routes
-    this.app.use(express.json({ limit: "10mb" }));
+    this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
 
     // CORS middleware
     this.app.use((req: Request, res: Response, next: NextFunction) => {
-      res.header("Access-Control-Allow-Origin", "*");
+      res.header('Access-Control-Allow-Origin', '*');
       res.header(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS"
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS'
       );
       res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
       );
 
-      if (req.method === "OPTIONS") {
+      if (req.method === 'OPTIONS') {
         res.sendStatus(200);
       } else {
         next();
@@ -84,27 +84,27 @@ export class WebhookServer {
    */
   private setupRoutes(): void {
     // Health check endpoint
-    this.app.get("/health", (req: Request, res: Response) => {
-      res.json({ status: "ok", timestamp: new Date().toISOString() });
+    this.app.get('/health', (req: Request, res: Response) => {
+      res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
     // Generic webhook endpoint
-    this.app.post("/webhook/:source", this.handleGenericWebhook.bind(this));
+    this.app.post('/webhook/:source', this.handleGenericWebhook.bind(this));
 
     // Meta/Facebook webhook endpoint
-    this.app.get("/webhook/meta", this.handleMetaVerification.bind(this));
-    this.app.post("/webhook/meta", this.handleMetaWebhook.bind(this));
+    this.app.get('/webhook/meta', this.handleMetaVerification.bind(this));
+    this.app.post('/webhook/meta', this.handleMetaWebhook.bind(this));
 
     // Website form webhook endpoint
-    this.app.post("/webhook/website", this.handleWebsiteForm.bind(this));
+    this.app.post('/webhook/website', this.handleWebsiteForm.bind(this));
 
     // Third-party integration endpoints
-    this.app.post("/webhook/zapier", this.handleZapierWebhook.bind(this));
+    this.app.post('/webhook/zapier', this.handleZapierWebhook.bind(this));
     this.app.post(
-      "/webhook/integromat",
+      '/webhook/integromat',
       this.handleIntegromatWebhook.bind(this)
     );
-    this.app.post("/webhook/generic", this.handleGenericIntegration.bind(this));
+    this.app.post('/webhook/generic', this.handleGenericIntegration.bind(this));
 
     // Error handling middleware
     this.app.use(this.errorHandler.bind(this));
@@ -123,8 +123,8 @@ export class WebhookServer {
           resolve();
         });
 
-        this.server.on("error", (error) => {
-          logger.error("Webhook server error:", error);
+        this.server.on('error', (error) => {
+          logger.error('Webhook server error:', error);
           reject(error);
         });
       } catch (error) {
@@ -140,7 +140,7 @@ export class WebhookServer {
     return new Promise((resolve) => {
       if (this.server) {
         this.server.close(() => {
-          logger.info("Webhook server stopped");
+          logger.info('Webhook server stopped');
           resolve();
         });
       } else {
@@ -189,8 +189,8 @@ export class WebhookServer {
         count: leads.length,
       });
     } catch (error) {
-      logger.error("Generic webhook error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Generic webhook error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -200,13 +200,13 @@ export class WebhookServer {
   private handleMetaVerification(req: Request, res: Response): void {
     try {
       if (!this.metaClient) {
-        res.status(404).json({ error: "Meta client not configured" });
+        res.status(404).json({ error: 'Meta client not configured' });
         return;
       }
 
-      const mode = req.query["hub.mode"] as string;
-      const token = req.query["hub.verify_token"] as string;
-      const challenge = req.query["hub.challenge"] as string;
+      const mode = req.query['hub.mode'] as string;
+      const token = req.query['hub.verify_token'] as string;
+      const challenge = req.query['hub.challenge'] as string;
 
       const result = this.metaClient.verifyWebhookChallenge(
         mode,
@@ -217,11 +217,11 @@ export class WebhookServer {
       if (result) {
         res.send(result);
       } else {
-        res.status(403).json({ error: "Verification failed" });
+        res.status(403).json({ error: 'Verification failed' });
       }
     } catch (error) {
-      logger.error("Meta verification error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Meta verification error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -231,16 +231,16 @@ export class WebhookServer {
   private async handleMetaWebhook(req: Request, res: Response): Promise<void> {
     try {
       if (!this.metaClient) {
-        res.status(404).json({ error: "Meta client not configured" });
+        res.status(404).json({ error: 'Meta client not configured' });
         return;
       }
 
       // Verify signature
-      const signature = req.headers["x-hub-signature-256"] as string;
+      const signature = req.headers['x-hub-signature-256'] as string;
       const payload = req.body.toString();
 
       if (!this.metaClient.verifyWebhookSignature(payload, signature)) {
-        res.status(403).json({ error: "Invalid signature" });
+        res.status(403).json({ error: 'Invalid signature' });
         return;
       }
 
@@ -257,8 +257,8 @@ export class WebhookServer {
         count: leads.length,
       });
     } catch (error) {
-      logger.error("Meta webhook error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Meta webhook error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -271,13 +271,13 @@ export class WebhookServer {
 
       // Create raw lead data from form submission
       const rawLeadData: RawLeadData = {
-        source: "website",
+        source: 'website',
         sourceId: formData.formId || `form_${Date.now()}`,
         rawData: {
           ...formData,
-          formName: formData.formName || "Website Contact Form",
+          formName: formData.formName || 'Website Contact Form',
           pageUrl: formData.pageUrl || req.headers.referer,
-          userAgent: req.headers["user-agent"],
+          userAgent: req.headers['user-agent'],
           ipAddress: req.ip,
           timestamp: new Date().toISOString(),
         },
@@ -289,12 +289,12 @@ export class WebhookServer {
 
       res.json({
         success: true,
-        message: "Form submission received",
+        message: 'Form submission received',
         leadId: rawLeadData.sourceId,
       });
     } catch (error) {
-      logger.error("Website form error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Website form error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -309,11 +309,11 @@ export class WebhookServer {
       const zapierData = req.body;
 
       const rawLeadData: RawLeadData = {
-        source: "third_party",
+        source: 'third_party',
         sourceId: zapierData.id || `zapier_${Date.now()}`,
         rawData: {
           ...zapierData,
-          integration: "zapier",
+          integration: 'zapier',
           receivedAt: new Date().toISOString(),
         },
         timestamp: new Date(),
@@ -323,12 +323,12 @@ export class WebhookServer {
 
       res.json({
         success: true,
-        message: "Zapier webhook processed",
+        message: 'Zapier webhook processed',
         leadId: rawLeadData.sourceId,
       });
     } catch (error) {
-      logger.error("Zapier webhook error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Zapier webhook error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -343,11 +343,11 @@ export class WebhookServer {
       const integromatData = req.body;
 
       const rawLeadData: RawLeadData = {
-        source: "third_party",
+        source: 'third_party',
         sourceId: integromatData.id || `integromat_${Date.now()}`,
         rawData: {
           ...integromatData,
-          integration: "integromat",
+          integration: 'integromat',
           receivedAt: new Date().toISOString(),
         },
         timestamp: new Date(),
@@ -357,12 +357,12 @@ export class WebhookServer {
 
       res.json({
         success: true,
-        message: "Integromat webhook processed",
+        message: 'Integromat webhook processed',
         leadId: rawLeadData.sourceId,
       });
     } catch (error) {
-      logger.error("Integromat webhook error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Integromat webhook error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -375,14 +375,14 @@ export class WebhookServer {
   ): Promise<void> {
     try {
       const integrationData = req.body;
-      const source = (req.headers["x-source"] as string) || "third_party";
+      const source = (req.headers['x-source'] as string) || 'third_party';
 
       const rawLeadData: RawLeadData = {
         source: source as any,
         sourceId: integrationData.id || `generic_${Date.now()}`,
         rawData: {
           ...integrationData,
-          integration: "generic",
+          integration: 'generic',
           receivedAt: new Date().toISOString(),
           headers: req.headers,
         },
@@ -393,12 +393,12 @@ export class WebhookServer {
 
       res.json({
         success: true,
-        message: "Generic integration processed",
+        message: 'Generic integration processed',
         leadId: rawLeadData.sourceId,
       });
     } catch (error) {
-      logger.error("Generic integration error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      logger.error('Generic integration error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -411,11 +411,11 @@ export class WebhookServer {
     res: Response,
     next: NextFunction
   ): void {
-    logger.error("Webhook server error:", error);
+    logger.error('Webhook server error:', error);
 
     if (!res.headersSent) {
       res.status(500).json({
-        error: "Internal server error",
+        error: 'Internal server error',
         message: error.message,
       });
     }
@@ -445,7 +445,7 @@ export class WebhookServer {
       try {
         await callback(leads);
       } catch (error) {
-        logger.error("Lead processing callback error:", error);
+        logger.error('Lead processing callback error:', error);
       }
     };
   }

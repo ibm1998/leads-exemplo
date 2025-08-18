@@ -1,22 +1,22 @@
-import { AIHeadAgent, PerformanceFeedback, RoutingRule } from "./ai-head-agent";
+import { AIHeadAgent, PerformanceFeedback, RoutingRule } from './ai-head-agent';
 import {
   AICustomerAnalyticsAgent,
   AnalyticsInsight,
   ScriptOptimization,
-} from "./ai-customer-analytics-agent";
+} from './ai-customer-analytics-agent';
 import {
   AgentPerformance,
   PerformanceMetrics,
   ScriptMetrics,
   DateRange,
-} from "../types/agent-performance";
+} from '../types/agent-performance';
 
 /**
  * Optimization feedback data structure
  */
 export interface OptimizationFeedback {
   id: string;
-  type: "routing" | "script" | "timing" | "general";
+  type: 'routing' | 'script' | 'timing' | 'general';
   agentId: string;
   insights: AnalyticsInsight[];
   recommendations: OptimizationRecommendation[];
@@ -30,11 +30,11 @@ export interface OptimizationFeedback {
 export interface OptimizationRecommendation {
   id: string;
   type:
-    | "routing_rule"
-    | "script_update"
-    | "timing_adjustment"
-    | "threshold_change";
-  priority: "high" | "medium" | "low";
+    | 'routing_rule'
+    | 'script_update'
+    | 'timing_adjustment'
+    | 'threshold_change';
+  priority: 'high' | 'medium' | 'low';
   description: string;
   expectedImpact: number; // percentage improvement expected
   implementation: OptimizationImplementation;
@@ -110,12 +110,12 @@ export class ContinuousOptimizationLoop {
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.log("Optimization loop is already running");
+      console.log('Optimization loop is already running');
       return;
     }
 
     this.isRunning = true;
-    console.log("Starting continuous optimization loop");
+    console.log('Starting continuous optimization loop');
 
     // Run initial optimization cycle
     await this.runOptimizationCycle();
@@ -133,7 +133,7 @@ export class ContinuousOptimizationLoop {
    */
   stop(): void {
     this.isRunning = false;
-    console.log("Stopping continuous optimization loop");
+    console.log('Stopping continuous optimization loop');
   }
 
   /**
@@ -141,7 +141,7 @@ export class ContinuousOptimizationLoop {
    */
   async runOptimizationCycle(): Promise<void> {
     try {
-      console.log("Running optimization cycle...");
+      console.log('Running optimization cycle...');
 
       // Step 1: Collect performance data and insights
       const feedback = await this.collectOptimizationFeedback();
@@ -160,9 +160,9 @@ export class ContinuousOptimizationLoop {
       // Step 5: Process feedback queue
       await this.processFeedbackQueue();
 
-      console.log("Optimization cycle completed successfully");
+      console.log('Optimization cycle completed successfully');
     } catch (error) {
-      console.error("Error in optimization cycle:", error);
+      console.error('Error in optimization cycle:', error);
     }
   }
 
@@ -183,11 +183,11 @@ export class ContinuousOptimizationLoop {
 
       // Get performance data for all agents
       const agentIds = [
-        "inbound",
-        "outbound",
-        "virtual-sales",
-        "retention",
-        "feedback-collector",
+        'inbound',
+        'outbound',
+        'virtual-sales',
+        'retention',
+        'feedback-collector',
       ];
 
       for (const agentId of agentIds) {
@@ -200,12 +200,12 @@ export class ContinuousOptimizationLoop {
 
           const agentFeedback: OptimizationFeedback = {
             id: `feedback_${agentId}_${Date.now()}`,
-            type: "general",
+            type: 'general',
             agentId,
             insights: insights.filter(
               (insight) =>
                 insight.actionable &&
-                (insight.impact === "high" || insight.impact === "medium")
+                (insight.impact === 'high' || insight.impact === 'medium')
             ),
             recommendations: [],
             performanceData,
@@ -223,7 +223,7 @@ export class ContinuousOptimizationLoop {
 
       return feedback;
     } catch (error) {
-      console.error("Error collecting optimization feedback:", error);
+      console.error('Error collecting optimization feedback:', error);
       return [];
     }
   }
@@ -282,22 +282,22 @@ export class ContinuousOptimizationLoop {
     if (metrics.conversionRate < 0.6) {
       recommendations.push({
         id: `routing_conv_${feedback.agentId}_${Date.now()}`,
-        type: "routing_rule",
-        priority: "high",
+        type: 'routing_rule',
+        priority: 'high',
         description: `Improve routing rules for ${feedback.agentId} - conversion rate below 60%`,
         expectedImpact: 15,
         implementation: {
-          action: "adjust_routing_thresholds",
+          action: 'adjust_routing_thresholds',
           parameters: {
             agentId: feedback.agentId,
             urgencyThreshold: 7, // Lower threshold for faster routing
             intentThreshold: 0.5, // Lower threshold for broader capture
           },
-          rollbackPlan: "Revert to previous thresholds if performance degrades",
+          rollbackPlan: 'Revert to previous thresholds if performance degrades',
           testingPeriod: 7,
         },
         validationCriteria: {
-          metrics: ["conversionRate", "averageResponseTime"],
+          metrics: ['conversionRate', 'averageResponseTime'],
           minimumImprovement: 10,
           testPeriod: 14,
           significanceThreshold: 0.05,
@@ -310,24 +310,24 @@ export class ContinuousOptimizationLoop {
       // 60 seconds
       recommendations.push({
         id: `routing_time_${feedback.agentId}_${Date.now()}`,
-        type: "routing_rule",
-        priority: "high",
+        type: 'routing_rule',
+        priority: 'high',
         description: `Optimize routing for faster response times - currently ${Math.round(
           metrics.averageResponseTime / 1000
         )}s`,
         expectedImpact: 20,
         implementation: {
-          action: "prioritize_fast_agents",
+          action: 'prioritize_fast_agents',
           parameters: {
             agentId: feedback.agentId,
             responseTimeSLA: 45000, // 45 seconds
             priorityBoost: true,
           },
-          rollbackPlan: "Remove priority boost if quality degrades",
+          rollbackPlan: 'Remove priority boost if quality degrades',
           testingPeriod: 5,
         },
         validationCriteria: {
-          metrics: ["averageResponseTime", "customerSatisfactionScore"],
+          metrics: ['averageResponseTime', 'customerSatisfactionScore'],
           minimumImprovement: 15,
           testPeriod: 10,
           significanceThreshold: 0.05,
@@ -355,26 +355,26 @@ export class ContinuousOptimizationLoop {
         if (scriptOpt.estimatedImpact.conversionRateImprovement > 10) {
           recommendations.push({
             id: `script_${scriptOpt.scriptId}_${Date.now()}`,
-            type: "script_update",
+            type: 'script_update',
             priority:
               scriptOpt.estimatedImpact.conversionRateImprovement > 20
-                ? "high"
-                : "medium",
+                ? 'high'
+                : 'medium',
             description: `Optimize ${scriptOpt.scriptName} - potential ${scriptOpt.estimatedImpact.conversionRateImprovement}% improvement`,
             expectedImpact: scriptOpt.estimatedImpact.conversionRateImprovement,
             implementation: {
-              action: "update_script",
+              action: 'update_script',
               parameters: {
                 scriptId: scriptOpt.scriptId,
                 recommendations: scriptOpt.recommendations,
                 currentPerformance: scriptOpt.currentPerformance,
               },
               rollbackPlan:
-                "Revert to previous script version if performance degrades",
+                'Revert to previous script version if performance degrades',
               testingPeriod: 14,
             },
             validationCriteria: {
-              metrics: ["conversionRate", "customerSatisfactionScore"],
+              metrics: ['conversionRate', 'customerSatisfactionScore'],
               minimumImprovement: 8,
               testPeriod: 21,
               significanceThreshold: 0.05,
@@ -383,7 +383,7 @@ export class ContinuousOptimizationLoop {
         }
       }
     } catch (error) {
-      console.warn("Error generating script optimizations:", error);
+      console.warn('Error generating script optimizations:', error);
     }
 
     return recommendations;
@@ -408,23 +408,23 @@ export class ContinuousOptimizationLoop {
       );
 
       for (const trend of trends) {
-        if (trend.trend === "decreasing" && trend.significance === "high") {
+        if (trend.trend === 'decreasing' && trend.significance === 'high') {
           recommendations.push({
             id: `timing_${trend.metric}_${Date.now()}`,
-            type: "timing_adjustment",
-            priority: "medium",
+            type: 'timing_adjustment',
+            priority: 'medium',
             description: `Adjust timing for ${
               trend.metric
             } - showing ${Math.abs(trend.changePercent)}% decline`,
             expectedImpact: Math.abs(trend.changePercent) * 0.8, // Conservative estimate
             implementation: {
-              action: "adjust_timing_sequences",
+              action: 'adjust_timing_sequences',
               parameters: {
                 metric: trend.metric,
-                adjustment: trend.changePercent > -10 ? "minor" : "major",
+                adjustment: trend.changePercent > -10 ? 'minor' : 'major',
                 targetImprovement: Math.abs(trend.changePercent),
               },
-              rollbackPlan: "Revert timing adjustments if trend continues",
+              rollbackPlan: 'Revert timing adjustments if trend continues',
               testingPeriod: 10,
             },
             validationCriteria: {
@@ -437,7 +437,7 @@ export class ContinuousOptimizationLoop {
         }
       }
     } catch (error) {
-      console.warn("Error generating timing optimizations:", error);
+      console.warn('Error generating timing optimizations:', error);
     }
 
     return recommendations;
@@ -451,7 +451,7 @@ export class ContinuousOptimizationLoop {
   ): Promise<void> {
     // Implement top 3 high-priority recommendations to avoid system instability
     const toImplement = recommendations
-      .filter((rec) => rec.priority === "high")
+      .filter((rec) => rec.priority === 'high')
       .slice(0, 3);
 
     for (const recommendation of toImplement) {
@@ -478,16 +478,16 @@ export class ContinuousOptimizationLoop {
     const { implementation } = recommendation;
 
     switch (recommendation.type) {
-      case "routing_rule":
+      case 'routing_rule':
         await this.implementRoutingOptimization(implementation);
         break;
-      case "script_update":
+      case 'script_update':
         await this.implementScriptOptimization(implementation);
         break;
-      case "timing_adjustment":
+      case 'timing_adjustment':
         await this.implementTimingOptimization(implementation);
         break;
-      case "threshold_change":
+      case 'threshold_change':
         await this.implementThresholdOptimization(implementation);
         break;
       default:
@@ -516,7 +516,7 @@ export class ContinuousOptimizationLoop {
     const { action, parameters } = implementation;
 
     switch (action) {
-      case "adjust_routing_thresholds":
+      case 'adjust_routing_thresholds':
         this.aiHeadAgent.updateConfig({
           urgencyThresholds: {
             high: parameters.urgencyThreshold,
@@ -529,18 +529,18 @@ export class ContinuousOptimizationLoop {
         });
         break;
 
-      case "prioritize_fast_agents":
+      case 'prioritize_fast_agents':
         // Update routing rules to prioritize faster response times
         const fastResponseRule: RoutingRule = {
           id: `fast_response_${Date.now()}`,
-          name: "Fast Response Priority",
+          name: 'Fast Response Priority',
           condition: (lead, analysis) => analysis.urgencyLevel >= 6,
           action: {
-            targetAgent: "inbound",
-            priority: "high",
-            reasoning: ["Prioritized for fast response"],
+            targetAgent: 'inbound',
+            priority: 'high',
+            reasoning: ['Prioritized for fast response'],
             estimatedResponseTime: parameters.responseTimeSLA,
-            suggestedActions: ["Immediate contact"],
+            suggestedActions: ['Immediate contact'],
           },
           priority: 0, // Highest priority
           enabled: true,
@@ -561,7 +561,7 @@ export class ContinuousOptimizationLoop {
     console.log(
       `Script optimization implemented for ${implementation.parameters.scriptId}`
     );
-    console.log("Recommendations:", implementation.parameters.recommendations);
+    console.log('Recommendations:', implementation.parameters.recommendations);
   }
 
   /**
@@ -575,7 +575,7 @@ export class ContinuousOptimizationLoop {
     console.log(
       `Timing optimization implemented for ${implementation.parameters.metric}`
     );
-    console.log("Adjustment type:", implementation.parameters.adjustment);
+    console.log('Adjustment type:', implementation.parameters.adjustment);
   }
 
   /**
@@ -586,7 +586,7 @@ export class ContinuousOptimizationLoop {
   ): Promise<void> {
     // This would adjust various system thresholds
     // For now, log the optimization
-    console.log("Threshold optimization implemented");
+    console.log('Threshold optimization implemented');
   }
 
   /**
@@ -635,7 +635,7 @@ export class ContinuousOptimizationLoop {
             this.optimizationHistory.set(id, result);
             console.log(
               `Validated optimization ${id}: ${
-                result.validated ? "SUCCESS" : "FAILED"
+                result.validated ? 'SUCCESS' : 'FAILED'
               }`
             );
           } catch (error) {
@@ -728,7 +728,7 @@ export class ContinuousOptimizationLoop {
     // Process any queued feedback that requires manual attention
     const highImpactFeedback = this.feedbackQueue.filter((fb) =>
       fb.insights.some(
-        (insight) => insight.impact === "high" && !insight.actionable
+        (insight) => insight.impact === 'high' && !insight.actionable
       )
     );
 

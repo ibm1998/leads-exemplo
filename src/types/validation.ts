@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Custom validation error class for better error handling
@@ -10,7 +10,7 @@ export class ValidationError extends Error {
 
   constructor(message: string, field: string, code: string, details?: any) {
     super(message);
-    this.name = "ValidationError";
+    this.name = 'ValidationError';
     this.field = field;
     this.code = code;
     this.details = details;
@@ -49,7 +49,7 @@ export function validateData<T>(
       };
     } else {
       const firstIssue = result.error.issues[0];
-      const field = firstIssue.path.join(".");
+      const field = firstIssue.path.join('.');
       const message = context
         ? `${context}: ${firstIssue.message}`
         : firstIssue.message;
@@ -65,10 +65,10 @@ export function validateData<T>(
       success: false,
       error: new ValidationError(
         `Validation failed: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`,
-        "unknown",
-        "internal_error",
+        'unknown',
+        'internal_error',
         error
       ),
       issues: [],
@@ -106,9 +106,9 @@ export const isValidUUID = (value: string): boolean => {
  * Utility to generate a UUID (simple implementation for testing)
  */
 export const generateUUID = (): string => {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 };
@@ -133,7 +133,7 @@ export const isValidPhone = (phone: string): boolean => {
  * Utility to sanitize string input
  */
 export const sanitizeString = (input: string): string => {
-  return input.trim().replace(/\s+/g, " ");
+  return input.trim().replace(/\s+/g, ' ');
 };
 
 /**

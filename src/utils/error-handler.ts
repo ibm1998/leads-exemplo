@@ -1,39 +1,39 @@
-import { logger } from "./logger";
-import { config } from "../config/environment";
+import { logger } from './logger';
+import { config } from '../config/environment';
 
 /**
  * Error severity levels for classification
  */
 export enum ErrorSeverity {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical",
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
 }
 
 /**
  * Error categories for classification
  */
 export enum ErrorCategory {
-  SYSTEM = "system",
-  INTEGRATION = "integration",
-  DATA = "data",
-  BUSINESS_LOGIC = "business_logic",
-  AUTHENTICATION = "authentication",
-  RATE_LIMIT = "rate_limit",
-  NETWORK = "network",
-  VALIDATION = "validation",
+  SYSTEM = 'system',
+  INTEGRATION = 'integration',
+  DATA = 'data',
+  BUSINESS_LOGIC = 'business_logic',
+  AUTHENTICATION = 'authentication',
+  RATE_LIMIT = 'rate_limit',
+  NETWORK = 'network',
+  VALIDATION = 'validation',
 }
 
 /**
  * Recovery strategies for different error types
  */
 export enum RecoveryStrategy {
-  RETRY = "retry",
-  FALLBACK = "fallback",
-  ESCALATE = "escalate",
-  IGNORE = "ignore",
-  CIRCUIT_BREAKER = "circuit_breaker",
+  RETRY = 'retry',
+  FALLBACK = 'fallback',
+  ESCALATE = 'escalate',
+  IGNORE = 'ignore',
+  CIRCUIT_BREAKER = 'circuit_breaker',
 }
 
 /**
@@ -88,7 +88,7 @@ export interface EscalationDetails {
   recoveryAttempts: RecoveryAttempt[];
   escalationReason: string;
   suggestedActions: string[];
-  priority: "low" | "medium" | "high" | "urgent";
+  priority: 'low' | 'medium' | 'high' | 'urgent';
 }
 
 /**
@@ -97,7 +97,7 @@ export interface EscalationDetails {
 interface CircuitBreakerState {
   failures: number;
   lastFailureTime: Date;
-  state: "closed" | "open" | "half-open";
+  state: 'closed' | 'open' | 'half-open';
   nextAttemptTime?: Date;
 }
 
@@ -120,12 +120,12 @@ export class ErrorHandler {
 
     // Database and data errors (check before network to avoid conflicts)
     if (
-      errorMessage.includes("database") ||
-      errorMessage.includes("sql") ||
-      errorMessage.includes("connection pool") ||
-      errorMessage.includes("deadlock") ||
-      errorMessage.includes("pool exhausted") ||
-      errorName.includes("databaseerror")
+      errorMessage.includes('database') ||
+      errorMessage.includes('sql') ||
+      errorMessage.includes('connection pool') ||
+      errorMessage.includes('deadlock') ||
+      errorMessage.includes('pool exhausted') ||
+      errorName.includes('databaseerror')
     ) {
       return {
         severity: ErrorSeverity.HIGH,
@@ -141,12 +141,12 @@ export class ErrorHandler {
 
     // Network and connectivity errors
     if (
-      errorMessage.includes("network") ||
-      errorMessage.includes("connection") ||
-      errorMessage.includes("timeout") ||
-      errorMessage.includes("econnrefused") ||
-      errorMessage.includes("enotfound") ||
-      errorName.includes("networkerror")
+      errorMessage.includes('network') ||
+      errorMessage.includes('connection') ||
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('econnrefused') ||
+      errorMessage.includes('enotfound') ||
+      errorName.includes('networkerror')
     ) {
       return {
         severity: ErrorSeverity.HIGH,
@@ -162,10 +162,10 @@ export class ErrorHandler {
 
     // Rate limiting errors
     if (
-      errorMessage.includes("rate limit") ||
-      errorMessage.includes("too many requests") ||
-      errorMessage.includes("429") ||
-      errorMessage.includes("quota exceeded")
+      errorMessage.includes('rate limit') ||
+      errorMessage.includes('too many requests') ||
+      errorMessage.includes('429') ||
+      errorMessage.includes('quota exceeded')
     ) {
       return {
         severity: ErrorSeverity.MEDIUM,
@@ -180,11 +180,11 @@ export class ErrorHandler {
 
     // Authentication errors
     if (
-      errorMessage.includes("unauthorized") ||
-      errorMessage.includes("authentication") ||
-      errorMessage.includes("invalid token") ||
-      errorMessage.includes("401") ||
-      errorMessage.includes("403")
+      errorMessage.includes('unauthorized') ||
+      errorMessage.includes('authentication') ||
+      errorMessage.includes('invalid token') ||
+      errorMessage.includes('401') ||
+      errorMessage.includes('403')
     ) {
       return {
         severity: ErrorSeverity.HIGH,
@@ -199,11 +199,11 @@ export class ErrorHandler {
 
     // Data validation errors
     if (
-      errorMessage.includes("validation") ||
-      errorMessage.includes("invalid") ||
-      errorMessage.includes("required") ||
-      errorMessage.includes("schema") ||
-      errorName.includes("validationerror")
+      errorMessage.includes('validation') ||
+      errorMessage.includes('invalid') ||
+      errorMessage.includes('required') ||
+      errorMessage.includes('schema') ||
+      errorName.includes('validationerror')
     ) {
       return {
         severity: ErrorSeverity.MEDIUM,
@@ -218,11 +218,11 @@ export class ErrorHandler {
 
     // Integration errors (external APIs)
     if (
-      context.component.includes("integration") ||
-      context.component.includes("api") ||
-      context.component.includes("client") ||
-      errorMessage.includes("api") ||
-      errorMessage.includes("service unavailable")
+      context.component.includes('integration') ||
+      context.component.includes('api') ||
+      context.component.includes('client') ||
+      errorMessage.includes('api') ||
+      errorMessage.includes('service unavailable')
     ) {
       return {
         severity: ErrorSeverity.HIGH,
@@ -238,10 +238,10 @@ export class ErrorHandler {
 
     // System errors (memory, disk, etc.)
     if (
-      errorMessage.includes("out of memory") ||
-      errorMessage.includes("disk space") ||
-      errorMessage.includes("system") ||
-      errorName.includes("systemerror")
+      errorMessage.includes('out of memory') ||
+      errorMessage.includes('disk space') ||
+      errorMessage.includes('system') ||
+      errorName.includes('systemerror')
     ) {
       return {
         severity: ErrorSeverity.CRITICAL,
@@ -295,7 +295,7 @@ export class ErrorHandler {
       );
 
       if (recoveryResult.success) {
-        logger.info("Error recovery successful", {
+        logger.info('Error recovery successful', {
           errorId,
           component: context.component,
           operation: context.operation,
@@ -326,7 +326,7 @@ export class ErrorHandler {
 
       return { success: false, escalated: false };
     } catch (recoveryError) {
-      logger.error("Error during recovery process", {
+      logger.error('Error during recovery process', {
         errorId,
         originalError: error.message,
         recoveryError:
@@ -387,7 +387,7 @@ export class ErrorHandler {
         return { success: false };
 
       case RecoveryStrategy.IGNORE:
-        logger.warn("Error ignored based on classification", {
+        logger.warn('Error ignored based on classification', {
           error: error.message,
           context,
         });
@@ -413,7 +413,7 @@ export class ErrorHandler {
         classification.backoffMultiplier
       );
 
-      logger.info("Retrying operation", {
+      logger.info('Retrying operation', {
         component: context.component,
         operation: context.operation,
         attempt,
@@ -452,7 +452,7 @@ export class ErrorHandler {
         });
 
         if (attempt === classification.maxRetries) {
-          logger.error("All retry attempts failed", {
+          logger.error('All retry attempts failed', {
             component: context.component,
             operation: context.operation,
             attempts: attempt,
@@ -479,17 +479,17 @@ export class ErrorHandler {
     const circuitState = this.circuitBreakers.get(circuitKey) || {
       failures: 0,
       lastFailureTime: new Date(),
-      state: "closed",
+      state: 'closed',
     };
 
     // Check circuit breaker state
-    if (circuitState.state === "open") {
+    if (circuitState.state === 'open') {
       const timeSinceLastFailure =
         Date.now() - circuitState.lastFailureTime.getTime();
       const cooldownPeriod = 60000; // 1 minute cooldown
 
       if (timeSinceLastFailure < cooldownPeriod) {
-        logger.warn("Circuit breaker is open, rejecting request", {
+        logger.warn('Circuit breaker is open, rejecting request', {
           component: context.component,
           operation: context.operation,
           timeSinceLastFailure,
@@ -501,13 +501,13 @@ export class ErrorHandler {
           success: false,
           attemptNumber: 1,
           duration: 0,
-          metadata: { circuitState: "open", reason: "cooldown_period" },
+          metadata: { circuitState: 'open', reason: 'cooldown_period' },
         });
 
         return { success: false };
       } else {
         // Move to half-open state
-        circuitState.state = "half-open";
+        circuitState.state = 'half-open';
         this.circuitBreakers.set(circuitKey, circuitState);
       }
     }
@@ -520,7 +520,7 @@ export class ErrorHandler {
 
       // Success - reset circuit breaker
       circuitState.failures = 0;
-      circuitState.state = "closed";
+      circuitState.state = 'closed';
       this.circuitBreakers.set(circuitKey, circuitState);
 
       recoveryAttempts.push({
@@ -528,7 +528,7 @@ export class ErrorHandler {
         success: true,
         attemptNumber: 1,
         duration,
-        metadata: { circuitState: "closed" },
+        metadata: { circuitState: 'closed' },
       });
 
       return { success: true, result };
@@ -542,8 +542,8 @@ export class ErrorHandler {
         classification.circuitBreakerThreshold &&
         circuitState.failures >= classification.circuitBreakerThreshold
       ) {
-        circuitState.state = "open";
-        logger.warn("Circuit breaker opened due to repeated failures", {
+        circuitState.state = 'open';
+        logger.warn('Circuit breaker opened due to repeated failures', {
           component: context.component,
           operation: context.operation,
           failures: circuitState.failures,
@@ -582,7 +582,7 @@ export class ErrorHandler {
     recoveryAttempts: RecoveryAttempt[] = []
   ): Promise<{ success: boolean; result?: any }> {
     if (!fallbackFunction) {
-      logger.warn("No fallback function provided", {
+      logger.warn('No fallback function provided', {
         component: context.component,
         operation: context.operation,
       });
@@ -592,7 +592,7 @@ export class ErrorHandler {
         success: false,
         attemptNumber: 1,
         duration: 0,
-        metadata: { reason: "no_fallback_function" },
+        metadata: { reason: 'no_fallback_function' },
       });
 
       return { success: false };
@@ -603,7 +603,7 @@ export class ErrorHandler {
       const result = await fallbackFunction();
       const duration = Date.now() - attemptStart;
 
-      logger.info("Fallback strategy successful", {
+      logger.info('Fallback strategy successful', {
         component: context.component,
         operation: context.operation,
         duration,
@@ -620,7 +620,7 @@ export class ErrorHandler {
     } catch (fallbackError) {
       const duration = Date.now() - attemptStart;
 
-      logger.error("Fallback strategy failed", {
+      logger.error('Fallback strategy failed', {
         component: context.component,
         operation: context.operation,
         fallbackError:
@@ -669,7 +669,7 @@ export class ErrorHandler {
       priority: this.getEscalationPriority(classification),
     };
 
-    logger.error("Escalating error to human intervention", {
+    logger.error('Escalating error to human intervention', {
       errorId,
       escalationDetails,
     });
@@ -679,7 +679,7 @@ export class ErrorHandler {
       try {
         await callback(escalationDetails);
       } catch (callbackError) {
-        logger.error("Error in escalation callback", {
+        logger.error('Error in escalation callback', {
           errorId,
           callbackError:
             callbackError instanceof Error
@@ -758,16 +758,16 @@ export class ErrorHandler {
 
     switch (classification.severity) {
       case ErrorSeverity.CRITICAL:
-        logger.error("CRITICAL ERROR", logData);
+        logger.error('CRITICAL ERROR', logData);
         break;
       case ErrorSeverity.HIGH:
-        logger.error("HIGH SEVERITY ERROR", logData);
+        logger.error('HIGH SEVERITY ERROR', logData);
         break;
       case ErrorSeverity.MEDIUM:
-        logger.warn("MEDIUM SEVERITY ERROR", logData);
+        logger.warn('MEDIUM SEVERITY ERROR', logData);
         break;
       case ErrorSeverity.LOW:
-        logger.info("LOW SEVERITY ERROR", logData);
+        logger.info('LOW SEVERITY ERROR', logData);
         break;
     }
   }
@@ -805,7 +805,7 @@ export class ErrorHandler {
     // re-execute the original operation that failed
     // For testing, we'll make it fail quickly
     await new Promise((resolve) => setTimeout(resolve, 10)); // Very short delay
-    throw new Error("Retry simulation - operation still failing");
+    throw new Error('Retry simulation - operation still failing');
   }
 
   /**
@@ -816,21 +816,21 @@ export class ErrorHandler {
     recoveryAttempts: RecoveryAttempt[]
   ): string {
     if (classification.severity === ErrorSeverity.CRITICAL) {
-      return "Critical system error requiring immediate attention";
+      return 'Critical system error requiring immediate attention';
     }
 
     if (classification.escalationRequired) {
-      return "Error type requires human intervention";
+      return 'Error type requires human intervention';
     }
 
     if (
       recoveryAttempts.length > 0 &&
       recoveryAttempts.every((a) => !a.success)
     ) {
-      return "All automatic recovery attempts failed";
+      return 'All automatic recovery attempts failed';
     }
 
-    return "Error escalated due to frequency or severity threshold";
+    return 'Error escalated due to frequency or severity threshold';
   }
 
   /**
@@ -844,32 +844,32 @@ export class ErrorHandler {
 
     switch (classification.category) {
       case ErrorCategory.AUTHENTICATION:
-        actions.push("Check API credentials and tokens");
-        actions.push("Verify authentication configuration");
+        actions.push('Check API credentials and tokens');
+        actions.push('Verify authentication configuration');
         break;
       case ErrorCategory.NETWORK:
-        actions.push("Check network connectivity");
-        actions.push("Verify external service status");
-        actions.push("Review firewall and proxy settings");
+        actions.push('Check network connectivity');
+        actions.push('Verify external service status');
+        actions.push('Review firewall and proxy settings');
         break;
       case ErrorCategory.DATA:
-        actions.push("Check database connectivity");
-        actions.push("Verify data integrity");
-        actions.push("Review recent data changes");
+        actions.push('Check database connectivity');
+        actions.push('Verify data integrity');
+        actions.push('Review recent data changes');
         break;
       case ErrorCategory.INTEGRATION:
-        actions.push("Check external API status");
-        actions.push("Verify integration configuration");
-        actions.push("Review API rate limits");
+        actions.push('Check external API status');
+        actions.push('Verify integration configuration');
+        actions.push('Review API rate limits');
         break;
       case ErrorCategory.SYSTEM:
-        actions.push("Check system resources (CPU, memory, disk)");
-        actions.push("Review system logs");
-        actions.push("Consider scaling resources");
+        actions.push('Check system resources (CPU, memory, disk)');
+        actions.push('Review system logs');
+        actions.push('Consider scaling resources');
         break;
       default:
-        actions.push("Review error logs and context");
-        actions.push("Check component configuration");
+        actions.push('Review error logs and context');
+        actions.push('Check component configuration');
     }
 
     actions.push(`Review ${context.component} component logs`);
@@ -883,18 +883,18 @@ export class ErrorHandler {
    */
   private getEscalationPriority(
     classification: ErrorClassification
-  ): "low" | "medium" | "high" | "urgent" {
+  ): 'low' | 'medium' | 'high' | 'urgent' {
     switch (classification.severity) {
       case ErrorSeverity.CRITICAL:
-        return "urgent";
+        return 'urgent';
       case ErrorSeverity.HIGH:
-        return "high";
+        return 'high';
       case ErrorSeverity.MEDIUM:
-        return "medium";
+        return 'medium';
       case ErrorSeverity.LOW:
-        return "low";
+        return 'low';
       default:
-        return "medium";
+        return 'medium';
     }
   }
 
@@ -951,7 +951,7 @@ export class ErrorHandler {
   resetCircuitBreaker(component: string, operation: string): void {
     const circuitKey = `${component}:${operation}`;
     this.circuitBreakers.delete(circuitKey);
-    logger.info("Circuit breaker reset", { component, operation });
+    logger.info('Circuit breaker reset', { component, operation });
   }
 
   /**

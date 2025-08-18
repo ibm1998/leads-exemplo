@@ -1,12 +1,12 @@
-import { z } from "zod";
-import { ValidationResult, validateData } from "./validation";
+import { z } from 'zod';
+import { ValidationResult, validateData } from './validation';
 
 // Communication channel enum
 export const CommunicationChannelSchema = z.enum([
-  "email",
-  "sms",
-  "voice",
-  "whatsapp",
+  'email',
+  'sms',
+  'voice',
+  'whatsapp',
 ]);
 
 export type CommunicationChannel = z.infer<typeof CommunicationChannelSchema>;
@@ -71,10 +71,10 @@ export type ConversationContext = z.infer<typeof ConversationContextSchema>;
 
 // Channel selection criteria schema
 export const ChannelSelectionCriteriaSchema = z.object({
-  urgency: z.enum(["low", "medium", "high"]),
-  messageType: z.enum(["informational", "promotional", "urgent", "follow_up"]),
+  urgency: z.enum(['low', 'medium', 'high']),
+  messageType: z.enum(['informational', 'promotional', 'urgent', 'follow_up']),
   leadProfile: z.object({
-    leadType: z.enum(["hot", "warm", "cold"]),
+    leadType: z.enum(['hot', 'warm', 'cold']),
     responseHistory: z.array(CommunicationChannelSchema),
     preferredChannel: CommunicationChannelSchema,
   }),
@@ -97,7 +97,7 @@ export const CommunicationValidation = {
     return validateData(
       CommunicationPreferenceSchema,
       data,
-      "Communication preference validation"
+      'Communication preference validation'
     ) as ValidationResult<CommunicationPreference>;
   },
 
@@ -107,7 +107,7 @@ export const CommunicationValidation = {
     return validateData(
       CommunicationAttemptSchema,
       data,
-      "Communication attempt validation"
+      'Communication attempt validation'
     );
   },
 
@@ -117,7 +117,7 @@ export const CommunicationValidation = {
     return validateData(
       ConversationContextSchema,
       data,
-      "Conversation context validation"
+      'Conversation context validation'
     );
   },
 
@@ -127,7 +127,7 @@ export const CommunicationValidation = {
     return validateData(
       ChannelSelectionCriteriaSchema,
       data,
-      "Channel selection criteria validation"
+      'Channel selection criteria validation'
     );
   },
 

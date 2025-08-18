@@ -1,6 +1,6 @@
-import Head from "next/head";
-import Link from "next/link";
-import enableMessaging from "@/messaging/enableMessaging";
+import Head from 'next/head';
+import Link from 'next/link';
+import enableMessaging from '@/messaging/enableMessaging';
 
 export default function Home({ data }) {
   //{data} is from getStaticProps() exported below.
@@ -18,15 +18,15 @@ export default function Home({ data }) {
             className="hover:underline text-blue-500"
           >
             Next.js
-          </a>{" "}
-          +{" "}
+          </a>{' '}
+          +{' '}
           <a
             href="https://firebase.google.com/"
             className="hover:underline"
-            style={{ color: "#ffa611" }}
+            style={{ color: '#ffa611' }}
           >
             Firebase
-          </a>{" "}
+          </a>{' '}
           🔥
         </h1>
         <hr className="my-5 text-gray" />
@@ -43,25 +43,25 @@ export default function Home({ data }) {
             <hr className="my-3 text-gray" />
             <ul>
               <li className="mb-2">
-                👤{" "}
+                👤{' '}
                 <Link href="/login">
                   <a className="hover:underline text-blue">Authenticate User</a>
                 </Link>
               </li>
               <li className="mb-2">
-                📅{" "}
+                📅{' '}
                 <Link href="/schedule">
                   <a className="hover:underline text-blue">Agendar Visita</a>
                 </Link>
               </li>
               <li className="mb-2">
-                📊{" "}
+                📊{' '}
                 <Link href="/leads">
                   <a className="hover:underline text-blue">Dashboard de Leads</a>
                 </Link>
               </li>
               <li className="mb-2">
-                🔒{" "}
+                🔒{' '}
                 <Link href="/dashboard">
                   <a className="hover:underline text-blue">Protected Page</a>
                 </Link>
@@ -77,15 +77,15 @@ export default function Home({ data }) {
           </article>
           <div className="text-center text-2xl p-4 col-span-12 md:col-span-2">
             <article className="text-left">
-              Check out my{" "}
+              Check out my{' '}
               <strong>
                 <a
                   href="https://github.com/shreyas-jadhav/next-firebase-starter"
-                  style={{ color: "#6f42c1" }}
+                  style={{ color: '#6f42c1' }}
                 >
                   GitHub Repository
                 </a>
-              </strong>{" "}
+              </strong>{' '}
               for more!
               <br />
               <div className="overflow-auto my-2">
@@ -156,7 +156,7 @@ export async function getStaticProps(context) {
   //Note: Do not use client functions here!
 
   //getDoc function is from Admin SDK.
-  const data = await import("@/FS-admin-functions").then(({ getDoc }) =>
+  const data = await import('@/FS-admin-functions').then(({ getDoc }) =>
     getDoc()
   );
 

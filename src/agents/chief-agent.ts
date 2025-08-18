@@ -2,22 +2,22 @@ import {
   AIHeadAgent,
   LeadAnalysisResult,
   PerformanceFeedback,
-} from "./ai-head-agent";
+} from './ai-head-agent';
 import {
   AgentPerformance,
   PerformanceMetrics,
-} from "../types/agent-performance";
-import { Lead } from "../types/lead";
-import { Interaction } from "../types/interaction";
+} from '../types/agent-performance';
+import { Lead } from '../types/lead';
+import { Interaction } from '../types/interaction';
 
 /**
  * System status enumeration
  */
 export enum SystemStatus {
-  OPERATIONAL = "operational",
-  DEGRADED = "degraded",
-  MAINTENANCE = "maintenance",
-  CRITICAL = "critical",
+  OPERATIONAL = 'operational',
+  DEGRADED = 'degraded',
+  MAINTENANCE = 'maintenance',
+  CRITICAL = 'critical',
 }
 
 /**
@@ -25,8 +25,8 @@ export enum SystemStatus {
  */
 export interface AgentStatus {
   agentId: string;
-  agentType: "ai_head" | "inbound" | "outbound" | "crm" | "analytics";
-  status: "active" | "idle" | "busy" | "error" | "offline";
+  agentType: 'ai_head' | 'inbound' | 'outbound' | 'crm' | 'analytics';
+  status: 'active' | 'idle' | 'busy' | 'error' | 'offline';
   lastActivity: Date;
   currentLoad: number; // 0-1 scale
   errorCount: number;
@@ -40,11 +40,11 @@ export interface AgentStatus {
 export interface SystemOverride {
   id: string;
   type:
-    | "pause_agent"
-    | "resume_agent"
-    | "redirect_leads"
-    | "emergency_stop"
-    | "priority_boost";
+    | 'pause_agent'
+    | 'resume_agent'
+    | 'redirect_leads'
+    | 'emergency_stop'
+    | 'priority_boost';
   targetAgent?: string;
   parameters?: Record<string, any>;
   reason: string;
@@ -61,13 +61,13 @@ export interface StrategicDirective {
   id: string;
   title: string;
   description: string;
-  type: "campaign" | "routing_change" | "performance_target" | "process_update";
-  priority: "low" | "medium" | "high" | "critical";
+  type: 'campaign' | 'routing_change' | 'performance_target' | 'process_update';
+  priority: 'low' | 'medium' | 'high' | 'critical';
   targetAgents: string[];
   parameters: Record<string, any>;
   startDate: Date;
   endDate?: Date;
-  status: "pending" | "active" | "completed" | "cancelled";
+  status: 'pending' | 'active' | 'completed' | 'cancelled';
   createdBy: string;
   createdAt: Date;
 }
@@ -77,7 +77,7 @@ export interface StrategicDirective {
  */
 export interface ExecutiveReport {
   id: string;
-  reportType: "daily" | "weekly" | "monthly" | "custom";
+  reportType: 'daily' | 'weekly' | 'monthly' | 'custom';
   period: {
     start: Date;
     end: Date;
@@ -102,7 +102,7 @@ export interface ExecutiveReport {
  */
 export interface SystemAlert {
   id: string;
-  level: "info" | "warning" | "error" | "critical";
+  level: 'info' | 'warning' | 'error' | 'critical';
   title: string;
   message: string;
   source: string;
@@ -157,19 +157,19 @@ export class ChiefAgent {
    * Initialize agent status tracking
    */
   private initializeAgentStatuses(): void {
-    const agents: Array<{ id: string; type: AgentStatus["agentType"] }> = [
-      { id: "ai-head-001", type: "ai_head" },
-      { id: "inbound-001", type: "inbound" },
-      { id: "outbound-001", type: "outbound" },
-      { id: "crm-001", type: "crm" },
-      { id: "analytics-001", type: "analytics" },
+    const agents: Array<{ id: string; type: AgentStatus['agentType'] }> = [
+      { id: 'ai-head-001', type: 'ai_head' },
+      { id: 'inbound-001', type: 'inbound' },
+      { id: 'outbound-001', type: 'outbound' },
+      { id: 'crm-001', type: 'crm' },
+      { id: 'analytics-001', type: 'analytics' },
     ];
 
     agents.forEach((agent) => {
       this.agentStatuses.set(agent.id, {
         agentId: agent.id,
         agentType: agent.type,
-        status: "active",
+        status: 'active',
         lastActivity: new Date(),
         currentLoad: 0,
         errorCount: 0,
@@ -192,10 +192,10 @@ export class ChiefAgent {
     // In a real implementation, this would set up periodic monitoring
     // For now, we'll simulate the monitoring setup
     this.addSystemAlert({
-      level: "info",
-      title: "System Monitoring Started",
-      message: "Chief Agent monitoring system is now active",
-      source: "chief-agent",
+      level: 'info',
+      title: 'System Monitoring Started',
+      message: 'Chief Agent monitoring system is now active',
+      source: 'chief-agent',
     });
   }
 
@@ -204,7 +204,7 @@ export class ChiefAgent {
    */
   getDashboardMetrics(): DashboardMetrics {
     const activeAgents = Array.from(this.agentStatuses.values()).filter(
-      (agent) => agent.status === "active" || agent.status === "busy"
+      (agent) => agent.status === 'active' || agent.status === 'busy'
     ).length;
 
     const totalLoad = Array.from(this.agentStatuses.values()).reduce(
@@ -218,7 +218,7 @@ export class ChiefAgent {
       (alert) => !alert.acknowledged
     );
     const criticalAlerts = alerts.filter(
-      (alert) => alert.level === "critical"
+      (alert) => alert.level === 'critical'
     ).length;
 
     // Get today's metrics (simulated for now)
@@ -250,7 +250,7 @@ export class ChiefAgent {
   private calculateSystemStatus(): SystemStatus {
     const agents = Array.from(this.agentStatuses.values());
     const criticalAlerts = Array.from(this.systemAlerts.values()).filter(
-      (alert) => alert.level === "critical" && !alert.acknowledged
+      (alert) => alert.level === 'critical' && !alert.acknowledged
     );
 
     if (criticalAlerts.length > 0) {
@@ -258,10 +258,10 @@ export class ChiefAgent {
     }
 
     const errorAgents = agents.filter(
-      (agent) => agent.status === "error"
+      (agent) => agent.status === 'error'
     ).length;
     const offlineAgents = agents.filter(
-      (agent) => agent.status === "offline"
+      (agent) => agent.status === 'offline'
     ).length;
 
     if (errorAgents > 0 || offlineAgents > agents.length * 0.3) {
@@ -269,7 +269,7 @@ export class ChiefAgent {
     }
 
     const activeOverrides = Array.from(this.systemOverrides.values()).filter(
-      (override) => override.isActive && override.type === "emergency_stop"
+      (override) => override.isActive && override.type === 'emergency_stop'
     );
 
     if (activeOverrides.length > 0) {
@@ -307,18 +307,18 @@ export class ChiefAgent {
     // High error count alert
     if (status.errorCount > 10) {
       this.addSystemAlert({
-        level: "warning",
-        title: "High Error Count",
+        level: 'warning',
+        title: 'High Error Count',
         message: `Agent ${agentId} has ${status.errorCount} errors`,
         source: agentId,
       });
     }
 
     // Agent offline alert
-    if (status.status === "offline") {
+    if (status.status === 'offline') {
       this.addSystemAlert({
-        level: "error",
-        title: "Agent Offline",
+        level: 'error',
+        title: 'Agent Offline',
         message: `Agent ${agentId} is offline`,
         source: agentId,
       });
@@ -327,8 +327,8 @@ export class ChiefAgent {
     // High load alert
     if (status.currentLoad > 0.9) {
       this.addSystemAlert({
-        level: "warning",
-        title: "High Agent Load",
+        level: 'warning',
+        title: 'High Agent Load',
         message: `Agent ${agentId} is at ${Math.round(
           status.currentLoad * 100
         )}% capacity`,
@@ -355,7 +355,7 @@ export class ChiefAgent {
    * Issue system override
    */
   issueSystemOverride(
-    override: Omit<SystemOverride, "id" | "timestamp" | "isActive">
+    override: Omit<SystemOverride, 'id' | 'timestamp' | 'isActive'>
   ): string {
     const overrideId = this.generateId();
     const systemOverride: SystemOverride = {
@@ -372,10 +372,10 @@ export class ChiefAgent {
 
     // Log the override
     this.addSystemAlert({
-      level: "info",
-      title: "System Override Issued",
+      level: 'info',
+      title: 'System Override Issued',
       message: `Override ${override.type} issued by ${override.issuedBy}: ${override.reason}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
 
     return overrideId;
@@ -386,25 +386,25 @@ export class ChiefAgent {
    */
   private executeSystemOverride(override: SystemOverride): void {
     switch (override.type) {
-      case "pause_agent":
+      case 'pause_agent':
         if (override.targetAgent) {
           this.pauseAgent(override.targetAgent);
         }
         break;
-      case "resume_agent":
+      case 'resume_agent':
         if (override.targetAgent) {
           this.resumeAgent(override.targetAgent);
         }
         break;
-      case "emergency_stop":
+      case 'emergency_stop':
         this.emergencyStop();
         break;
-      case "priority_boost":
+      case 'priority_boost':
         if (override.targetAgent) {
           this.boostAgentPriority(override.targetAgent);
         }
         break;
-      case "redirect_leads":
+      case 'redirect_leads':
         this.redirectLeads(override.parameters);
         break;
     }
@@ -416,7 +416,7 @@ export class ChiefAgent {
   private pauseAgent(agentId: string): void {
     const status = this.agentStatuses.get(agentId);
     if (status) {
-      this.updateAgentStatus(agentId, { status: "offline" });
+      this.updateAgentStatus(agentId, { status: 'offline' });
     }
   }
 
@@ -426,7 +426,7 @@ export class ChiefAgent {
   private resumeAgent(agentId: string): void {
     const status = this.agentStatuses.get(agentId);
     if (status) {
-      this.updateAgentStatus(agentId, { status: "active" });
+      this.updateAgentStatus(agentId, { status: 'active' });
     }
   }
 
@@ -435,14 +435,14 @@ export class ChiefAgent {
    */
   private emergencyStop(): void {
     this.agentStatuses.forEach((status, agentId) => {
-      this.updateAgentStatus(agentId, { status: "offline" });
+      this.updateAgentStatus(agentId, { status: 'offline' });
     });
 
     this.addSystemAlert({
-      level: "critical",
-      title: "Emergency Stop Activated",
-      message: "All agents have been stopped due to emergency override",
-      source: "chief-agent",
+      level: 'critical',
+      title: 'Emergency Stop Activated',
+      message: 'All agents have been stopped due to emergency override',
+      source: 'chief-agent',
     });
   }
 
@@ -452,10 +452,10 @@ export class ChiefAgent {
   private boostAgentPriority(agentId: string): void {
     // Implementation would depend on specific agent architecture
     this.addSystemAlert({
-      level: "info",
-      title: "Agent Priority Boosted",
+      level: 'info',
+      title: 'Agent Priority Boosted',
       message: `Priority boost applied to agent ${agentId}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -465,10 +465,10 @@ export class ChiefAgent {
   private redirectLeads(parameters?: Record<string, any>): void {
     // Implementation would integrate with AI Head Agent routing
     this.addSystemAlert({
-      level: "info",
-      title: "Lead Redirection Active",
-      message: "Lead routing has been modified by system override",
-      source: "chief-agent",
+      level: 'info',
+      title: 'Lead Redirection Active',
+      message: 'Lead routing has been modified by system override',
+      source: 'chief-agent',
     });
   }
 
@@ -485,10 +485,10 @@ export class ChiefAgent {
     this.systemOverrides.set(overrideId, override);
 
     this.addSystemAlert({
-      level: "info",
-      title: "System Override Cancelled",
+      level: 'info',
+      title: 'System Override Cancelled',
       message: `Override ${override.type} cancelled: ${reason}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -496,23 +496,23 @@ export class ChiefAgent {
    * Create strategic directive
    */
   createStrategicDirective(
-    directive: Omit<StrategicDirective, "id" | "createdAt" | "status">
+    directive: Omit<StrategicDirective, 'id' | 'createdAt' | 'status'>
   ): string {
     const directiveId = this.generateId();
     const strategicDirective: StrategicDirective = {
       ...directive,
       id: directiveId,
-      status: "pending",
+      status: 'pending',
       createdAt: new Date(),
     };
 
     this.strategicDirectives.set(directiveId, strategicDirective);
 
     this.addSystemAlert({
-      level: "info",
-      title: "Strategic Directive Created",
+      level: 'info',
+      title: 'Strategic Directive Created',
       message: `New directive: ${directive.title}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
 
     return directiveId;
@@ -527,17 +527,17 @@ export class ChiefAgent {
       throw new Error(`Directive ${directiveId} not found`);
     }
 
-    directive.status = "active";
+    directive.status = 'active';
     this.strategicDirectives.set(directiveId, directive);
 
     // Execute the directive
     this.executeStrategicDirective(directive);
 
     this.addSystemAlert({
-      level: "info",
-      title: "Strategic Directive Activated",
+      level: 'info',
+      title: 'Strategic Directive Activated',
       message: `Directive activated: ${directive.title}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -547,16 +547,16 @@ export class ChiefAgent {
   private executeStrategicDirective(directive: StrategicDirective): void {
     // Implementation would depend on directive type and target agents
     switch (directive.type) {
-      case "campaign":
+      case 'campaign':
         this.executeCampaignDirective(directive);
         break;
-      case "routing_change":
+      case 'routing_change':
         this.executeRoutingChangeDirective(directive);
         break;
-      case "performance_target":
+      case 'performance_target':
         this.executePerformanceTargetDirective(directive);
         break;
-      case "process_update":
+      case 'process_update':
         this.executeProcessUpdateDirective(directive);
         break;
     }
@@ -568,10 +568,10 @@ export class ChiefAgent {
   private executeCampaignDirective(directive: StrategicDirective): void {
     // Would integrate with outbound agents for campaign execution
     this.addSystemAlert({
-      level: "info",
-      title: "Campaign Directive Executing",
+      level: 'info',
+      title: 'Campaign Directive Executing',
       message: `Campaign "${directive.title}" is now active`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -581,10 +581,10 @@ export class ChiefAgent {
   private executeRoutingChangeDirective(directive: StrategicDirective): void {
     // Would update AI Head Agent routing rules
     this.addSystemAlert({
-      level: "info",
-      title: "Routing Changes Applied",
+      level: 'info',
+      title: 'Routing Changes Applied',
       message: `Routing updated per directive: ${directive.title}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -596,10 +596,10 @@ export class ChiefAgent {
   ): void {
     // Would update performance targets for specified agents
     this.addSystemAlert({
-      level: "info",
-      title: "Performance Targets Updated",
+      level: 'info',
+      title: 'Performance Targets Updated',
       message: `New performance targets set: ${directive.title}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -609,10 +609,10 @@ export class ChiefAgent {
   private executeProcessUpdateDirective(directive: StrategicDirective): void {
     // Would update agent processes and workflows
     this.addSystemAlert({
-      level: "info",
-      title: "Process Updates Applied",
+      level: 'info',
+      title: 'Process Updates Applied',
       message: `Process changes implemented: ${directive.title}`,
-      source: "chief-agent",
+      source: 'chief-agent',
     });
   }
 
@@ -628,7 +628,7 @@ export class ChiefAgent {
    */
   getActiveStrategicDirectives(): StrategicDirective[] {
     return Array.from(this.strategicDirectives.values()).filter(
-      (directive) => directive.status === "active"
+      (directive) => directive.status === 'active'
     );
   }
 
@@ -636,7 +636,7 @@ export class ChiefAgent {
    * Add system alert
    */
   private addSystemAlert(
-    alert: Omit<SystemAlert, "id" | "timestamp" | "acknowledged">
+    alert: Omit<SystemAlert, 'id' | 'timestamp' | 'acknowledged'>
   ): void {
     const alertId = this.generateId();
     const systemAlert: SystemAlert = {
@@ -674,7 +674,7 @@ export class ChiefAgent {
    * Generate executive report
    */
   generateExecutiveReport(
-    reportType: ExecutiveReport["reportType"],
+    reportType: ExecutiveReport['reportType'],
     period?: { start: Date; end: Date }
   ): ExecutiveReport {
     const reportPeriod = period || this.getDefaultReportPeriod(reportType);
@@ -697,7 +697,7 @@ export class ChiefAgent {
   /**
    * Get default report period based on type
    */
-  private getDefaultReportPeriod(reportType: ExecutiveReport["reportType"]): {
+  private getDefaultReportPeriod(reportType: ExecutiveReport['reportType']): {
     start: Date;
     end: Date;
   } {
@@ -706,13 +706,13 @@ export class ChiefAgent {
     let start: Date;
 
     switch (reportType) {
-      case "daily":
+      case 'daily':
         start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         break;
-      case "weekly":
+      case 'weekly':
         start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         break;
-      case "monthly":
+      case 'monthly':
         start = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
       default:
@@ -728,7 +728,7 @@ export class ChiefAgent {
   private generateReportSummary(period: {
     start: Date;
     end: Date;
-  }): ExecutiveReport["summary"] {
+  }): ExecutiveReport['summary'] {
     // In a real implementation, this would query actual data
     return {
       totalLeads: this.getLeadsProcessedInPeriod(period),
@@ -749,26 +749,26 @@ export class ChiefAgent {
     const metrics = this.getDashboardMetrics();
 
     if (metrics.conversionRateToday > 0.8) {
-      insights.push("Conversion rates are performing exceptionally well today");
+      insights.push('Conversion rates are performing exceptionally well today');
     }
 
     if (metrics.averageResponseTime < 30000) {
       // 30 seconds in milliseconds
-      insights.push("Response times are well within SLA targets");
+      insights.push('Response times are well within SLA targets');
     }
 
     if (metrics.activeAlerts > 5) {
-      insights.push("Higher than normal alert activity detected");
+      insights.push('Higher than normal alert activity detected');
     }
 
     const aiHeadMetrics = this.aiHeadAgent.getPerformanceMetrics();
     if (aiHeadMetrics.routingAccuracy > 0.9) {
-      insights.push("AI Head Agent routing accuracy is excellent");
+      insights.push('AI Head Agent routing accuracy is excellent');
     }
 
     // Always include at least one insight
     if (insights.length === 0) {
-      insights.push("System is operating within normal parameters");
+      insights.push('System is operating within normal parameters');
     }
 
     return insights;
@@ -783,29 +783,29 @@ export class ChiefAgent {
 
     if (metrics.currentLoad > 0.8) {
       recommendations.push(
-        "Consider scaling up agent capacity due to high system load"
+        'Consider scaling up agent capacity due to high system load'
       );
     }
 
     if (metrics.averageResponseTime > 45000) {
       // 45 seconds in milliseconds
       recommendations.push(
-        "Investigate response time delays and optimize agent workflows"
+        'Investigate response time delays and optimize agent workflows'
       );
     }
 
     if (metrics.criticalAlerts > 0) {
-      recommendations.push("Address critical system alerts immediately");
+      recommendations.push('Address critical system alerts immediately');
     }
 
     const aiHeadMetrics = this.aiHeadAgent.getPerformanceMetrics();
     if (aiHeadMetrics.routingAccuracy < 0.7) {
-      recommendations.push("Review and optimize lead routing rules");
+      recommendations.push('Review and optimize lead routing rules');
     }
 
     // Always include at least one recommendation
     if (recommendations.length === 0) {
-      recommendations.push("System is performing well - continue monitoring");
+      recommendations.push('System is performing well - continue monitoring');
     }
 
     return recommendations;
@@ -899,7 +899,7 @@ export class ChiefAgent {
   }): SystemAlert[] {
     return Array.from(this.systemAlerts.values()).filter(
       (alert) =>
-        alert.level === "critical" &&
+        alert.level === 'critical' &&
         alert.timestamp >= period.start &&
         alert.timestamp <= period.end
     );
@@ -930,7 +930,7 @@ export class ChiefAgent {
 
     // Deduct for offline agents
     const offlineAgents = agents.filter(
-      (agent) => agent.status === "offline"
+      (agent) => agent.status === 'offline'
     ).length;
     score -= (offlineAgents / agents.length) * 0.3;
 

@@ -1,13 +1,13 @@
-import { AIHeadAgent, PerformanceFeedback } from "./ai-head-agent";
-import { Lead } from "../types/lead";
+import { AIHeadAgent, PerformanceFeedback } from './ai-head-agent';
+import { Lead } from '../types/lead';
 
 /**
  * Example usage of the AI Head Agent
  * This demonstrates the core functionality of lead analysis and routing
  */
 async function demonstrateAIHeadAgent() {
-  console.log("🤖 AI Head Agent Demo");
-  console.log("====================\n");
+  console.log('🤖 AI Head Agent Demo');
+  console.log('====================\n');
 
   // Initialize the AI Head Agent
   const aiHeadAgent = new AIHeadAgent({
@@ -18,78 +18,78 @@ async function demonstrateAIHeadAgent() {
   // Example leads to analyze
   const leads: Lead[] = [
     {
-      id: "lead-001",
-      source: "website",
+      id: 'lead-001',
+      source: 'website',
       contactInfo: {
-        name: "Sarah Johnson",
-        email: "sarah@example.com",
-        phone: "+1234567890",
-        preferredChannel: "email",
-        timezone: "America/New_York",
+        name: 'Sarah Johnson',
+        email: 'sarah@example.com',
+        phone: '+1234567890',
+        preferredChannel: 'email',
+        timezone: 'America/New_York',
       },
-      leadType: "hot",
+      leadType: 'hot',
       urgencyLevel: 9,
       intentSignals: [
-        "form_submission",
-        "requested_callback",
-        "asked_about_pricing",
+        'form_submission',
+        'requested_callback',
+        'asked_about_pricing',
       ],
       qualificationData: {
         budget: { min: 200000, max: 800000 },
-        location: "Manhattan",
-        propertyType: "condo",
-        timeline: "2 months",
+        location: 'Manhattan',
+        propertyType: 'condo',
+        timeline: '2 months',
         qualificationScore: 0.85,
       },
-      status: "new",
+      status: 'new',
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
-      id: "lead-002",
-      source: "meta_ads",
+      id: 'lead-002',
+      source: 'meta_ads',
       contactInfo: {
-        name: "Mike Chen",
-        email: "mike.chen@example.com",
-        preferredChannel: "sms",
-        timezone: "America/Los_Angeles",
+        name: 'Mike Chen',
+        email: 'mike.chen@example.com',
+        preferredChannel: 'sms',
+        timezone: 'America/Los_Angeles',
       },
-      leadType: "warm",
+      leadType: 'warm',
       urgencyLevel: 5,
-      intentSignals: ["downloaded_content", "visited_multiple_pages"],
+      intentSignals: ['downloaded_content', 'visited_multiple_pages'],
       qualificationData: {
-        location: "San Francisco",
-        propertyType: "apartment",
+        location: 'San Francisco',
+        propertyType: 'apartment',
         qualificationScore: 0.4,
       },
-      status: "new",
+      status: 'new',
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
-      id: "lead-003",
-      source: "gmail",
+      id: 'lead-003',
+      source: 'gmail',
       contactInfo: {
-        name: "Jennifer Smith",
-        email: "jennifer.smith@example.com",
-        preferredChannel: "email",
-        timezone: "UTC",
+        name: 'Jennifer Smith',
+        email: 'jennifer.smith@example.com',
+        preferredChannel: 'email',
+        timezone: 'UTC',
       },
-      leadType: "cold",
+      leadType: 'cold',
       urgencyLevel: 2,
-      intentSignals: ["email_opened"],
+      intentSignals: ['email_opened'],
       qualificationData: {
         qualificationScore: 0.1,
       },
-      status: "new",
+      status: 'new',
       createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day old
       updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     },
   ];
 
   // Analyze each lead
-  console.log("📊 Analyzing Leads:");
-  console.log("-------------------");
+  console.log('📊 Analyzing Leads:');
+  console.log('-------------------');
 
   for (const lead of leads) {
     try {
@@ -117,12 +117,12 @@ async function demonstrateAIHeadAgent() {
       );
       console.log(
         `      Reasoning: ${analysis.routingRecommendation.reasoning.join(
-          ", "
+          ', '
         )}`
       );
       console.log(
         `      Suggested Actions: ${analysis.routingRecommendation.suggestedActions.join(
-          ", "
+          ', '
         )}`
       );
     } catch (error) {
@@ -131,12 +131,12 @@ async function demonstrateAIHeadAgent() {
   }
 
   // Simulate performance feedback
-  console.log("\n\n📈 Processing Performance Feedback:");
-  console.log("------------------------------------");
+  console.log('\n\n📈 Processing Performance Feedback:');
+  console.log('------------------------------------');
 
   const feedbackData: PerformanceFeedback[] = [
     {
-      leadId: "lead-001",
+      leadId: 'lead-001',
       routingDecision: (await aiHeadAgent.analyzeLead(leads[0]))
         .routingRecommendation,
       actualOutcome: {
@@ -148,7 +148,7 @@ async function demonstrateAIHeadAgent() {
       timestamp: new Date(),
     },
     {
-      leadId: "lead-002",
+      leadId: 'lead-002',
       routingDecision: (await aiHeadAgent.analyzeLead(leads[1]))
         .routingRecommendation,
       actualOutcome: {
@@ -166,18 +166,18 @@ async function demonstrateAIHeadAgent() {
     console.log(`✅ Processed feedback for lead ${feedback.leadId}`);
     console.log(
       `   Conversion: ${
-        feedback.actualOutcome.conversionSuccessful ? "Success" : "Failed"
+        feedback.actualOutcome.conversionSuccessful ? 'Success' : 'Failed'
       }`
     );
     console.log(`   Response Time: ${feedback.actualOutcome.responseTime}s`);
     console.log(
-      `   Satisfaction: ${feedback.actualOutcome.customerSatisfaction || "N/A"}`
+      `   Satisfaction: ${feedback.actualOutcome.customerSatisfaction || 'N/A'}`
     );
   }
 
   // Show performance metrics
-  console.log("\n\n📊 Performance Metrics:");
-  console.log("------------------------");
+  console.log('\n\n📊 Performance Metrics:');
+  console.log('------------------------');
 
   const metrics = aiHeadAgent.getPerformanceMetrics();
   console.log(`Total Leads Analyzed: ${metrics.totalLeadsAnalyzed}`);
@@ -190,7 +190,7 @@ async function demonstrateAIHeadAgent() {
   console.log(`Average Analysis Time: ${metrics.averageAnalysisTime}ms`);
 
   if (metrics.rulePerformance.length > 0) {
-    console.log("\nRule Performance:");
+    console.log('\nRule Performance:');
     metrics.rulePerformance.forEach((rule) => {
       console.log(
         `  ${rule.ruleId}: ${(rule.successRate * 100).toFixed(1)}% success (${
@@ -201,53 +201,53 @@ async function demonstrateAIHeadAgent() {
   }
 
   // Demonstrate custom routing rule
-  console.log("\n\n⚙️  Adding Custom Routing Rule:");
-  console.log("--------------------------------");
+  console.log('\n\n⚙️  Adding Custom Routing Rule:');
+  console.log('--------------------------------');
 
   aiHeadAgent.addRoutingRule({
-    id: "vip-referral",
-    name: "VIP Referral Priority",
+    id: 'vip-referral',
+    name: 'VIP Referral Priority',
     condition: (lead) =>
-      lead.source === "referral" &&
+      lead.source === 'referral' &&
       lead.qualificationData.qualificationScore > 0.8,
     action: {
-      targetAgent: "inbound",
-      priority: "high",
-      reasoning: ["VIP referral with high qualification"],
+      targetAgent: 'inbound',
+      priority: 'high',
+      reasoning: ['VIP referral with high qualification'],
       estimatedResponseTime: 15,
       suggestedActions: [
-        "Immediate personal contact",
-        "VIP treatment protocol",
+        'Immediate personal contact',
+        'VIP treatment protocol',
       ],
     },
     priority: 1,
     enabled: true,
   });
 
-  console.log("✅ Added VIP Referral Priority rule");
+  console.log('✅ Added VIP Referral Priority rule');
 
   // Test the new rule with a VIP referral lead
   const vipLead: Lead = {
-    id: "lead-vip",
-    source: "referral",
+    id: 'lead-vip',
+    source: 'referral',
     contactInfo: {
-      name: "Robert Williams",
-      email: "robert@example.com",
-      phone: "+1987654321",
-      preferredChannel: "voice",
-      timezone: "America/New_York",
+      name: 'Robert Williams',
+      email: 'robert@example.com',
+      phone: '+1987654321',
+      preferredChannel: 'voice',
+      timezone: 'America/New_York',
     },
-    leadType: "warm",
+    leadType: 'warm',
     urgencyLevel: 7,
-    intentSignals: ["personal_referral", "high_value_inquiry"],
+    intentSignals: ['personal_referral', 'high_value_inquiry'],
     qualificationData: {
       budget: { min: 1000000, max: 5000000 },
-      location: "Upper East Side",
-      propertyType: "penthouse",
-      timeline: "immediate",
+      location: 'Upper East Side',
+      propertyType: 'penthouse',
+      timeline: 'immediate',
       qualificationScore: 0.95,
     },
-    status: "new",
+    status: 'new',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -261,10 +261,10 @@ async function demonstrateAIHeadAgent() {
     `   Response Time: ${vipAnalysis.routingRecommendation.estimatedResponseTime}s`
   );
   console.log(
-    `   Reasoning: ${vipAnalysis.routingRecommendation.reasoning.join(", ")}`
+    `   Reasoning: ${vipAnalysis.routingRecommendation.reasoning.join(', ')}`
   );
 
-  console.log("\n🎉 Demo Complete!");
+  console.log('\n🎉 Demo Complete!');
 }
 
 // Run the demo if this file is executed directly

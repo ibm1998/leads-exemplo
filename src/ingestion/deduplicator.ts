@@ -1,6 +1,6 @@
-import { DatabaseManager } from "../database/manager";
-import { logger } from "../utils/logger";
-import { NormalizedLeadData, DeduplicationResult } from "./types";
+import { DatabaseManager } from '../database/manager';
+import { logger } from '../utils/logger';
+import { NormalizedLeadData, DeduplicationResult } from './types';
 
 /**
  * Lead deduplicator that identifies potential duplicate leads
@@ -16,7 +16,7 @@ export class LeadDeduplicator {
     leadData: NormalizedLeadData
   ): Promise<DeduplicationResult> {
     try {
-      logger.info("Checking for duplicate leads");
+      logger.info('Checking for duplicate leads');
 
       // Get potential matches based on different criteria
       const emailMatches = await this.findByEmail(leadData.contactInfo.email);
@@ -43,7 +43,7 @@ export class LeadDeduplicator {
 
       return bestMatch;
     } catch (error) {
-      logger.error("Duplicate check failed:", error);
+      logger.error('Duplicate check failed:', error);
       throw new Error(`Failed to check for duplicates: ${error}`);
     }
   }
@@ -55,7 +55,7 @@ export class LeadDeduplicator {
     if (!email) return [];
 
     const result = await this.dbManager.query(
-      "SELECT * FROM leads WHERE email = $1",
+      'SELECT * FROM leads WHERE email = $1',
       [email.toLowerCase()]
     );
 
@@ -69,7 +69,7 @@ export class LeadDeduplicator {
     if (!phone) return [];
 
     // Normalize phone number (remove all non-digits)
-    const normalizedPhone = phone.replace(/\D/g, "");
+    const normalizedPhone = phone.replace(/\D/g, '');
 
     // Try different phone number formats
     const phoneVariations = [
@@ -78,7 +78,7 @@ export class LeadDeduplicator {
       `1${normalizedPhone}`, // With country code
     ];
 
-    const placeholders = phoneVariations.map((_, i) => `$${i + 1}`).join(", ");
+    const placeholders = phoneVariations.map((_, i) => `$${i + 1}`).join(', ');
 
     const result = await this.dbManager.query(
       `SELECT * FROM leads WHERE regexp_replace(phone, '[^0-9]', '', 'g') IN (${placeholders})`,
@@ -92,7 +92,7 @@ export class LeadDeduplicator {
    * Find leads by name (fuzzy matching)
    */
   private async findByName(name: string): Promise<any[]> {
-    if (!name || name === "Unknown") return [];
+    if (!name || name === 'Unknown') return [];
 
     // Use PostgreSQL's similarity function for fuzzy name matching
     const result = await this.dbManager.query(
@@ -176,21 +176,21 @@ export class LeadDeduplicator {
         existingLead.email.toLowerCase()
       ) {
         score += 0.5;
-        fields.push("email");
+        fields.push('email');
       }
     }
 
     // Phone match (high weight)
     if (newLead.contactInfo.phone && existingLead.phone) {
-      const newPhone = newLead.contactInfo.phone.replace(/\D/g, "");
-      const existingPhone = existingLead.phone.replace(/\D/g, "");
+      const newPhone = newLead.contactInfo.phone.replace(/\D/g, '');
+      const existingPhone = existingLead.phone.replace(/\D/g, '');
 
       if (
         newPhone === existingPhone ||
         newPhone.slice(-10) === existingPhone.slice(-10)
       ) {
         score += 0.4;
-        fields.push("phone");
+        fields.push('phone');
       }
     }
 
@@ -203,14 +203,14 @@ export class LeadDeduplicator {
 
       if (similarity > 0.8) {
         score += 0.3 * similarity;
-        fields.push("name");
+        fields.push('name');
       }
     }
 
     // Source match (low weight, but relevant)
     if (newLead.source === existingLead.source) {
       score += 0.1;
-      fields.push("source");
+      fields.push('source');
     }
 
     // Location match (if available)
@@ -220,7 +220,7 @@ export class LeadDeduplicator {
         existingLead.location.toLowerCase()
       ) {
         score += 0.1;
-        fields.push("location");
+        fields.push('location');
       }
     }
 
@@ -232,7 +232,7 @@ export class LeadDeduplicator {
 
     if (daysDiff < 1) {
       score += 0.1; // Same day
-      fields.push("timing");
+      fields.push('timing');
     } else if (daysDiff < 7) {
       score += 0.05; // Same week
     }
@@ -284,7 +284,7 @@ export class LeadDeduplicator {
 
       // Get existing lead data
       const existingResult = await this.dbManager.query(
-        "SELECT * FROM leads WHERE id = $1",
+        'SELECT * FROM leads WHERE id = $1',
         [existingLeadId]
       );
 
@@ -297,7 +297,7 @@ export class LeadDeduplicator {
       // Merge contact information (prefer non-empty values)
       const mergedContactInfo = {
         name:
-          newLeadData.contactInfo.name !== "Unknown"
+          newLeadData.contactInfo.name !== 'Unknown'
             ? newLeadData.contactInfo.name
             : existingLead.name,
         email: newLeadData.contactInfo.email || existingLead.email,
@@ -381,7 +381,7 @@ export class LeadDeduplicator {
         `Successfully merged duplicate lead data for lead ${existingLeadId}`
       );
     } catch (error) {
-      logger.error("Failed to merge duplicate lead data:", error);
+      logger.error('Failed to merge duplicate lead data:', error);
       throw error;
     }
   }

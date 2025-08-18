@@ -1,19 +1,19 @@
-import { WorkflowDefinition, WorkflowNode } from "./n8n-client";
-import { LeadSource, LeadType } from "../types/lead";
+import { WorkflowDefinition, WorkflowNode } from './n8n-client';
+import { LeadSource, LeadType } from '../types/lead';
 
 /**
  * Agent coordination workflow types
  */
 export type AgentWorkflowType =
-  | "lead_routing"
-  | "inbound_processing"
-  | "outbound_processing"
-  | "customer_retention"
-  | "feedback_collection"
-  | "appointment_coordination"
-  | "crm_management"
-  | "analytics_processing"
-  | "optimization_loop";
+  | 'lead_routing'
+  | 'inbound_processing'
+  | 'outbound_processing'
+  | 'customer_retention'
+  | 'feedback_collection'
+  | 'appointment_coordination'
+  | 'crm_management'
+  | 'analytics_processing'
+  | 'optimization_loop';
 
 /**
  * Workflow template configuration
@@ -30,7 +30,7 @@ export interface WorkflowTemplateConfig {
  * Workflow trigger configuration
  */
 export interface WorkflowTrigger {
-  type: "webhook" | "schedule" | "manual";
+  type: 'webhook' | 'schedule' | 'manual';
   config: Record<string, any>;
 }
 
@@ -50,34 +50,34 @@ export class WorkflowTemplateGenerator {
     const nodes: WorkflowNode[] = [
       // Webhook trigger for new leads
       {
-        id: "webhook-trigger",
-        name: "Lead Webhook",
-        type: "n8n-nodes-base.webhook",
+        id: 'webhook-trigger',
+        name: 'Lead Webhook',
+        type: 'n8n-nodes-base.webhook',
         typeVersion: 1,
         position: [100, 200],
         parameters: {
-          path: config.webhookPath || "lead-routing",
-          httpMethod: "POST",
-          responseMode: "responseNode",
+          path: config.webhookPath || 'lead-routing',
+          httpMethod: 'POST',
+          responseMode: 'responseNode',
         },
       },
 
       // AI Head Agent analysis
       {
-        id: "ai-head-analysis",
-        name: "AI Head Agent Analysis",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'ai-head-analysis',
+        name: 'AI Head Agent Analysis',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [300, 200],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.aiHeadAgentEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
-                value: "={{ $json }}",
+                name: 'lead',
+                value: '={{ $json }}',
               },
             ],
           },
@@ -89,23 +89,23 @@ export class WorkflowTemplateGenerator {
 
       // Route to Inbound Agent
       {
-        id: "route-inbound",
-        name: "Route to Inbound Agent",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'route-inbound',
+        name: 'Route to Inbound Agent',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [500, 100],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.inboundAgentEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
+                name: 'lead',
                 value: "={{ $('webhook-trigger').item.json }}",
               },
               {
-                name: "analysis",
+                name: 'analysis',
                 value: "={{ $('ai-head-analysis').item.json }}",
               },
             ],
@@ -115,23 +115,23 @@ export class WorkflowTemplateGenerator {
 
       // Route to Outbound Agent
       {
-        id: "route-outbound",
-        name: "Route to Outbound Agent",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'route-outbound',
+        name: 'Route to Outbound Agent',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [500, 300],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.outboundAgentEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
+                name: 'lead',
                 value: "={{ $('webhook-trigger').item.json }}",
               },
               {
-                name: "analysis",
+                name: 'analysis',
                 value: "={{ $('ai-head-analysis').item.json }}",
               },
             ],
@@ -141,30 +141,30 @@ export class WorkflowTemplateGenerator {
 
       // Routing decision switch
       {
-        id: "routing-switch",
-        name: "Routing Decision",
-        type: "n8n-nodes-base.switch",
+        id: 'routing-switch',
+        name: 'Routing Decision',
+        type: 'n8n-nodes-base.switch',
         typeVersion: 1,
         position: [400, 200],
         parameters: {
           conditions: {
             options: {
               caseSensitive: true,
-              leftValue: "",
-              typeValidation: "strict",
+              leftValue: '',
+              typeValidation: 'strict',
             },
             conditions: [
               {
                 leftValue:
                   "={{ $('ai-head-analysis').item.json.routingRecommendation.targetAgent }}",
-                rightValue: "inbound",
+                rightValue: 'inbound',
                 operator: {
-                  type: "string",
-                  operation: "equals",
+                  type: 'string',
+                  operation: 'equals',
                 },
               },
             ],
-            combinator: "and",
+            combinator: 'and',
           },
           fallbackOutput: 1,
         },
@@ -172,13 +172,13 @@ export class WorkflowTemplateGenerator {
 
       // Response node
       {
-        id: "webhook-response",
-        name: "Webhook Response",
-        type: "n8n-nodes-base.respondToWebhook",
+        id: 'webhook-response',
+        name: 'Webhook Response',
+        type: 'n8n-nodes-base.respondToWebhook',
         typeVersion: 1,
         position: [700, 200],
         parameters: {
-          respondWith: "json",
+          respondWith: 'json',
           responseBody:
             '={{ { "status": "routed", "agent": $(\'ai-head-analysis\').item.json.routingRecommendation.targetAgent, "leadId": $(\'webhook-trigger\').item.json.id } }}',
         },
@@ -186,63 +186,63 @@ export class WorkflowTemplateGenerator {
     ];
 
     const connections = {
-      "webhook-trigger": {
+      'webhook-trigger': {
         main: [
           [
             {
-              node: "ai-head-analysis",
-              type: "main",
+              node: 'ai-head-analysis',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "ai-head-analysis": {
+      'ai-head-analysis': {
         main: [
           [
             {
-              node: "routing-switch",
-              type: "main",
+              node: 'routing-switch',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "routing-switch": {
+      'routing-switch': {
         main: [
           [
             {
-              node: "route-inbound",
-              type: "main",
+              node: 'route-inbound',
+              type: 'main',
               index: 0,
             },
           ],
           [
             {
-              node: "route-outbound",
-              type: "main",
-              index: 0,
-            },
-          ],
-        ],
-      },
-      "route-inbound": {
-        main: [
-          [
-            {
-              node: "webhook-response",
-              type: "main",
+              node: 'route-outbound',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "route-outbound": {
+      'route-inbound': {
         main: [
           [
             {
-              node: "webhook-response",
-              type: "main",
+              node: 'webhook-response',
+              type: 'main',
+              index: 0,
+            },
+          ],
+        ],
+      },
+      'route-outbound': {
+        main: [
+          [
+            {
+              node: 'webhook-response',
+              type: 'main',
               index: 0,
             },
           ],
@@ -251,13 +251,13 @@ export class WorkflowTemplateGenerator {
     };
 
     return {
-      id: "",
-      name: "Lead Routing Workflow",
+      id: '',
+      name: 'Lead Routing Workflow',
       active: true,
       nodes,
       connections,
       settings: {
-        executionOrder: "v1",
+        executionOrder: 'v1',
         saveManualExecutions: true,
       },
     };
@@ -275,22 +275,22 @@ export class WorkflowTemplateGenerator {
     const nodes: WorkflowNode[] = [
       // Webhook trigger for inbound leads
       {
-        id: "inbound-webhook",
-        name: "Inbound Lead Webhook",
-        type: "n8n-nodes-base.webhook",
+        id: 'inbound-webhook',
+        name: 'Inbound Lead Webhook',
+        type: 'n8n-nodes-base.webhook',
         typeVersion: 1,
         position: [100, 200],
         parameters: {
-          path: "inbound-processing",
-          httpMethod: "POST",
+          path: 'inbound-processing',
+          httpMethod: 'POST',
         },
       },
 
       // Lead type switch
       {
-        id: "lead-type-switch",
-        name: "Lead Type Decision",
-        type: "n8n-nodes-base.switch",
+        id: 'lead-type-switch',
+        name: 'Lead Type Decision',
+        type: 'n8n-nodes-base.switch',
         typeVersion: 1,
         position: [300, 200],
         parameters: {
@@ -300,54 +300,54 @@ export class WorkflowTemplateGenerator {
             },
             conditions: [
               {
-                leftValue: "={{ $json.analysis.leadType }}",
-                rightValue: "hot",
+                leftValue: '={{ $json.analysis.leadType }}',
+                rightValue: 'hot',
                 operator: {
-                  type: "string",
-                  operation: "equals",
+                  type: 'string',
+                  operation: 'equals',
                 },
               },
               {
-                leftValue: "={{ $json.lead.status }}",
-                rightValue: "dormant",
+                leftValue: '={{ $json.lead.status }}',
+                rightValue: 'dormant',
                 operator: {
-                  type: "string",
-                  operation: "equals",
+                  type: 'string',
+                  operation: 'equals',
                 },
               },
               {
-                leftValue: "={{ $json.lead.status }}",
-                rightValue: "converted",
+                leftValue: '={{ $json.lead.status }}',
+                rightValue: 'converted',
                 operator: {
-                  type: "string",
-                  operation: "equals",
+                  type: 'string',
+                  operation: 'equals',
                 },
               },
             ],
-            combinator: "or",
+            combinator: 'or',
           },
         },
       },
 
       // Virtual Sales Assistant for hot leads
       {
-        id: "virtual-sales-assistant",
-        name: "Virtual Sales Assistant",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'virtual-sales-assistant',
+        name: 'Virtual Sales Assistant',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [500, 100],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.virtualSalesAssistantEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
+                name: 'lead',
                 value: "={{ $('inbound-webhook').item.json.lead }}",
               },
               {
-                name: "analysis",
+                name: 'analysis',
                 value: "={{ $('inbound-webhook').item.json.analysis }}",
               },
             ],
@@ -357,19 +357,19 @@ export class WorkflowTemplateGenerator {
 
       // Customer Retention for dormant leads
       {
-        id: "customer-retention",
-        name: "Customer Retention Agent",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'customer-retention',
+        name: 'Customer Retention Agent',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [500, 200],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.customerRetentionEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
+                name: 'lead',
                 value: "={{ $('inbound-webhook').item.json.lead }}",
               },
             ],
@@ -379,19 +379,19 @@ export class WorkflowTemplateGenerator {
 
       // Feedback Collector for converted leads
       {
-        id: "feedback-collector",
-        name: "Review & Feedback Collector",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'feedback-collector',
+        name: 'Review & Feedback Collector',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [500, 300],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.feedbackCollectorEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
+                name: 'lead',
                 value: "={{ $('inbound-webhook').item.json.lead }}",
               },
             ],
@@ -401,28 +401,28 @@ export class WorkflowTemplateGenerator {
 
       // CRM Management update
       {
-        id: "crm-update",
-        name: "CRM Management Update",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'crm-update',
+        name: 'CRM Management Update',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [700, 200],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.crmManagementEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "leadId",
+                name: 'leadId',
                 value: "={{ $('inbound-webhook').item.json.lead.id }}",
               },
               {
-                name: "interaction",
-                value: "={{ $json }}",
+                name: 'interaction',
+                value: '={{ $json }}',
               },
               {
-                name: "source",
-                value: "inbound_processing",
+                name: 'source',
+                value: 'inbound_processing',
               },
             ],
           },
@@ -431,70 +431,70 @@ export class WorkflowTemplateGenerator {
     ];
 
     const connections = {
-      "inbound-webhook": {
+      'inbound-webhook': {
         main: [
           [
             {
-              node: "lead-type-switch",
-              type: "main",
+              node: 'lead-type-switch',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "lead-type-switch": {
+      'lead-type-switch': {
         main: [
           [
             {
-              node: "virtual-sales-assistant",
-              type: "main",
+              node: 'virtual-sales-assistant',
+              type: 'main',
               index: 0,
             },
           ],
           [
             {
-              node: "customer-retention",
-              type: "main",
+              node: 'customer-retention',
+              type: 'main',
               index: 0,
             },
           ],
           [
             {
-              node: "feedback-collector",
-              type: "main",
+              node: 'feedback-collector',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "virtual-sales-assistant": {
+      'virtual-sales-assistant': {
         main: [
           [
             {
-              node: "crm-update",
-              type: "main",
+              node: 'crm-update',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "customer-retention": {
+      'customer-retention': {
         main: [
           [
             {
-              node: "crm-update",
-              type: "main",
+              node: 'crm-update',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "feedback-collector": {
+      'feedback-collector': {
         main: [
           [
             {
-              node: "crm-update",
-              type: "main",
+              node: 'crm-update',
+              type: 'main',
               index: 0,
             },
           ],
@@ -503,13 +503,13 @@ export class WorkflowTemplateGenerator {
     };
 
     return {
-      id: "",
-      name: "Inbound Processing Workflow",
+      id: '',
+      name: 'Inbound Processing Workflow',
       active: true,
       nodes,
       connections,
       settings: {
-        executionOrder: "v1",
+        executionOrder: 'v1',
         saveManualExecutions: true,
       },
     };
@@ -526,37 +526,37 @@ export class WorkflowTemplateGenerator {
     const nodes: WorkflowNode[] = [
       // Webhook trigger for outbound leads
       {
-        id: "outbound-webhook",
-        name: "Outbound Lead Webhook",
-        type: "n8n-nodes-base.webhook",
+        id: 'outbound-webhook',
+        name: 'Outbound Lead Webhook',
+        type: 'n8n-nodes-base.webhook',
         typeVersion: 1,
         position: [100, 200],
         parameters: {
-          path: "outbound-processing",
-          httpMethod: "POST",
+          path: 'outbound-processing',
+          httpMethod: 'POST',
         },
       },
 
       // Lead Generation Agent
       {
-        id: "lead-generation",
-        name: "AI Lead Generation Agent",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'lead-generation',
+        name: 'AI Lead Generation Agent',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [300, 200],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.leadGenerationEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
-                value: "={{ $json.lead }}",
+                name: 'lead',
+                value: '={{ $json.lead }}',
               },
               {
-                name: "analysis",
-                value: "={{ $json.analysis }}",
+                name: 'analysis',
+                value: '={{ $json.analysis }}',
               },
             ],
           },
@@ -565,9 +565,9 @@ export class WorkflowTemplateGenerator {
 
       // Check if appointment needed
       {
-        id: "appointment-check",
-        name: "Check Appointment Need",
-        type: "n8n-nodes-base.switch",
+        id: 'appointment-check',
+        name: 'Check Appointment Need',
+        type: 'n8n-nodes-base.switch',
         typeVersion: 1,
         position: [500, 200],
         parameters: {
@@ -577,11 +577,11 @@ export class WorkflowTemplateGenerator {
             },
             conditions: [
               {
-                leftValue: "={{ $json.needsAppointment }}",
+                leftValue: '={{ $json.needsAppointment }}',
                 rightValue: true,
                 operator: {
-                  type: "boolean",
-                  operation: "true",
+                  type: 'boolean',
+                  operation: 'true',
                 },
               },
             ],
@@ -591,23 +591,23 @@ export class WorkflowTemplateGenerator {
 
       // Appointment Coordinator
       {
-        id: "appointment-coordinator",
-        name: "Appointment & Workflow Coordinator",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'appointment-coordinator',
+        name: 'Appointment & Workflow Coordinator',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [700, 150],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.appointmentCoordinatorEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "lead",
+                name: 'lead',
                 value: "={{ $('outbound-webhook').item.json.lead }}",
               },
               {
-                name: "generationResult",
+                name: 'generationResult',
                 value: "={{ $('lead-generation').item.json }}",
               },
             ],
@@ -617,28 +617,28 @@ export class WorkflowTemplateGenerator {
 
       // CRM Management update
       {
-        id: "crm-update",
-        name: "CRM Management Update",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'crm-update',
+        name: 'CRM Management Update',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [700, 250],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: config.crmManagementEndpoint,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "leadId",
+                name: 'leadId',
                 value: "={{ $('outbound-webhook').item.json.lead.id }}",
               },
               {
-                name: "interaction",
+                name: 'interaction',
                 value: "={{ $('lead-generation').item.json }}",
               },
               {
-                name: "source",
-                value: "outbound_processing",
+                name: 'source',
+                value: 'outbound_processing',
               },
             ],
           },
@@ -647,52 +647,52 @@ export class WorkflowTemplateGenerator {
     ];
 
     const connections = {
-      "outbound-webhook": {
+      'outbound-webhook': {
         main: [
           [
             {
-              node: "lead-generation",
-              type: "main",
+              node: 'lead-generation',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "lead-generation": {
+      'lead-generation': {
         main: [
           [
             {
-              node: "appointment-check",
-              type: "main",
+              node: 'appointment-check',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "appointment-check": {
+      'appointment-check': {
         main: [
           [
             {
-              node: "appointment-coordinator",
-              type: "main",
+              node: 'appointment-coordinator',
+              type: 'main',
               index: 0,
             },
           ],
           [
             {
-              node: "crm-update",
-              type: "main",
+              node: 'crm-update',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "appointment-coordinator": {
+      'appointment-coordinator': {
         main: [
           [
             {
-              node: "crm-update",
-              type: "main",
+              node: 'crm-update',
+              type: 'main',
               index: 0,
             },
           ],
@@ -701,13 +701,13 @@ export class WorkflowTemplateGenerator {
     };
 
     return {
-      id: "",
-      name: "Outbound Processing Workflow",
+      id: '',
+      name: 'Outbound Processing Workflow',
       active: true,
       nodes,
       connections,
       settings: {
-        executionOrder: "v1",
+        executionOrder: 'v1',
         saveManualExecutions: true,
       },
     };
@@ -724,16 +724,16 @@ export class WorkflowTemplateGenerator {
     const nodes: WorkflowNode[] = [
       // Schedule trigger for optimization
       {
-        id: "schedule-trigger",
-        name: "Optimization Schedule",
-        type: "n8n-nodes-base.cron",
+        id: 'schedule-trigger',
+        name: 'Optimization Schedule',
+        type: 'n8n-nodes-base.cron',
         typeVersion: 1,
         position: [100, 200],
         parameters: {
           rule: {
             interval: [
               {
-                field: config.scheduleInterval || "hour",
+                field: config.scheduleInterval || 'hour',
               },
             ],
           },
@@ -742,33 +742,33 @@ export class WorkflowTemplateGenerator {
 
       // Analytics Agent data collection
       {
-        id: "analytics-collection",
-        name: "Analytics Data Collection",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'analytics-collection',
+        name: 'Analytics Data Collection',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [300, 200],
         parameters: {
-          method: "GET",
+          method: 'GET',
           url: `${config.analyticsAgentEndpoint}/performance-data`,
         },
       },
 
       // Generate optimization recommendations
       {
-        id: "optimization-analysis",
-        name: "Generate Optimization Recommendations",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'optimization-analysis',
+        name: 'Generate Optimization Recommendations',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [500, 200],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: `${config.analyticsAgentEndpoint}/optimize`,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "performanceData",
-                value: "={{ $json }}",
+                name: 'performanceData',
+                value: '={{ $json }}',
               },
             ],
           },
@@ -777,20 +777,20 @@ export class WorkflowTemplateGenerator {
 
       // Apply optimizations to AI Head Agent
       {
-        id: "apply-optimizations",
-        name: "Apply Optimizations",
-        type: "n8n-nodes-base.httpRequest",
+        id: 'apply-optimizations',
+        name: 'Apply Optimizations',
+        type: 'n8n-nodes-base.httpRequest',
         typeVersion: 3,
         position: [700, 200],
         parameters: {
-          method: "POST",
+          method: 'POST',
           url: `${config.aiHeadAgentEndpoint}/optimization-feedback`,
           sendBody: true,
           bodyParameters: {
             parameters: [
               {
-                name: "optimizations",
-                value: "={{ $json }}",
+                name: 'optimizations',
+                value: '={{ $json }}',
               },
             ],
           },
@@ -799,34 +799,34 @@ export class WorkflowTemplateGenerator {
     ];
 
     const connections = {
-      "schedule-trigger": {
+      'schedule-trigger': {
         main: [
           [
             {
-              node: "analytics-collection",
-              type: "main",
+              node: 'analytics-collection',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "analytics-collection": {
+      'analytics-collection': {
         main: [
           [
             {
-              node: "optimization-analysis",
-              type: "main",
+              node: 'optimization-analysis',
+              type: 'main',
               index: 0,
             },
           ],
         ],
       },
-      "optimization-analysis": {
+      'optimization-analysis': {
         main: [
           [
             {
-              node: "apply-optimizations",
-              type: "main",
+              node: 'apply-optimizations',
+              type: 'main',
               index: 0,
             },
           ],
@@ -835,13 +835,13 @@ export class WorkflowTemplateGenerator {
     };
 
     return {
-      id: "",
-      name: "Optimization Loop Workflow",
+      id: '',
+      name: 'Optimization Loop Workflow',
       active: true,
       nodes,
       connections,
       settings: {
-        executionOrder: "v1",
+        executionOrder: 'v1',
         saveManualExecutions: true,
       },
     };
@@ -853,61 +853,61 @@ export class WorkflowTemplateGenerator {
   static getAvailableTemplates(): WorkflowTemplateConfig[] {
     return [
       {
-        name: "Lead Routing Workflow",
+        name: 'Lead Routing Workflow',
         description:
-          "Routes incoming leads to appropriate agents based on AI Head Agent analysis",
-        type: "lead_routing",
-        triggers: [{ type: "webhook", config: { path: "lead-routing" } }],
+          'Routes incoming leads to appropriate agents based on AI Head Agent analysis',
+        type: 'lead_routing',
+        triggers: [{ type: 'webhook', config: { path: 'lead-routing' } }],
         parameters: {
-          aiHeadAgentEndpoint: "http://localhost:3000/api/agents/ai-head",
-          inboundAgentEndpoint: "http://localhost:3000/api/agents/inbound",
-          outboundAgentEndpoint: "http://localhost:3000/api/agents/outbound",
+          aiHeadAgentEndpoint: 'http://localhost:3000/api/agents/ai-head',
+          inboundAgentEndpoint: 'http://localhost:3000/api/agents/inbound',
+          outboundAgentEndpoint: 'http://localhost:3000/api/agents/outbound',
         },
       },
       {
-        name: "Inbound Processing Workflow",
+        name: 'Inbound Processing Workflow',
         description:
-          "Processes inbound leads through appropriate specialized agents",
-        type: "inbound_processing",
-        triggers: [{ type: "webhook", config: { path: "inbound-processing" } }],
+          'Processes inbound leads through appropriate specialized agents',
+        type: 'inbound_processing',
+        triggers: [{ type: 'webhook', config: { path: 'inbound-processing' } }],
         parameters: {
           virtualSalesAssistantEndpoint:
-            "http://localhost:3000/api/agents/virtual-sales",
+            'http://localhost:3000/api/agents/virtual-sales',
           customerRetentionEndpoint:
-            "http://localhost:3000/api/agents/customer-retention",
+            'http://localhost:3000/api/agents/customer-retention',
           feedbackCollectorEndpoint:
-            "http://localhost:3000/api/agents/feedback-collector",
+            'http://localhost:3000/api/agents/feedback-collector',
           crmManagementEndpoint:
-            "http://localhost:3000/api/agents/crm-management",
+            'http://localhost:3000/api/agents/crm-management',
         },
       },
       {
-        name: "Outbound Processing Workflow",
+        name: 'Outbound Processing Workflow',
         description:
-          "Processes outbound leads through lead generation and appointment coordination",
-        type: "outbound_processing",
+          'Processes outbound leads through lead generation and appointment coordination',
+        type: 'outbound_processing',
         triggers: [
-          { type: "webhook", config: { path: "outbound-processing" } },
+          { type: 'webhook', config: { path: 'outbound-processing' } },
         ],
         parameters: {
           leadGenerationEndpoint:
-            "http://localhost:3000/api/agents/lead-generation",
+            'http://localhost:3000/api/agents/lead-generation',
           appointmentCoordinatorEndpoint:
-            "http://localhost:3000/api/agents/appointment-coordinator",
+            'http://localhost:3000/api/agents/appointment-coordinator',
           crmManagementEndpoint:
-            "http://localhost:3000/api/agents/crm-management",
+            'http://localhost:3000/api/agents/crm-management',
         },
       },
       {
-        name: "Optimization Loop Workflow",
+        name: 'Optimization Loop Workflow',
         description:
-          "Continuously optimizes system performance based on analytics data",
-        type: "optimization_loop",
-        triggers: [{ type: "schedule", config: { interval: "hour" } }],
+          'Continuously optimizes system performance based on analytics data',
+        type: 'optimization_loop',
+        triggers: [{ type: 'schedule', config: { interval: 'hour' } }],
         parameters: {
-          analyticsAgentEndpoint: "http://localhost:3000/api/agents/analytics",
-          aiHeadAgentEndpoint: "http://localhost:3000/api/agents/ai-head",
-          scheduleInterval: "hour",
+          analyticsAgentEndpoint: 'http://localhost:3000/api/agents/analytics',
+          aiHeadAgentEndpoint: 'http://localhost:3000/api/agents/ai-head',
+          scheduleInterval: 'hour',
         },
       },
     ];

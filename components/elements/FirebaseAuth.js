@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
+import React, { useEffect, useState } from 'react';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
-import firebase from "@/firebase-client";
-import "firebase/auth";
-import { registerUser } from "@/FS-client-functions";
+import firebase from '@/firebase-client';
+import 'firebase/auth';
+import { registerUser } from '@/FS-client-functions';
 
 // Note that next-firebase-auth inits Firebase for us,
 // so we don't need to.
 
 const firebaseAuthConfig = {
-  signInFlow: "popup",
+  signInFlow: 'popup',
   // Auth providers
   // https://github.com/firebase/firebaseui-web#configure-oauth-providers
   signInOptions: [
@@ -18,14 +18,14 @@ const firebaseAuthConfig = {
       customParameters: {
         // Forces account selection even when one account
         // is available.
-        prompt: "select_account",
+        prompt: 'select_account',
       },
     },
     firebase.auth.EmailAuthProvider.PROVIDER_ID,
     firebase.auth.GithubAuthProvider.PROVIDER_ID,
   ],
-  signInSuccessUrl: "/",
-  credentialHelper: "none",
+  signInSuccessUrl: '/',
+  credentialHelper: 'none',
   callbacks: {
     // https://github.com/firebase/firebaseui-web#signinsuccesswithauthresultauthresult-redirecturl
     signInSuccessWithAuthResult: (authResult) => {
@@ -46,7 +46,7 @@ const FirebaseAuth = () => {
   // https://github.com/firebase/firebaseui-web/issues/213
   const [renderAuth, setRenderAuth] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       setRenderAuth(true);
     }
   }, []);

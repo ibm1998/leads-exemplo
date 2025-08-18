@@ -1,7 +1,7 @@
-import { config } from "dotenv";
+import { config } from 'dotenv';
 
 // Load test environment variables
-config({ path: ".env.test" });
+config({ path: '.env.test' });
 
 // Mock console methods for cleaner test output
 global.console = {

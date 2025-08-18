@@ -1,5 +1,5 @@
-import { useAuthUser, withAuthUser, AuthAction } from "next-firebase-auth";
-import Loader from "@/elements/Loader";
+import { useAuthUser, withAuthUser, AuthAction } from 'next-firebase-auth';
+import Loader from '@/elements/Loader';
 
 const dashboard = () => {
   //auth user object
@@ -14,9 +14,9 @@ const dashboard = () => {
       <hr className="my-10 text-gray" />
       <article className="text-center">
         <h2 className="text-navy font-bold text-3xl">
-          Your E-Mail is{" "}
+          Your E-Mail is{' '}
           <span className="text-blue hover:underline ">
-            {AuthUser.email ? AuthUser.email : "Anonymous"}.
+            {AuthUser.email ? AuthUser.email : 'Anonymous'}.
           </span>
           <br />
           <span className="text-coral">You are a Authenticated!</span>
@@ -37,5 +37,5 @@ export default withAuthUser({
   whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
   whenUnauthedBeforeInit: AuthAction.SHOW_LOADER,
   LoaderComponent: Loader,
-  authPageURL: "/login",
+  authPageURL: '/login',
 })(dashboard);

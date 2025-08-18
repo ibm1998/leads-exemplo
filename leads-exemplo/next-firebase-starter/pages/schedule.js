@@ -26,7 +26,7 @@ export default function Schedule() {
       <div className="cal-embed-container mb-8">
         {/* Cal.com Embed */}
         <div 
-          data-cal-link={process.env.NEXT_PUBLIC_CALCOM_URL || "yourusername/30min"} 
+          data-cal-link={process.env.NEXT_PUBLIC_CALCOM_URL || 'yourusername/30min'} 
           data-cal-config='{"layout":"month_view"}'
           style={{ width: '100%', height: '600px', overflow: 'hidden' }}
         />

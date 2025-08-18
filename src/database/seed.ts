@@ -1,11 +1,11 @@
-import { DatabaseManager } from "./manager";
-import { logger } from "../utils/logger";
+import { DatabaseManager } from './manager';
+import { logger } from '../utils/logger';
 
 async function seedDatabase() {
   const dbManager = new DatabaseManager();
 
   try {
-    logger.info("Starting database seeding...");
+    logger.info('Starting database seeding...');
     await dbManager.initialize();
 
     // Insert sample leads for testing
@@ -23,10 +23,10 @@ async function seedDatabase() {
       ON CONFLICT DO NOTHING
     `);
 
-    logger.info("Sample data inserted successfully");
-    logger.info("Database seeding completed successfully");
+    logger.info('Sample data inserted successfully');
+    logger.info('Database seeding completed successfully');
   } catch (error) {
-    logger.error("Seeding failed:", error);
+    logger.error('Seeding failed:', error);
     process.exit(1);
   } finally {
     await dbManager.close();

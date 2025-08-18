@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   CustomerRetentionAgent,
   EngagementAnalysis,
-} from "../customer-retention-agent";
-import { Lead, LeadModel } from "../../types/lead";
-import { Interaction, InteractionModel } from "../../types/interaction";
+} from '../customer-retention-agent';
+import { Lead, LeadModel } from '../../types/lead';
+import { Interaction, InteractionModel } from '../../types/interaction';
 
-describe("CustomerRetentionAgent", () => {
+describe('CustomerRetentionAgent', () => {
   let agent: CustomerRetentionAgent;
   let mockLead: Lead;
   let mockInteractions: Interaction[];
@@ -16,25 +16,25 @@ describe("CustomerRetentionAgent", () => {
 
     // Create mock lead data
     mockLead = LeadModel.create({
-      source: "website",
+      source: 'website',
       contactInfo: {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "+1234567890",
-        preferredChannel: "email",
-        timezone: "UTC",
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1234567890',
+        preferredChannel: 'email',
+        timezone: 'UTC',
       },
-      leadType: "warm",
+      leadType: 'warm',
       urgencyLevel: 5,
-      intentSignals: ["form_submission", "requested_callback"],
+      intentSignals: ['form_submission', 'requested_callback'],
       qualificationData: {
         budget: { min: 400000, max: 600000 },
-        location: "Downtown",
-        propertyType: "Condo",
-        timeline: "3-6 months",
+        location: 'Downtown',
+        propertyType: 'Condo',
+        timeline: '3-6 months',
         qualificationScore: 0.7,
       },
-      status: "contacted",
+      status: 'contacted',
     }).data;
 
     // Create mock interactions (old interactions to trigger inactivity)
@@ -44,12 +44,12 @@ describe("CustomerRetentionAgent", () => {
     mockInteractions = [
       InteractionModel.create({
         leadId: mockLead.id,
-        agentId: "test-agent",
-        type: "email",
-        direction: "outbound",
-        content: "Initial contact email",
+        agentId: 'test-agent',
+        type: 'email',
+        direction: 'outbound',
+        content: 'Initial contact email',
         outcome: {
-          status: "successful",
+          status: 'successful',
           appointmentBooked: false,
           qualificationUpdated: true,
           escalationRequired: false,
@@ -61,15 +61,15 @@ describe("CustomerRetentionAgent", () => {
     mockInteractions[0].timestamp = oldDate;
 
     // Mock console.log to avoid test output noise
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  describe("Initialization", () => {
-    it("should initialize with default configuration", () => {
+  describe('Initialization', () => {
+    it('should initialize with default configuration', () => {
       const newAgent = new CustomerRetentionAgent();
       expect(newAgent).toBeDefined();
 
@@ -78,7 +78,7 @@ describe("CustomerRetentionAgent", () => {
       expect(metrics.activeCampaigns).toBe(0);
     });
 
-    it("should accept custom configuration", () => {
+    it('should accept custom configuration', () => {
       const customConfig = {
         inactivityThresholdDays: 30,
         maxConcurrentCampaigns: 25,
@@ -88,7 +88,7 @@ describe("CustomerRetentionAgent", () => {
       expect(customAgent).toBeDefined();
     });
 
-    it("should initialize default triggers, templates, and campaigns", () => {
+    it('should initialize default triggers, templates, and campaigns', () => {
       const newAgent = new CustomerRetentionAgent();
 
       // Check that default configuration was initialized
@@ -100,8 +100,8 @@ describe("CustomerRetentionAgent", () => {
     });
   });
 
-  describe("Inactivity Detection", () => {
-    it("should detect inactive customers after 60+ days", async () => {
+  describe('Inactivity Detection', () => {
+    it('should detect inactive customers after 60+ days', async () => {
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
 
@@ -112,19 +112,19 @@ describe("CustomerRetentionAgent", () => {
 
       expect(triggeredSessions).toHaveLength(1);
       expect(triggeredSessions[0].leadId).toBe(mockLead.id);
-      expect(triggeredSessions[0].status).toBe("active");
+      expect(triggeredSessions[0].status).toBe('active');
     });
 
-    it("should not trigger for recently active customers", async () => {
+    it('should not trigger for recently active customers', async () => {
       // Create recent interaction
       const recentInteraction = InteractionModel.create({
         leadId: mockLead.id,
-        agentId: "test-agent",
-        type: "email",
-        direction: "outbound",
-        content: "Recent contact",
+        agentId: 'test-agent',
+        type: 'email',
+        direction: 'outbound',
+        content: 'Recent contact',
         outcome: {
-          status: "successful",
+          status: 'successful',
           appointmentBooked: false,
           qualificationUpdated: false,
           escalationRequired: false,
@@ -142,7 +142,7 @@ describe("CustomerRetentionAgent", () => {
       expect(triggeredSessions).toHaveLength(0);
     });
 
-    it("should detect qualified but inactive leads with higher priority", async () => {
+    it('should detect qualified but inactive leads with higher priority', async () => {
       // Create a highly qualified lead with 30+ days inactivity
       const qualifiedLead = {
         ...mockLead,
@@ -165,10 +165,10 @@ describe("CustomerRetentionAgent", () => {
       );
 
       expect(triggeredSessions).toHaveLength(1);
-      expect(triggeredSessions[0].triggerId).toBe("qualified_but_inactive");
+      expect(triggeredSessions[0].triggerId).toBe('qualified_but_inactive');
     });
 
-    it("should not trigger multiple campaigns for the same lead", async () => {
+    it('should not trigger multiple campaigns for the same lead', async () => {
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
 
@@ -188,8 +188,8 @@ describe("CustomerRetentionAgent", () => {
     });
   });
 
-  describe("Campaign Execution", () => {
-    it("should start a re-engagement campaign", async () => {
+  describe('Campaign Execution', () => {
+    it('should start a re-engagement campaign', async () => {
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
 
@@ -201,12 +201,12 @@ describe("CustomerRetentionAgent", () => {
       expect(triggeredSessions).toHaveLength(1);
 
       const session = triggeredSessions[0];
-      expect(session.status).toBe("active");
+      expect(session.status).toBe('active');
       expect(session.messagesAttempted).toBe(1); // First message should be sent
       expect(session.currentStep).toBe(1);
     });
 
-    it("should execute campaign steps in sequence", async () => {
+    it('should execute campaign steps in sequence', async () => {
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
 
@@ -225,7 +225,7 @@ describe("CustomerRetentionAgent", () => {
       expect(updatedSession?.currentStep).toBe(2);
     });
 
-    it("should complete campaign when max attempts reached", async () => {
+    it('should complete campaign when max attempts reached', async () => {
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
 
@@ -245,42 +245,42 @@ describe("CustomerRetentionAgent", () => {
       }
 
       const finalSession = agent.getSession(session.id);
-      expect(finalSession?.status).toBe("completed");
-      expect(finalSession?.outcome).toBe("no_response");
+      expect(finalSession?.status).toBe('completed');
+      expect(finalSession?.outcome).toBe('no_response');
     });
   });
 
-  describe("Message Personalization", () => {
-    it("should personalize message templates with lead data", async () => {
+  describe('Message Personalization', () => {
+    it('should personalize message templates with lead data', async () => {
       const template = {
-        id: "test-template",
-        name: "Test Template",
-        channel: "email" as const,
-        subject: "Hi {{name}}, properties in {{location}}",
+        id: 'test-template',
+        name: 'Test Template',
+        channel: 'email' as const,
+        subject: 'Hi {{name}}, properties in {{location}}',
         content:
-          "Hello {{name}}, we have new {{propertyType}} listings in {{location}} within your {{budget}} budget.",
-        variables: ["name", "location", "propertyType", "budget"],
+          'Hello {{name}}, we have new {{propertyType}} listings in {{location}} within your {{budget}} budget.',
+        variables: ['name', 'location', 'propertyType', 'budget'],
         enabled: true,
       };
 
       const leadData = {
-        contactInfo: { name: "John Doe" },
+        contactInfo: { name: 'John Doe' },
         qualificationData: {
-          location: "Downtown",
-          propertyType: "Condo",
+          location: 'Downtown',
+          propertyType: 'Condo',
           budget: { min: 400000, max: 600000 },
         },
       };
 
       const analysis: EngagementAnalysis = {
-        leadId: "test-lead-id",
+        leadId: 'test-lead-id',
         daysSinceLastInteraction: 65,
         totalInteractions: 1,
-        preferredChannel: "email",
-        bestContactTime: "10:00 AM",
+        preferredChannel: 'email',
+        bestContactTime: '10:00 AM',
         engagementScore: 0.7,
-        personalizedFactors: ["Interested in Downtown", "Looking for Condo"],
-        riskLevel: "medium",
+        personalizedFactors: ['Interested in Downtown', 'Looking for Condo'],
+        riskLevel: 'medium',
       };
 
       const personalizedMessage = await agent.personalizeMessage(
@@ -289,26 +289,26 @@ describe("CustomerRetentionAgent", () => {
         analysis
       );
 
-      expect(personalizedMessage.subject).toContain("John");
-      expect(personalizedMessage.subject).toContain("Downtown");
-      expect(personalizedMessage.content).toContain("John");
-      expect(personalizedMessage.content).toContain("Downtown");
-      expect(personalizedMessage.content).toContain("Condo");
-      expect(personalizedMessage.content).toContain("$400,000 - $600,000");
+      expect(personalizedMessage.subject).toContain('John');
+      expect(personalizedMessage.subject).toContain('Downtown');
+      expect(personalizedMessage.content).toContain('John');
+      expect(personalizedMessage.content).toContain('Downtown');
+      expect(personalizedMessage.content).toContain('Condo');
+      expect(personalizedMessage.content).toContain('$400,000 - $600,000');
     });
 
-    it("should handle missing data gracefully in personalization", async () => {
+    it('should handle missing data gracefully in personalization', async () => {
       const template = {
-        id: "test-template",
-        name: "Test Template",
-        channel: "email" as const,
-        content: "Hello {{name}}, interested in {{location}}?",
-        variables: ["name", "location"],
+        id: 'test-template',
+        name: 'Test Template',
+        channel: 'email' as const,
+        content: 'Hello {{name}}, interested in {{location}}?',
+        variables: ['name', 'location'],
         enabled: true,
       };
 
       const leadData = {
-        contactInfo: { name: "John Doe" },
+        contactInfo: { name: 'John Doe' },
         qualificationData: {}, // Missing location
       };
 
@@ -317,13 +317,13 @@ describe("CustomerRetentionAgent", () => {
         leadData
       );
 
-      expect(personalizedMessage.content).toContain("John");
-      expect(personalizedMessage.content).toContain("your preferred area"); // Default value
+      expect(personalizedMessage.content).toContain('John');
+      expect(personalizedMessage.content).toContain('your preferred area'); // Default value
     });
   });
 
-  describe("Response Handling", () => {
-    it("should handle positive customer responses", async () => {
+  describe('Response Handling', () => {
+    it('should handle positive customer responses', async () => {
       // Start a campaign first
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -336,22 +336,22 @@ describe("CustomerRetentionAgent", () => {
       const result = await agent.handleCustomerResponse(
         mockLead.id,
         "Yes, I'm very interested! When can we schedule a call?",
-        "sms"
+        'sms'
       );
 
-      expect(result.responseType).toBe("positive");
-      expect(result.nextAction).toBe("escalate");
+      expect(result.responseType).toBe('positive');
+      expect(result.nextAction).toBe('escalate');
       expect(result.reasoning).toContain(
-        "Positive response - escalating to human agent"
+        'Positive response - escalating to human agent'
       );
 
       const updatedSession = agent.getSession(session.id);
       expect(updatedSession?.responseReceived).toBe(true);
-      expect(updatedSession?.status).toBe("completed");
-      expect(updatedSession?.outcome).toBe("re_engaged");
+      expect(updatedSession?.status).toBe('completed');
+      expect(updatedSession?.outcome).toBe('re_engaged');
     });
 
-    it("should handle negative customer responses", async () => {
+    it('should handle negative customer responses', async () => {
       // Start a campaign first
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -364,20 +364,20 @@ describe("CustomerRetentionAgent", () => {
       const result = await agent.handleCustomerResponse(
         mockLead.id,
         "No, I'm not interested right now. Maybe later.",
-        "sms"
+        'sms'
       );
 
-      expect(result.responseType).toBe("negative");
-      expect(result.nextAction).toBe("pause");
+      expect(result.responseType).toBe('negative');
+      expect(result.nextAction).toBe('pause');
       expect(result.reasoning).toContain(
-        "Negative response - pausing campaign"
+        'Negative response - pausing campaign'
       );
 
       const updatedSession = agent.getSession(session.id);
-      expect(updatedSession?.status).toBe("paused");
+      expect(updatedSession?.status).toBe('paused');
     });
 
-    it("should handle opt-out requests", async () => {
+    it('should handle opt-out requests', async () => {
       // Start a campaign first
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -390,21 +390,21 @@ describe("CustomerRetentionAgent", () => {
       const result = await agent.handleCustomerResponse(
         mockLead.id,
         "STOP - please don't contact me anymore",
-        "sms"
+        'sms'
       );
 
-      expect(result.responseType).toBe("opt_out");
-      expect(result.nextAction).toBe("end");
+      expect(result.responseType).toBe('opt_out');
+      expect(result.nextAction).toBe('end');
       expect(result.reasoning).toContain(
-        "Opt-out request - ending campaign and updating preferences"
+        'Opt-out request - ending campaign and updating preferences'
       );
 
       const updatedSession = agent.getSession(session.id);
-      expect(updatedSession?.status).toBe("completed");
-      expect(updatedSession?.outcome).toBe("opted_out");
+      expect(updatedSession?.status).toBe('completed');
+      expect(updatedSession?.outcome).toBe('opted_out');
     });
 
-    it("should handle neutral responses by continuing campaign", async () => {
+    it('should handle neutral responses by continuing campaign', async () => {
       // Start a campaign first
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -416,30 +416,30 @@ describe("CustomerRetentionAgent", () => {
 
       const result = await agent.handleCustomerResponse(
         mockLead.id,
-        "Thanks for the information.",
-        "email"
+        'Thanks for the information.',
+        'email'
       );
 
-      expect(result.responseType).toBe("neutral");
-      expect(result.nextAction).toBe("continue_campaign");
+      expect(result.responseType).toBe('neutral');
+      expect(result.nextAction).toBe('continue_campaign');
       expect(result.reasoning).toContain(
-        "Neutral response - continuing campaign sequence"
+        'Neutral response - continuing campaign sequence'
       );
 
       const updatedSession = agent.getSession(session.id);
       expect(updatedSession?.responseReceived).toBe(true);
-      expect(updatedSession?.status).toBe("active"); // Still active
+      expect(updatedSession?.status).toBe('active'); // Still active
     });
 
-    it("should throw error for response without active session", async () => {
+    it('should throw error for response without active session', async () => {
       await expect(
-        agent.handleCustomerResponse("non-existent-lead", "Hello", "sms")
-      ).rejects.toThrow("No active re-engagement session found for lead");
+        agent.handleCustomerResponse('non-existent-lead', 'Hello', 'sms')
+      ).rejects.toThrow('No active re-engagement session found for lead');
     });
   });
 
-  describe("Engagement Analysis", () => {
-    it("should analyze customer engagement correctly", async () => {
+  describe('Engagement Analysis', () => {
+    it('should analyze customer engagement correctly', async () => {
       const analysis = await agent.analyzeCustomerEngagement(
         mockLead,
         mockInteractions
@@ -448,14 +448,14 @@ describe("CustomerRetentionAgent", () => {
       expect(analysis.leadId).toBe(mockLead.id);
       expect(analysis.daysSinceLastInteraction).toBeGreaterThan(60);
       expect(analysis.totalInteractions).toBe(1);
-      expect(analysis.preferredChannel).toBe("email");
+      expect(analysis.preferredChannel).toBe('email');
       expect(analysis.engagementScore).toBeGreaterThan(0);
-      expect(analysis.riskLevel).toBe("medium"); // Due to long inactivity but good qualification score
-      expect(analysis.personalizedFactors).toContain("Interested in Downtown");
-      expect(analysis.personalizedFactors).toContain("Looking for Condo");
+      expect(analysis.riskLevel).toBe('medium'); // Due to long inactivity but good qualification score
+      expect(analysis.personalizedFactors).toContain('Interested in Downtown');
+      expect(analysis.personalizedFactors).toContain('Looking for Condo');
     });
 
-    it("should calculate engagement score based on multiple factors", async () => {
+    it('should calculate engagement score based on multiple factors', async () => {
       // Create a highly qualified lead with recent interactions
       const qualifiedLead = {
         ...mockLead,
@@ -469,12 +469,12 @@ describe("CustomerRetentionAgent", () => {
         ...mockInteractions,
         InteractionModel.create({
           leadId: mockLead.id,
-          agentId: "test-agent",
-          type: "call",
-          direction: "inbound",
-          content: "Customer called back",
+          agentId: 'test-agent',
+          type: 'call',
+          direction: 'inbound',
+          content: 'Customer called back',
           outcome: {
-            status: "successful",
+            status: 'successful',
             appointmentBooked: true,
             qualificationUpdated: false,
             escalationRequired: false,
@@ -491,7 +491,7 @@ describe("CustomerRetentionAgent", () => {
       expect(analysis.totalInteractions).toBe(2);
     });
 
-    it("should determine risk level correctly", async () => {
+    it('should determine risk level correctly', async () => {
       // Test high risk (very old interaction)
       const veryOldDate = new Date();
       veryOldDate.setDate(veryOldDate.getDate() - 120); // 120 days ago
@@ -503,7 +503,7 @@ describe("CustomerRetentionAgent", () => {
       const highRiskAnalysis = await agent.analyzeCustomerEngagement(mockLead, [
         veryOldInteraction,
       ]);
-      expect(highRiskAnalysis.riskLevel).toBe("high");
+      expect(highRiskAnalysis.riskLevel).toBe('high');
 
       // Test medium risk (moderately old interaction)
       const mediumOldDate = new Date();
@@ -517,61 +517,61 @@ describe("CustomerRetentionAgent", () => {
         mockLead,
         [mediumOldInteraction]
       );
-      expect(mediumRiskAnalysis.riskLevel).toBe("medium");
+      expect(mediumRiskAnalysis.riskLevel).toBe('medium');
     });
   });
 
-  describe("Multi-Channel Communication", () => {
-    it("should send SMS messages", async () => {
+  describe('Multi-Channel Communication', () => {
+    it('should send SMS messages', async () => {
       const success = await agent.sendMessage(
-        "sms",
-        { phone: "+1234567890" },
-        { content: "Test SMS message" }
+        'sms',
+        { phone: '+1234567890' },
+        { content: 'Test SMS message' }
       );
 
       expect(success).toBe(true);
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("Sending SMS to +1234567890")
+        expect.stringContaining('Sending SMS to +1234567890')
       );
     });
 
-    it("should send email messages", async () => {
+    it('should send email messages', async () => {
       const success = await agent.sendMessage(
-        "email",
-        { email: "test@example.com" },
-        { subject: "Test Subject", content: "Test email content" }
+        'email',
+        { email: 'test@example.com' },
+        { subject: 'Test Subject', content: 'Test email content' }
       );
 
       expect(success).toBe(true);
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("Sending email to test@example.com")
+        expect.stringContaining('Sending email to test@example.com')
       );
     });
 
-    it("should send WhatsApp messages", async () => {
+    it('should send WhatsApp messages', async () => {
       const success = await agent.sendMessage(
-        "whatsapp",
-        { phone: "+1234567890" },
-        { content: "Test WhatsApp message" }
+        'whatsapp',
+        { phone: '+1234567890' },
+        { content: 'Test WhatsApp message' }
       );
 
       expect(success).toBe(true);
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining("Sending WhatsApp to +1234567890")
+        expect.stringContaining('Sending WhatsApp to +1234567890')
       );
     });
 
-    it("should fail gracefully when contact info is missing", async () => {
+    it('should fail gracefully when contact info is missing', async () => {
       const smsSuccess = await agent.sendMessage(
-        "sms",
-        { email: "test@example.com" }, // No phone for SMS
-        { content: "Test message" }
+        'sms',
+        { email: 'test@example.com' }, // No phone for SMS
+        { content: 'Test message' }
       );
 
       const emailSuccess = await agent.sendMessage(
-        "email",
-        { phone: "+1234567890" }, // No email for email
-        { content: "Test message" }
+        'email',
+        { phone: '+1234567890' }, // No email for email
+        { content: 'Test message' }
       );
 
       expect(smsSuccess).toBe(false);
@@ -579,8 +579,8 @@ describe("CustomerRetentionAgent", () => {
     });
   });
 
-  describe("Configuration Management", () => {
-    it("should allow updating configuration", () => {
+  describe('Configuration Management', () => {
+    it('should allow updating configuration', () => {
       const updates = {
         inactivityThresholdDays: 45,
         maxConcurrentCampaigns: 30,
@@ -592,12 +592,12 @@ describe("CustomerRetentionAgent", () => {
       expect(agent).toBeDefined(); // Basic check since config is private
     });
 
-    it("should allow adding custom triggers", () => {
+    it('should allow adding custom triggers', () => {
       const customTrigger = {
-        id: "custom_trigger",
-        name: "Custom Trigger",
+        id: 'custom_trigger',
+        name: 'Custom Trigger',
         condition: (lead: Lead) => lead.urgencyLevel > 8,
-        priority: "high" as const,
+        priority: 'high' as const,
         enabled: true,
         cooldownDays: 14,
       };
@@ -608,13 +608,13 @@ describe("CustomerRetentionAgent", () => {
       expect(agent).toBeDefined();
     });
 
-    it("should allow adding custom message templates", () => {
+    it('should allow adding custom message templates', () => {
       const customTemplate = {
-        id: "custom_template",
-        name: "Custom Template",
-        channel: "sms" as const,
-        content: "Custom message for {{name}}",
-        variables: ["name"],
+        id: 'custom_template',
+        name: 'Custom Template',
+        channel: 'sms' as const,
+        content: 'Custom message for {{name}}',
+        variables: ['name'],
         enabled: true,
       };
 
@@ -623,21 +623,21 @@ describe("CustomerRetentionAgent", () => {
       expect(agent).toBeDefined();
     });
 
-    it("should allow adding custom campaigns", () => {
+    it('should allow adding custom campaigns', () => {
       const customCampaign = {
-        id: "custom_campaign",
-        name: "Custom Campaign",
-        triggers: ["custom_trigger"],
+        id: 'custom_campaign',
+        name: 'Custom Campaign',
+        triggers: ['custom_trigger'],
         messageSequence: [
           {
-            templateId: "custom_template",
-            channel: "sms" as const,
+            templateId: 'custom_template',
+            channel: 'sms' as const,
             delayDays: 0,
           },
         ],
         enabled: true,
         maxAttempts: 2,
-        successCriteria: ["response_received"],
+        successCriteria: ['response_received'],
       };
 
       agent.addCampaign(customCampaign);
@@ -646,8 +646,8 @@ describe("CustomerRetentionAgent", () => {
     });
   });
 
-  describe("Performance Metrics", () => {
-    it("should track performance metrics correctly", async () => {
+  describe('Performance Metrics', () => {
+    it('should track performance metrics correctly', async () => {
       const initialMetrics = agent.getPerformanceMetrics();
       expect(initialMetrics.totalCampaignsStarted).toBe(0);
       expect(initialMetrics.activeCampaigns).toBe(0);
@@ -662,7 +662,7 @@ describe("CustomerRetentionAgent", () => {
       expect(metricsAfterStart.activeCampaigns).toBe(1);
     });
 
-    it("should calculate conversion rates correctly", async () => {
+    it('should calculate conversion rates correctly', async () => {
       // Start and complete a campaign with conversion
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -675,7 +675,7 @@ describe("CustomerRetentionAgent", () => {
       await agent.handleCustomerResponse(
         mockLead.id,
         "Yes, I'm very interested!",
-        "sms"
+        'sms'
       );
 
       const metrics = agent.getPerformanceMetrics();
@@ -683,7 +683,7 @@ describe("CustomerRetentionAgent", () => {
       expect(metrics.completedCampaigns).toBe(1);
     });
 
-    it("should track opt-out rates", async () => {
+    it('should track opt-out rates', async () => {
       // Start a campaign and simulate opt-out
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -692,7 +692,7 @@ describe("CustomerRetentionAgent", () => {
       await agent.handleCustomerResponse(
         mockLead.id,
         "STOP - don't contact me",
-        "sms"
+        'sms'
       );
 
       const metrics = agent.getPerformanceMetrics();
@@ -701,8 +701,8 @@ describe("CustomerRetentionAgent", () => {
     });
   });
 
-  describe("Session Management", () => {
-    it("should manage active sessions correctly", async () => {
+  describe('Session Management', () => {
+    it('should manage active sessions correctly', async () => {
       expect(agent.getActiveSessions()).toHaveLength(0);
 
       // Start a campaign
@@ -717,7 +717,7 @@ describe("CustomerRetentionAgent", () => {
       expect(agent.getSession(triggeredSessions[0].id)).toBeDefined();
     });
 
-    it("should retrieve engagement analysis for leads", async () => {
+    it('should retrieve engagement analysis for leads', async () => {
       // Start a campaign to generate analysis
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -729,40 +729,40 @@ describe("CustomerRetentionAgent", () => {
     });
   });
 
-  describe("Error Handling", () => {
-    it("should handle invalid session IDs gracefully", async () => {
-      const success = await agent.executeNextCampaignStep("invalid-session-id");
+  describe('Error Handling', () => {
+    it('should handle invalid session IDs gracefully', async () => {
+      const success = await agent.executeNextCampaignStep('invalid-session-id');
       expect(success).toBe(false);
     });
 
-    it("should handle missing templates gracefully", async () => {
+    it('should handle missing templates gracefully', async () => {
       // This would be tested by creating a campaign with non-existent template
       // The agent should handle this gracefully without crashing
       expect(agent).toBeDefined();
     });
 
-    it("should handle communication failures gracefully", async () => {
+    it('should handle communication failures gracefully', async () => {
       // Mock a communication failure
-      const originalSendSMS = agent["sendSMS"];
-      agent["sendSMS"] = vi
+      const originalSendSMS = agent['sendSMS'];
+      agent['sendSMS'] = vi
         .fn()
-        .mockRejectedValue(new Error("SMS service unavailable"));
+        .mockRejectedValue(new Error('SMS service unavailable'));
 
       const success = await agent.sendMessage(
-        "sms",
-        { phone: "+1234567890" },
-        { content: "Test message" }
+        'sms',
+        { phone: '+1234567890' },
+        { content: 'Test message' }
       );
 
       expect(success).toBe(false);
 
       // Restore original method
-      agent["sendSMS"] = originalSendSMS;
+      agent['sendSMS'] = originalSendSMS;
     });
   });
 
-  describe("Integration Requirements", () => {
-    it("should satisfy requirement 4.1: 60+ day inactivity detection", async () => {
+  describe('Integration Requirements', () => {
+    it('should satisfy requirement 4.1: 60+ day inactivity detection', async () => {
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
 
@@ -772,45 +772,45 @@ describe("CustomerRetentionAgent", () => {
       );
 
       expect(triggeredSessions).toHaveLength(1);
-      expect(triggeredSessions[0].triggerId).toBe("inactive_60_days");
+      expect(triggeredSessions[0].triggerId).toBe('inactive_60_days');
     });
 
-    it("should satisfy requirement 4.2: personalized message generation", async () => {
+    it('should satisfy requirement 4.2: personalized message generation', async () => {
       const template = {
-        id: "test",
-        name: "Test",
-        channel: "email" as const,
-        content: "Hi {{name}}, we have {{propertyType}} in {{location}}",
-        variables: ["name", "propertyType", "location"],
+        id: 'test',
+        name: 'Test',
+        channel: 'email' as const,
+        content: 'Hi {{name}}, we have {{propertyType}} in {{location}}',
+        variables: ['name', 'propertyType', 'location'],
         enabled: true,
       };
 
       const leadData = {
-        contactInfo: { name: "John Doe" },
-        qualificationData: { propertyType: "Condo", location: "Downtown" },
+        contactInfo: { name: 'John Doe' },
+        qualificationData: { propertyType: 'Condo', location: 'Downtown' },
       };
 
       const result = await agent.personalizeMessage(template, leadData);
 
-      expect(result.content).toContain("John");
-      expect(result.content).toContain("Condo");
-      expect(result.content).toContain("Downtown");
+      expect(result.content).toContain('John');
+      expect(result.content).toContain('Condo');
+      expect(result.content).toContain('Downtown');
     });
 
-    it("should satisfy requirement 4.3: multi-channel outreach", async () => {
-      const channels = ["sms", "email", "whatsapp"] as const;
+    it('should satisfy requirement 4.3: multi-channel outreach', async () => {
+      const channels = ['sms', 'email', 'whatsapp'] as const;
 
       for (const channel of channels) {
         const success = await agent.sendMessage(
           channel,
-          { phone: "+1234567890", email: "test@example.com" },
-          { content: "Test message", subject: "Test" }
+          { phone: '+1234567890', email: 'test@example.com' },
+          { content: 'Test message', subject: 'Test' }
         );
         expect(success).toBe(true);
       }
     });
 
-    it("should satisfy requirement 4.4: response handling and workflow routing", async () => {
+    it('should satisfy requirement 4.4: response handling and workflow routing', async () => {
       // Start campaign
       const leads = [mockLead];
       const interactionsMap = new Map([[mockLead.id, mockInteractions]]);
@@ -820,41 +820,41 @@ describe("CustomerRetentionAgent", () => {
       const positiveResult = await agent.handleCustomerResponse(
         mockLead.id,
         "Yes, I'm interested!",
-        "sms"
+        'sms'
       );
-      expect(positiveResult.nextAction).toBe("escalate");
+      expect(positiveResult.nextAction).toBe('escalate');
 
       // Reset for next test - create a new lead with proper UUID
       const mockLead2 = LeadModel.create({
-        source: "website",
+        source: 'website',
         contactInfo: {
-          name: "Jane Smith",
-          email: "jane@example.com",
-          phone: "+1234567891",
-          preferredChannel: "email",
-          timezone: "UTC",
+          name: 'Jane Smith',
+          email: 'jane@example.com',
+          phone: '+1234567891',
+          preferredChannel: 'email',
+          timezone: 'UTC',
         },
-        leadType: "warm",
+        leadType: 'warm',
         urgencyLevel: 5,
-        intentSignals: ["form_submission"],
+        intentSignals: ['form_submission'],
         qualificationData: {
           budget: { min: 300000, max: 500000 },
-          location: "Uptown",
-          propertyType: "House",
-          timeline: "1-3 months",
+          location: 'Uptown',
+          propertyType: 'House',
+          timeline: '1-3 months',
           qualificationScore: 0.6,
         },
-        status: "contacted",
+        status: 'contacted',
       }).data;
 
       const mockInteraction2 = InteractionModel.create({
         leadId: mockLead2.id,
-        agentId: "test-agent",
-        type: "email",
-        direction: "outbound",
-        content: "Initial contact email",
+        agentId: 'test-agent',
+        type: 'email',
+        direction: 'outbound',
+        content: 'Initial contact email',
         outcome: {
-          status: "successful",
+          status: 'successful',
           appointmentBooked: false,
           qualificationUpdated: true,
           escalationRequired: false,
@@ -875,10 +875,10 @@ describe("CustomerRetentionAgent", () => {
 
       const negativeResult = await agent.handleCustomerResponse(
         mockLead2.id,
-        "No, not interested",
-        "sms"
+        'No, not interested',
+        'sms'
       );
-      expect(negativeResult.nextAction).toBe("pause");
+      expect(negativeResult.nextAction).toBe('pause');
     });
   });
 });

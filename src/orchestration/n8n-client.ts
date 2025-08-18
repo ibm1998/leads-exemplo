@@ -1,16 +1,16 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { logger } from "../utils/logger";
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { logger } from '../utils/logger';
 
 /**
  * n8n workflow execution status
  */
 export type WorkflowExecutionStatus =
-  | "new"
-  | "running"
-  | "success"
-  | "error"
-  | "canceled"
-  | "waiting";
+  | 'new'
+  | 'running'
+  | 'success'
+  | 'error'
+  | 'canceled'
+  | 'waiting';
 
 /**
  * n8n workflow execution data
@@ -63,9 +63,9 @@ export interface WorkflowConnections {
  * n8n workflow settings
  */
 export interface WorkflowSettings {
-  executionOrder?: "v0" | "v1";
+  executionOrder?: 'v0' | 'v1';
   saveManualExecutions?: boolean;
-  callerPolicy?: "workflowsFromSameOwner" | "workflowsFromAList" | "any";
+  callerPolicy?: 'workflowsFromSameOwner' | 'workflowsFromAList' | 'any';
   errorWorkflow?: string;
 }
 
@@ -113,7 +113,7 @@ export class N8nClient {
       baseURL: this.config.baseUrl,
       timeout: this.config.timeout,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -126,12 +126,12 @@ export class N8nClient {
    */
   private setupAuthentication(): void {
     if (this.config.apiKey) {
-      this.client.defaults.headers.common["X-N8N-API-KEY"] = this.config.apiKey;
+      this.client.defaults.headers.common['X-N8N-API-KEY'] = this.config.apiKey;
     } else if (this.config.username && this.config.password) {
       const auth = Buffer.from(
         `${this.config.username}:${this.config.password}`
-      ).toString("base64");
-      this.client.defaults.headers.common["Authorization"] = `Basic ${auth}`;
+      ).toString('base64');
+      this.client.defaults.headers.common['Authorization'] = `Basic ${auth}`;
     }
   }
 
@@ -148,7 +148,7 @@ export class N8nClient {
         return config;
       },
       (error) => {
-        logger.error("n8n API Request Error:", error);
+        logger.error('n8n API Request Error:', error);
         return Promise.reject(error);
       }
     );
@@ -163,7 +163,7 @@ export class N8nClient {
       },
       async (error) => {
         logger.error(
-          "n8n API Response Error:",
+          'n8n API Response Error:',
           error.response?.data || error.message
         );
 
@@ -186,8 +186,8 @@ export class N8nClient {
    */
   private shouldRetry(error: any): boolean {
     return (
-      error.code === "ECONNRESET" ||
-      error.code === "ETIMEDOUT" ||
+      error.code === 'ECONNRESET' ||
+      error.code === 'ETIMEDOUT' ||
       (error.response && error.response.status >= 500)
     );
   }
@@ -220,13 +220,13 @@ export class N8nClient {
    */
   async getWorkflows(): Promise<WorkflowDefinition[]> {
     try {
-      const response = await this.client.get("/workflows");
+      const response = await this.client.get('/workflows');
       return response.data.data || response.data;
     } catch (error) {
-      logger.error("Failed to get workflows:", error);
+      logger.error('Failed to get workflows:', error);
       throw new Error(
         `Failed to get workflows: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -243,7 +243,7 @@ export class N8nClient {
       logger.error(`Failed to get workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to get workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -253,16 +253,16 @@ export class N8nClient {
    * Create new workflow
    */
   async createWorkflow(
-    workflow: Omit<WorkflowDefinition, "id">
+    workflow: Omit<WorkflowDefinition, 'id'>
   ): Promise<WorkflowDefinition> {
     try {
-      const response = await this.client.post("/workflows", workflow);
+      const response = await this.client.post('/workflows', workflow);
       return response.data.data || response.data;
     } catch (error) {
-      logger.error("Failed to create workflow:", error);
+      logger.error('Failed to create workflow:', error);
       throw new Error(
         `Failed to create workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -285,7 +285,7 @@ export class N8nClient {
       logger.error(`Failed to update workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to update workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -301,7 +301,7 @@ export class N8nClient {
       logger.error(`Failed to delete workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to delete workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -317,7 +317,7 @@ export class N8nClient {
       logger.error(`Failed to activate workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to activate workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -333,7 +333,7 @@ export class N8nClient {
       logger.error(`Failed to deactivate workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to deactivate workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -358,7 +358,7 @@ export class N8nClient {
       return {
         id: executionData.id,
         workflowId,
-        status: executionData.finished ? "success" : "running",
+        status: executionData.finished ? 'success' : 'running',
         startedAt: new Date(executionData.startedAt),
         finishedAt: executionData.stoppedAt
           ? new Date(executionData.stoppedAt)
@@ -370,7 +370,7 @@ export class N8nClient {
       logger.error(`Failed to execute workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to execute workflow: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -384,7 +384,7 @@ export class N8nClient {
     limit = 20
   ): Promise<WorkflowExecution[]> {
     try {
-      const response = await this.client.get(`/executions`, {
+      const response = await this.client.get('/executions', {
         params: {
           filter: JSON.stringify({ workflowId }),
           limit,
@@ -395,7 +395,7 @@ export class N8nClient {
       return executions.map((exec: any) => ({
         id: exec.id,
         workflowId: exec.workflowId,
-        status: exec.finished ? (exec.error ? "error" : "success") : "running",
+        status: exec.finished ? (exec.error ? 'error' : 'success') : 'running',
         startedAt: new Date(exec.startedAt),
         finishedAt: exec.stoppedAt ? new Date(exec.stoppedAt) : undefined,
         data: exec.data,
@@ -408,7 +408,7 @@ export class N8nClient {
       );
       throw new Error(
         `Failed to get workflow executions: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -425,7 +425,7 @@ export class N8nClient {
       return {
         id: exec.id,
         workflowId: exec.workflowId,
-        status: exec.finished ? (exec.error ? "error" : "success") : "running",
+        status: exec.finished ? (exec.error ? 'error' : 'success') : 'running',
         startedAt: new Date(exec.startedAt),
         finishedAt: exec.stoppedAt ? new Date(exec.stoppedAt) : undefined,
         data: exec.data,
@@ -435,7 +435,7 @@ export class N8nClient {
       logger.error(`Failed to get execution ${executionId}:`, error);
       throw new Error(
         `Failed to get execution: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -451,7 +451,7 @@ export class N8nClient {
       logger.error(`Failed to stop execution ${executionId}:`, error);
       throw new Error(
         `Failed to stop execution: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -471,7 +471,7 @@ export class N8nClient {
       logger.error(`Failed to test webhook for workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to test webhook: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -492,10 +492,10 @@ export class N8nClient {
 
       const totalExecutions = executions.length;
       const successfulExecutions = executions.filter(
-        (e) => e.status === "success"
+        (e) => e.status === 'success'
       ).length;
       const failedExecutions = executions.filter(
-        (e) => e.status === "error"
+        (e) => e.status === 'error'
       ).length;
 
       const completedExecutions = executions.filter((e) => e.finishedAt);
@@ -525,7 +525,7 @@ export class N8nClient {
       logger.error(`Failed to get stats for workflow ${workflowId}:`, error);
       throw new Error(
         `Failed to get workflow stats: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -536,10 +536,10 @@ export class N8nClient {
    */
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await this.client.get("/healthz");
+      const response = await this.client.get('/healthz');
       return response.status === 200;
     } catch (error) {
-      logger.error("n8n health check failed:", error);
+      logger.error('n8n health check failed:', error);
       return false;
     }
   }

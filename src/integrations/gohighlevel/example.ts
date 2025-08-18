@@ -3,17 +3,17 @@
  * This file demonstrates how to use the GoHighLevel client and sync utilities
  */
 
-import { GoHighLevelClient } from "./client";
-import { GoHighLevelSync } from "./sync";
-import { Lead } from "../../types/lead";
-import { Interaction } from "../../types/interaction";
-import { logger } from "../../utils/logger";
+import { GoHighLevelClient } from './client';
+import { GoHighLevelSync } from './sync';
+import { Lead } from '../../types/lead';
+import { Interaction } from '../../types/interaction';
+import { logger } from '../../utils/logger';
 
 // Example configuration
 const config = {
-  apiKey: process.env.GOHIGHLEVEL_API_KEY || "your-api-key-here",
+  apiKey: process.env.GOHIGHLEVEL_API_KEY || 'your-api-key-here',
   baseUrl:
-    process.env.GOHIGHLEVEL_BASE_URL || "https://rest.gohighlevel.com/v1",
+    process.env.GOHIGHLEVEL_BASE_URL || 'https://rest.gohighlevel.com/v1',
   timeout: 30000,
   maxRetries: 3,
 };
@@ -32,7 +32,7 @@ export async function syncNewLead(lead: Lead): Promise<string> {
     // Check API health before syncing
     const isHealthy = await client.healthCheck();
     if (!isHealthy) {
-      throw new Error("GoHighLevel API is not available");
+      throw new Error('GoHighLevel API is not available');
     }
 
     // Sync the lead
@@ -79,10 +79,10 @@ export async function batchSyncLeads(leads: Lead[]): Promise<void> {
     );
 
     if (results.failed.length > 0) {
-      logger.warn("Failed syncs:", results.failed);
+      logger.warn('Failed syncs:', results.failed);
     }
   } catch (error) {
-    logger.error("Batch sync failed:", error);
+    logger.error('Batch sync failed:', error);
     throw error;
   }
 }
@@ -97,7 +97,7 @@ export function checkRateLimit(): void {
   );
 
   if (status.remainingPoints < 10) {
-    logger.warn("Rate limit is low, consider throttling requests");
+    logger.warn('Rate limit is low, consider throttling requests');
   }
 }
 
@@ -141,7 +141,7 @@ export async function syncLeadLifecycle(
       // Check rate limit between requests
       const rateLimitStatus = client.getRateLimitStatus();
       if (rateLimitStatus.remainingPoints < 5) {
-        logger.info("Rate limit low, waiting before next request...");
+        logger.info('Rate limit low, waiting before next request...');
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }

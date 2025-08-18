@@ -1,10 +1,10 @@
 // src/database/manager.ts
 
 
-import { Pool, PoolClient, QueryResult } from "pg";
-import { createClient, RedisClientType } from "redis";
-import { config } from "../config/environment";
-import { logger } from "../utils/logger";
+import { Pool, PoolClient, QueryResult } from 'pg';
+import { createClient, RedisClientType } from 'redis';
+import { config } from '../config/environment';
+import { logger } from '../utils/logger';
 
 export interface LeadPayload {
   source: string;
@@ -13,7 +13,7 @@ export interface LeadPayload {
   phone?: string;
   preferred_channel?: string;
   timezone?: string;
-  lead_type: "hot" | "warm" | "cold";
+  lead_type: 'hot' | 'warm' | 'cold';
   urgency_level?: number;
   intent_signals?: string[];
   budget_min?: number;
@@ -56,15 +56,15 @@ export class DatabaseManager {
   async initialize(): Promise<void> {
     try {
       const client = await this.pgPool.connect();
-      logger.info("PostgreSQL connection established");
+      logger.info('PostgreSQL connection established');
       client.release();
 
       await this.redisClient.connect();
-      logger.info("Redis connection established");
+      logger.info('Redis connection established');
 
       await this.runMigrations();
     } catch (error) {
-      logger.error("Database initialization failed:", error);
+      logger.error('Database initialization failed:', error);
       throw error;
     }
   }
@@ -73,9 +73,9 @@ export class DatabaseManager {
     try {
       await this.pgPool.end();
       await this.redisClient.quit();
-      logger.info("Database connections closed");
+      logger.info('Database connections closed');
     } catch (error) {
-      logger.error("Error closing database connections:", error);
+      logger.error('Error closing database connections:', error);
     }
   }
 
@@ -172,7 +172,7 @@ export class DatabaseManager {
 
   private async runMigrations(): Promise<void> {
     try {
-      logger.info("Running database migrations...");
+      logger.info('Running database migrations...');
 
       await this.query(`
         CREATE TABLE IF NOT EXISTS migrations (
@@ -182,24 +182,24 @@ export class DatabaseManager {
         );
       `);
 
-      const migrationName = "001_initial_schema";
+      const migrationName = '001_initial_schema';
       const check = await this.query(
-        "SELECT 1 FROM migrations WHERE name = $1",
+        'SELECT 1 FROM migrations WHERE name = $1',
         [migrationName]
       );
 
         if (check.rows.length === 0) {
           await this.createInitialSchema();
           await this.query(
-            "INSERT INTO migrations (name, executed_at) VALUES ($1, CURRENT_TIMESTAMP)",
+            'INSERT INTO migrations (name, executed_at) VALUES ($1, CURRENT_TIMESTAMP)',
             [migrationName]
           );
-          logger.info("Initial schema migration completed");
+          logger.info('Initial schema migration completed');
         } else {
-          logger.info("Database schema is up to date");
+          logger.info('Database schema is up to date');
         }
     } catch (error) {
-      logger.error("Migration failed:", error);
+      logger.error('Migration failed:', error);
       throw error;
     }
   }
@@ -207,7 +207,7 @@ export class DatabaseManager {
   private async createInitialSchema(): Promise<void> {
     const client = await this.pgPool.connect();
     try {
-      await client.query("BEGIN");
+      await client.query('BEGIN');
 
       // Create leads table
       await client.query(`
@@ -291,18 +291,18 @@ export class DatabaseManager {
       `);
 
       // Indexes for performance
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_type ON leads(lead_type);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_interactions_lead_id ON interactions(lead_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_interactions_agent_id ON interactions(agent_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON interactions(created_at);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_agent_performance_agent_id ON agent_performance(agent_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_agent_performance_period ON agent_performance(period_start, period_end);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_audit_logs_agent_id ON audit_logs(agent_id);`);
+      await client.query('CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_leads_type ON leads(lead_type);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_interactions_lead_id ON interactions(lead_id);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_interactions_agent_id ON interactions(agent_id);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON interactions(created_at);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_agent_performance_agent_id ON agent_performance(agent_id);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_agent_performance_period ON agent_performance(period_start, period_end);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);');
+      await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_agent_id ON audit_logs(agent_id);');
 
       // Trigger to update updated_at on modifications
       await client.query(`
@@ -323,11 +323,11 @@ export class DatabaseManager {
           EXECUTE FUNCTION update_updated_at_column();
       `);
 
-      await client.query("COMMIT");
-      logger.info("Database schema created successfully");
+      await client.query('COMMIT');
+      logger.info('Database schema created successfully');
     } catch (error) {
-      await client.query("ROLLBACK");
-      logger.error("Schema creation failed:", error);
+      await client.query('ROLLBACK');
+      logger.error('Schema creation failed:', error);
       throw error;
     } finally {
       client.release();

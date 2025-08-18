@@ -1,11 +1,11 @@
-import { init } from "next-firebase-auth";
+import { init } from 'next-firebase-auth';
 
 const initAuth = () => {
   init({
-    authPageURL: "/login",
-    appPageURL: "/dashboard",
-    loginAPIEndpoint: "/api/login", // required
-    logoutAPIEndpoint: "/api/logout", // required
+    authPageURL: '/login',
+    appPageURL: '/dashboard',
+    loginAPIEndpoint: '/api/login', // required
+    logoutAPIEndpoint: '/api/logout', // required
     // Required in most cases.
     firebaseAdminInitConfig: {
       credential: {
@@ -27,7 +27,7 @@ const initAuth = () => {
       measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
     },
     cookies: {
-      name: "NextFirebase", // required
+      name: 'NextFirebase', // required
       // Keys are required unless you set `signed` to `false`.
       // The keys cannot be accessible on the client side.
       keys: [
@@ -37,8 +37,8 @@ const initAuth = () => {
       httpOnly: false,
       maxAge: 12 * 60 * 60 * 24 * 1000, // twelve days
       overwrite: true,
-      path: "/",
-      sameSite: "strict",
+      path: '/',
+      sameSite: 'strict',
       secure: process.env.COOKIE_SECURE, // set this to false in local (non-HTTPS) development
       signed: true,
     },

@@ -1,14 +1,14 @@
-import { EventEmitter } from "events";
-import { DatabaseManager } from "../database/manager";
-import { logger } from "../utils/logger";
-import { LeadNormalizer } from "./normalizer";
-import { LeadDeduplicator } from "./deduplicator";
-import { WebhookServer, WebhookConfig } from "./webhook-server";
-import { GmailClient, GmailConfig } from "../integrations/gmail/client";
-import { OAuth2Client } from "google-auth-library";
-import { MetaClient, MetaConfig } from "../integrations/meta/client";
-import { RawLeadData, NormalizedLeadData, IngestionResult } from "./types";
-import { LeadModel, CreateLead } from "../types/lead";
+import { EventEmitter } from 'events';
+import { DatabaseManager } from '../database/manager';
+import { logger } from '../utils/logger';
+import { LeadNormalizer } from './normalizer';
+import { LeadDeduplicator } from './deduplicator';
+import { WebhookServer, WebhookConfig } from './webhook-server';
+import { GmailClient, GmailConfig } from '../integrations/gmail/client';
+import { OAuth2Client } from 'google-auth-library';
+import { MetaClient, MetaConfig } from '../integrations/meta/client';
+import { RawLeadData, NormalizedLeadData, IngestionResult } from './types';
+import { LeadModel, CreateLead } from '../types/lead';
 
 export interface LeadIngestionConfig {
   database: DatabaseManager;
@@ -74,7 +74,7 @@ export class LeadIngestionSystem extends EventEmitter {
    */
   async start(): Promise<void> {
     try {
-      logger.info("Starting lead ingestion system...");
+      logger.info('Starting lead ingestion system...');
 
       // Initialize clients
       if (this.gmailClient) {
@@ -96,10 +96,10 @@ export class LeadIngestionSystem extends EventEmitter {
       }
 
       this.isRunning = true;
-      logger.info("Lead ingestion system started successfully");
-      this.emit("started");
+      logger.info('Lead ingestion system started successfully');
+      this.emit('started');
     } catch (error) {
-      logger.error("Failed to start lead ingestion system:", error);
+      logger.error('Failed to start lead ingestion system:', error);
       throw error;
     }
   }
@@ -109,7 +109,7 @@ export class LeadIngestionSystem extends EventEmitter {
    */
   async stop(): Promise<void> {
     try {
-      logger.info("Stopping lead ingestion system...");
+      logger.info('Stopping lead ingestion system...');
 
       this.isRunning = false;
 
@@ -124,10 +124,10 @@ export class LeadIngestionSystem extends EventEmitter {
         await this.webhookServer.stop();
       }
 
-      logger.info("Lead ingestion system stopped");
-      this.emit("stopped");
+      logger.info('Lead ingestion system stopped');
+      this.emit('stopped');
     } catch (error) {
-      logger.error("Error stopping lead ingestion system:", error);
+      logger.error('Error stopping lead ingestion system:', error);
       throw error;
     }
   }
@@ -150,8 +150,8 @@ export class LeadIngestionSystem extends EventEmitter {
       try {
         await this.pollForLeads();
       } catch (error) {
-        logger.error("Polling error:", error);
-        this.emit("error", error);
+        logger.error('Polling error:', error);
+        this.emit('error', error);
       }
     }, intervalMs);
 
@@ -163,7 +163,7 @@ export class LeadIngestionSystem extends EventEmitter {
    * Poll for new leads from all sources
    */
   private async pollForLeads(): Promise<void> {
-    logger.info("Polling for new leads...");
+    logger.info('Polling for new leads...');
 
     const rawLeads: RawLeadData[] = [];
 
@@ -179,12 +179,12 @@ export class LeadIngestionSystem extends EventEmitter {
           rawLeads.push(this.gmailClient.emailToRawLeadData(email));
 
           // Mark email as processed
-          await this.gmailClient.addLabel(email.messageId, "Lead Processed");
+          await this.gmailClient.addLabel(email.messageId, 'Lead Processed');
         }
 
         logger.info(`Found ${emails.length} potential leads from Gmail`);
       } catch (error) {
-        logger.error("Gmail polling error:", error);
+        logger.error('Gmail polling error:', error);
       }
     }
 
@@ -193,9 +193,9 @@ export class LeadIngestionSystem extends EventEmitter {
       try {
         // This would require page IDs to be configured
         // For now, Meta leads are primarily handled via webhooks
-        logger.debug("Meta polling not implemented - using webhooks");
+        logger.debug('Meta polling not implemented - using webhooks');
       } catch (error) {
-        logger.error("Meta polling error:", error);
+        logger.error('Meta polling error:', error);
       }
     }
 
@@ -220,9 +220,9 @@ export class LeadIngestionSystem extends EventEmitter {
 
         // Emit events for successful processing
         if (result.success) {
-          this.emit("leadProcessed", result);
+          this.emit('leadProcessed', result);
         } else {
-          this.emit("leadFailed", result);
+          this.emit('leadFailed', result);
         }
       } catch (error) {
         logger.error(`Failed to process lead from ${rawLead.source}:`, error);
@@ -295,7 +295,7 @@ export class LeadIngestionSystem extends EventEmitter {
         warnings: [],
       };
     } catch (error) {
-      logger.error("Lead processing error:", error);
+      logger.error('Lead processing error:', error);
       return {
         success: false,
         isDuplicate: false,
@@ -318,7 +318,7 @@ export class LeadIngestionSystem extends EventEmitter {
       urgencyLevel: normalizedLead.urgencyLevel,
       intentSignals: normalizedLead.intentSignals,
       qualificationData: normalizedLead.qualificationData,
-      status: "new",
+      status: 'new',
     };
 
     // Create lead model and validate
@@ -366,17 +366,17 @@ export class LeadIngestionSystem extends EventEmitter {
   /**
    * Get ingestion statistics
    */
-  async getStats(period: "hour" | "day" | "week" = "day"): Promise<any> {
+  async getStats(period: 'hour' | 'day' | 'week' = 'day'): Promise<any> {
     let interval: string;
     switch (period) {
-      case "hour":
-        interval = "1 hour";
+      case 'hour':
+        interval = '1 hour';
         break;
-      case "week":
-        interval = "7 days";
+      case 'week':
+        interval = '7 days';
         break;
       default:
-        interval = "1 day";
+        interval = '1 day';
     }
 
     const result = await this.config.database.query(`
@@ -408,7 +408,7 @@ export class LeadIngestionSystem extends EventEmitter {
    * Manually trigger lead ingestion from a specific source
    */
   async triggerIngestion(
-    source: "gmail" | "meta",
+    source: 'gmail' | 'meta',
     options: any = {}
   ): Promise<IngestionResult[]> {
     logger.info(`Manually triggering ingestion from ${source}`);
@@ -416,9 +416,9 @@ export class LeadIngestionSystem extends EventEmitter {
     const rawLeads: RawLeadData[] = [];
 
     switch (source) {
-      case "gmail":
+      case 'gmail':
         if (!this.gmailClient) {
-          throw new Error("Gmail client not configured");
+          throw new Error('Gmail client not configured');
         }
 
         const emails = await this.gmailClient.getRecentEmails(options);
@@ -427,9 +427,9 @@ export class LeadIngestionSystem extends EventEmitter {
         }
         break;
 
-      case "meta":
+      case 'meta':
         if (!this.metaClient) {
-          throw new Error("Meta client not configured");
+          throw new Error('Meta client not configured');
         }
 
         // Would need page ID or form ID in options

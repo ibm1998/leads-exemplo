@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { LeadSource, ContactInfo, QualificationData } from "../types/lead";
+import { z } from 'zod';
+import { LeadSource, ContactInfo, QualificationData } from '../types/lead';
 
 // Raw lead data from different sources
 export const RawLeadDataSchema = z.object({
@@ -14,24 +14,24 @@ export type RawLeadData = z.infer<typeof RawLeadDataSchema>;
 // Normalized lead data after processing
 export const NormalizedLeadDataSchema = z.object({
   source: z.enum([
-    "gmail",
-    "meta_ads",
-    "website",
-    "slack",
-    "third_party",
-    "referral",
-    "other",
+    'gmail',
+    'meta_ads',
+    'website',
+    'slack',
+    'third_party',
+    'referral',
+    'other',
   ]),
   contactInfo: z.object({
     name: z.string(),
     email: z.string().optional(),
     phone: z.string().optional(),
     preferredChannel: z
-      .enum(["email", "sms", "voice", "whatsapp"])
-      .default("email"),
-    timezone: z.string().default("UTC"),
+      .enum(['email', 'sms', 'voice', 'whatsapp'])
+      .default('email'),
+    timezone: z.string().default('UTC'),
   }),
-  leadType: z.enum(["hot", "warm", "cold"]).default("cold"),
+  leadType: z.enum(['hot', 'warm', 'cold']).default('cold'),
   urgencyLevel: z.number().min(1).max(10).default(1),
   intentSignals: z.array(z.string()).default([]),
   qualificationData: z.object({

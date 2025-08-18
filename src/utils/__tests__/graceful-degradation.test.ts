@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   GracefulDegradationService,
   DegradationLevel,
   ServiceCapability,
   DegradationRule,
   DegradationContext,
-} from "../graceful-degradation";
+} from '../graceful-degradation';
 
-describe("GracefulDegradationService", () => {
+describe('GracefulDegradationService', () => {
   let degradationService: GracefulDegradationService;
 
   beforeEach(() => {
@@ -19,57 +19,57 @@ describe("GracefulDegradationService", () => {
     vi.clearAllMocks();
   });
 
-  describe("Service Capability Management", () => {
-    it("should register new service capabilities", () => {
+  describe('Service Capability Management', () => {
+    it('should register new service capabilities', () => {
       const capability: ServiceCapability = {
-        name: "test_service",
+        name: 'test_service',
         essential: true,
         degradationThreshold: 3,
-        dependencies: ["database"],
+        dependencies: ['database'],
       };
 
       degradationService.registerCapability(capability);
 
       const status = degradationService.getSystemStatus();
-      expect(status.serviceStatuses["test_service"]).toBeDefined();
-      expect(status.serviceStatuses["test_service"].status).toBe("healthy");
+      expect(status.serviceStatuses['test_service']).toBeDefined();
+      expect(status.serviceStatuses['test_service'].status).toBe('healthy');
     });
 
-    it("should initialize with default capabilities", () => {
+    it('should initialize with default capabilities', () => {
       const status = degradationService.getSystemStatus();
 
-      expect(status.serviceStatuses["lead_ingestion"]).toBeDefined();
-      expect(status.serviceStatuses["voice_calling"]).toBeDefined();
-      expect(status.serviceStatuses["appointment_booking"]).toBeDefined();
-      expect(status.serviceStatuses["crm_sync"]).toBeDefined();
+      expect(status.serviceStatuses['lead_ingestion']).toBeDefined();
+      expect(status.serviceStatuses['voice_calling']).toBeDefined();
+      expect(status.serviceStatuses['appointment_booking']).toBeDefined();
+      expect(status.serviceStatuses['crm_sync']).toBeDefined();
     });
 
-    it("should track capability dependencies", () => {
+    it('should track capability dependencies', () => {
       const capability: ServiceCapability = {
-        name: "complex_service",
+        name: 'complex_service',
         essential: false,
         degradationThreshold: 2,
-        dependencies: ["database", "api_gateway", "cache"],
+        dependencies: ['database', 'api_gateway', 'cache'],
       };
 
       degradationService.registerCapability(capability);
 
       const status = degradationService.getSystemStatus();
-      expect(status.serviceStatuses["complex_service"]).toBeDefined();
+      expect(status.serviceStatuses['complex_service']).toBeDefined();
     });
   });
 
-  describe("Degradation Rules", () => {
-    it("should add custom degradation rules", () => {
+  describe('Degradation Rules', () => {
+    it('should add custom degradation rules', () => {
       const rule: DegradationRule = {
-        id: "test_rule",
-        name: "Test Degradation Rule",
+        id: 'test_rule',
+        name: 'Test Degradation Rule',
         condition: (context) => context.errorRate > 5,
         action: {
           level: DegradationLevel.MINIMAL,
-          disabledCapabilities: ["real_time_analytics"],
+          disabledCapabilities: ['real_time_analytics'],
           fallbackCapabilities: [],
-          message: "Test degradation applied",
+          message: 'Test degradation applied',
         },
         priority: 1,
         enabled: true,
@@ -78,33 +78,33 @@ describe("GracefulDegradationService", () => {
       degradationService.addDegradationRule(rule);
 
       const status = degradationService.getSystemStatus();
-      expect(status.activeRules).toContain("Test Degradation Rule");
+      expect(status.activeRules).toContain('Test Degradation Rule');
     });
 
-    it("should prioritize rules correctly", () => {
+    it('should prioritize rules correctly', () => {
       const highPriorityRule: DegradationRule = {
-        id: "high_priority",
-        name: "High Priority Rule",
+        id: 'high_priority',
+        name: 'High Priority Rule',
         condition: (context) => context.errorRate > 1,
         action: {
           level: DegradationLevel.SEVERE,
           disabledCapabilities: [],
           fallbackCapabilities: [],
-          message: "High priority degradation",
+          message: 'High priority degradation',
         },
         priority: 1,
         enabled: true,
       };
 
       const lowPriorityRule: DegradationRule = {
-        id: "low_priority",
-        name: "Low Priority Rule",
+        id: 'low_priority',
+        name: 'Low Priority Rule',
         condition: (context) => context.errorRate > 1,
         action: {
           level: DegradationLevel.MINIMAL,
           disabledCapabilities: [],
           fallbackCapabilities: [],
-          message: "Low priority degradation",
+          message: 'Low priority degradation',
         },
         priority: 5,
         enabled: true,
@@ -131,8 +131,8 @@ describe("GracefulDegradationService", () => {
     });
   });
 
-  describe("Degradation Evaluation", () => {
-    it("should evaluate degradation based on error rate", async () => {
+  describe('Degradation Evaluation', () => {
+    it('should evaluate degradation based on error rate', async () => {
       const context: DegradationContext = {
         errorRate: 15, // High error rate
         criticalErrors: 0,
@@ -148,7 +148,7 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.SEVERE);
     });
 
-    it("should evaluate degradation based on critical errors", async () => {
+    it('should evaluate degradation based on critical errors', async () => {
       const context: DegradationContext = {
         errorRate: 1,
         criticalErrors: 5, // High critical errors
@@ -164,7 +164,7 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.EMERGENCY);
     });
 
-    it("should evaluate degradation based on circuit breaker trips", async () => {
+    it('should evaluate degradation based on circuit breaker trips', async () => {
       const context: DegradationContext = {
         errorRate: 2,
         criticalErrors: 0,
@@ -180,11 +180,11 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.MODERATE);
     });
 
-    it("should evaluate degradation based on failed services", async () => {
+    it('should evaluate degradation based on failed services', async () => {
       const context: DegradationContext = {
         errorRate: 1,
         criticalErrors: 0,
-        failedServices: ["service_a", "service_b", "service_c"],
+        failedServices: ['service_a', 'service_b', 'service_c'],
         circuitBreakerTrips: 0,
         systemLoad: 0.3,
         timestamp: new Date(),
@@ -196,7 +196,7 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.MINIMAL);
     });
 
-    it("should not degrade when conditions are normal", async () => {
+    it('should not degrade when conditions are normal', async () => {
       const context: DegradationContext = {
         errorRate: 1,
         criticalErrors: 0,
@@ -213,8 +213,8 @@ describe("GracefulDegradationService", () => {
     });
   });
 
-  describe("Capability Management During Degradation", () => {
-    it("should disable capabilities during degradation", async () => {
+  describe('Capability Management During Degradation', () => {
+    it('should disable capabilities during degradation', async () => {
       const context: DegradationContext = {
         errorRate: 15,
         criticalErrors: 0,
@@ -227,11 +227,11 @@ describe("GracefulDegradationService", () => {
       await degradationService.evaluateDegradation(context);
 
       const status = degradationService.getSystemStatus();
-      const analyticsService = status.serviceStatuses["real_time_analytics"];
-      expect(analyticsService.status).toBe("degraded");
+      const analyticsService = status.serviceStatuses['real_time_analytics'];
+      expect(analyticsService.status).toBe('degraded');
     });
 
-    it("should activate fallbacks during degradation", async () => {
+    it('should activate fallbacks during degradation', async () => {
       const context: DegradationContext = {
         errorRate: 12,
         criticalErrors: 0,
@@ -246,18 +246,18 @@ describe("GracefulDegradationService", () => {
       const status = degradationService.getSystemStatus();
 
       // Check that fallbacks are activated for appropriate services
-      const voiceService = status.serviceStatuses["voice_calling"];
-      expect(voiceService.status).toBe("degraded");
+      const voiceService = status.serviceStatuses['voice_calling'];
+      expect(voiceService.status).toBe('degraded');
     });
 
-    it("should handle fallback failures gracefully", async () => {
+    it('should handle fallback failures gracefully', async () => {
       // Register a capability with a failing fallback
       const capability: ServiceCapability = {
-        name: "failing_service",
+        name: 'failing_service',
         essential: false,
         degradationThreshold: 1,
         fallbackFunction: async () => {
-          throw new Error("Fallback failed");
+          throw new Error('Fallback failed');
         },
         dependencies: [],
       };
@@ -267,22 +267,22 @@ describe("GracefulDegradationService", () => {
       // Force degradation to trigger fallback activation
       await degradationService.forceDegradation(
         DegradationLevel.MODERATE,
-        "Test fallback failure",
-        ["failing_service"]
+        'Test fallback failure',
+        ['failing_service']
       );
 
       const status = degradationService.getSystemStatus();
-      const failingService = status.serviceStatuses["failing_service"];
-      expect(failingService.status).toBe("degraded");
+      const failingService = status.serviceStatuses['failing_service'];
+      expect(failingService.status).toBe('degraded');
     });
   });
 
-  describe("Recovery Process", () => {
-    it("should attempt recovery when conditions improve", async () => {
+  describe('Recovery Process', () => {
+    it('should attempt recovery when conditions improve', async () => {
       // First, trigger degradation
       await degradationService.forceDegradation(
         DegradationLevel.SEVERE,
-        "Test degradation for recovery"
+        'Test degradation for recovery'
       );
 
       let status = degradationService.getSystemStatus();
@@ -295,12 +295,12 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.NONE);
     });
 
-    it("should test capabilities before recovery", async () => {
+    it('should test capabilities before recovery', async () => {
       // Trigger degradation
       await degradationService.forceDegradation(
         DegradationLevel.MODERATE,
-        "Test degradation",
-        ["voice_calling"]
+        'Test degradation',
+        ['voice_calling']
       );
 
       let status = degradationService.getSystemStatus();
@@ -313,12 +313,12 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.NONE);
     });
 
-    it("should maintain degradation if recovery tests fail", async () => {
+    it('should maintain degradation if recovery tests fail', async () => {
       // This would require mocking the capability test to fail
       // For now, we'll test the basic recovery flow
       await degradationService.forceDegradation(
         DegradationLevel.MINIMAL,
-        "Test degradation"
+        'Test degradation'
       );
 
       const status = degradationService.getSystemStatus();
@@ -326,12 +326,12 @@ describe("GracefulDegradationService", () => {
     });
   });
 
-  describe("Manual Degradation Control", () => {
-    it("should allow forced degradation", async () => {
+  describe('Manual Degradation Control', () => {
+    it('should allow forced degradation', async () => {
       await degradationService.forceDegradation(
         DegradationLevel.SEVERE,
-        "Manual degradation for maintenance",
-        ["real_time_analytics", "voice_calling"]
+        'Manual degradation for maintenance',
+        ['real_time_analytics', 'voice_calling']
       );
 
       const status = degradationService.getSystemStatus();
@@ -339,14 +339,14 @@ describe("GracefulDegradationService", () => {
 
       const history = status.degradationHistory;
       expect(history).toHaveLength(1);
-      expect(history[0].reason).toContain("Manual degradation");
+      expect(history[0].reason).toContain('Manual degradation');
     });
 
-    it("should allow forced recovery", async () => {
+    it('should allow forced recovery', async () => {
       // First degrade
       await degradationService.forceDegradation(
         DegradationLevel.MODERATE,
-        "Test degradation"
+        'Test degradation'
       );
 
       let status = degradationService.getSystemStatus();
@@ -360,8 +360,8 @@ describe("GracefulDegradationService", () => {
     });
   });
 
-  describe("System Status Reporting", () => {
-    it("should provide comprehensive system status", () => {
+  describe('System Status Reporting', () => {
+    it('should provide comprehensive system status', () => {
       const status = degradationService.getSystemStatus();
 
       expect(status.degradationLevel).toBeDefined();
@@ -370,42 +370,42 @@ describe("GracefulDegradationService", () => {
       expect(status.activeRules).toBeDefined();
 
       // Check that default services are present
-      expect(status.serviceStatuses["lead_ingestion"]).toBeDefined();
-      expect(status.serviceStatuses["voice_calling"]).toBeDefined();
+      expect(status.serviceStatuses['lead_ingestion']).toBeDefined();
+      expect(status.serviceStatuses['voice_calling']).toBeDefined();
     });
 
-    it("should track degradation history", async () => {
+    it('should track degradation history', async () => {
       await degradationService.forceDegradation(
         DegradationLevel.MINIMAL,
-        "First degradation"
+        'First degradation'
       );
 
       await degradationService.forceDegradation(
         DegradationLevel.MODERATE,
-        "Second degradation"
+        'Second degradation'
       );
 
       const status = degradationService.getSystemStatus();
       expect(status.degradationHistory).toHaveLength(2);
-      expect(status.degradationHistory[0].reason).toBe("First degradation");
-      expect(status.degradationHistory[1].reason).toBe("Second degradation");
+      expect(status.degradationHistory[0].reason).toBe('First degradation');
+      expect(status.degradationHistory[1].reason).toBe('Second degradation');
     });
 
-    it("should list active rules", () => {
+    it('should list active rules', () => {
       const status = degradationService.getSystemStatus();
 
       // Should have default rules
-      expect(status.activeRules).toContain("Critical System Failure");
-      expect(status.activeRules).toContain("High Error Rate");
-      expect(status.activeRules).toContain("Multiple Circuit Breakers Open");
+      expect(status.activeRules).toContain('Critical System Failure');
+      expect(status.activeRules).toContain('High Error Rate');
+      expect(status.activeRules).toContain('Multiple Circuit Breakers Open');
     });
   });
 
-  describe("Data Management", () => {
-    it("should clear degradation history", async () => {
+  describe('Data Management', () => {
+    it('should clear degradation history', async () => {
       await degradationService.forceDegradation(
         DegradationLevel.MINIMAL,
-        "Test degradation"
+        'Test degradation'
       );
 
       let status = degradationService.getSystemStatus();
@@ -418,8 +418,8 @@ describe("GracefulDegradationService", () => {
     });
   });
 
-  describe("Edge Cases", () => {
-    it("should handle empty degradation context", async () => {
+  describe('Edge Cases', () => {
+    it('should handle empty degradation context', async () => {
       const emptyContext: DegradationContext = {
         errorRate: 0,
         criticalErrors: 0,
@@ -435,16 +435,16 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.NONE);
     });
 
-    it("should handle disabled rules", async () => {
+    it('should handle disabled rules', async () => {
       const rule: DegradationRule = {
-        id: "disabled_rule",
-        name: "Disabled Rule",
+        id: 'disabled_rule',
+        name: 'Disabled Rule',
         condition: (context) => true, // Always true
         action: {
           level: DegradationLevel.EMERGENCY,
           disabledCapabilities: [],
           fallbackCapabilities: [],
-          message: "Should not be applied",
+          message: 'Should not be applied',
         },
         priority: 1,
         enabled: false, // Disabled
@@ -467,11 +467,11 @@ describe("GracefulDegradationService", () => {
       expect(status.degradationLevel).toBe(DegradationLevel.NONE);
     });
 
-    it("should handle unknown capabilities gracefully", async () => {
+    it('should handle unknown capabilities gracefully', async () => {
       const context: DegradationContext = {
         errorRate: 15,
         criticalErrors: 0,
-        failedServices: ["unknown_service"],
+        failedServices: ['unknown_service'],
         circuitBreakerTrips: 0,
         systemLoad: 0.5,
         timestamp: new Date(),

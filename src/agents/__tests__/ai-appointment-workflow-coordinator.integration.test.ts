@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   AIAppointmentWorkflowCoordinator,
   Campaign,
   CampaignAudience,
   CampaignStep,
-} from "../ai-appointment-workflow-coordinator";
-import { LeadModel, CreateLead } from "../../types/lead";
+} from '../ai-appointment-workflow-coordinator';
+import { LeadModel, CreateLead } from '../../types/lead';
 
-describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
+describe('AIAppointmentWorkflowCoordinator Integration Tests', () => {
   let coordinator: AIAppointmentWorkflowCoordinator;
   let testLead: LeadModel;
 
@@ -16,63 +16,63 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
 
     // Create a test lead
     const leadData: CreateLead = {
-      source: "website",
+      source: 'website',
       contactInfo: {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "+1234567890",
-        preferredChannel: "email",
-        timezone: "UTC",
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1234567890',
+        preferredChannel: 'email',
+        timezone: 'UTC',
       },
-      leadType: "hot",
+      leadType: 'hot',
       urgencyLevel: 8,
-      intentSignals: ["property_inquiry", "budget_discussed"],
+      intentSignals: ['property_inquiry', 'budget_discussed'],
       qualificationData: {
         budget: { min: 100000, max: 500000 },
-        location: "New York",
-        propertyType: "Apartment",
-        timeline: "3 months",
+        location: 'New York',
+        propertyType: 'Apartment',
+        timeline: '3 months',
         qualificationScore: 0.8,
       },
-      status: "new",
+      status: 'new',
     };
 
     testLead = LeadModel.create(leadData);
   });
 
-  describe("End-to-End Campaign Workflows", () => {
-    it("should execute complete callback sequence campaign", async () => {
+  describe('End-to-End Campaign Workflows', () => {
+    it('should execute complete callback sequence campaign', async () => {
       // Create a multi-step callback campaign
       const targetAudience: CampaignAudience = {
-        leadTypes: ["hot"],
-        sources: ["website"],
+        leadTypes: ['hot'],
+        sources: ['website'],
         qualificationScoreMin: 0.7,
       };
 
-      const steps: Omit<CampaignStep, "id">[] = [
+      const steps: Omit<CampaignStep, 'id'>[] = [
         {
           order: 1,
-          type: "callback",
+          type: 'callback',
           delayHours: 1,
-          content: "Initial callback within 1 hour",
+          content: 'Initial callback within 1 hour',
         },
         {
           order: 2,
-          type: "message",
+          type: 'message',
           delayHours: 24,
-          content: "Follow-up message after 24 hours",
+          content: 'Follow-up message after 24 hours',
         },
         {
           order: 3,
-          type: "appointment",
+          type: 'appointment',
           delayHours: 48,
-          content: "Schedule consultation after 48 hours",
+          content: 'Schedule consultation after 48 hours',
         },
       ];
 
       const campaign = await coordinator.createCampaign(
-        "Hot Lead Callback Sequence",
-        "callback_sequence",
+        'Hot Lead Callback Sequence',
+        'callback_sequence',
         targetAudience,
         steps
       );
@@ -97,28 +97,28 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       // Verify callbacks and appointments were created
       const leadAppointments = coordinator.getLeadAppointments(testLead.id);
       expect(leadAppointments).toHaveLength(1);
-      expect(leadAppointments[0].type).toBe("consultation");
+      expect(leadAppointments[0].type).toBe('consultation');
     });
 
-    it("should handle appointment booking with full reminder workflow", async () => {
+    it('should handle appointment booking with full reminder workflow', async () => {
       const scheduledAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
 
       // Book appointment
       const appointment = await coordinator.bookAppointment(
         testLead.id,
-        "consultation",
+        'consultation',
         scheduledAt,
         90, // 90 minutes
-        "Main Office",
+        'Main Office',
         undefined
       );
 
-      expect(appointment.status).toBe("scheduled");
+      expect(appointment.status).toBe('scheduled');
       expect(appointment.confirmationSent).toBe(false);
 
       // Confirm appointment
       const confirmed = await coordinator.confirmAppointment(appointment.id);
-      expect(confirmed.status).toBe("confirmed");
+      expect(confirmed.status).toBe('confirmed');
       expect(confirmed.confirmationSent).toBe(true);
 
       // Verify reminder sequence was created
@@ -128,7 +128,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       ) as any;
 
       expect(sequence).toBeDefined();
-      expect(sequence.status).toBe("active");
+      expect(sequence.status).toBe('active');
       expect(sequence.reminders).toHaveLength(2);
 
       // Test rescheduling
@@ -136,53 +136,53 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       const rescheduled = await coordinator.rescheduleAppointment(
         appointment.id,
         newTime,
-        "Client requested different time"
+        'Client requested different time'
       );
 
       expect(rescheduled.scheduledAt).toEqual(newTime);
-      expect(rescheduled.status).toBe("rescheduled");
-      expect(rescheduled.notes).toContain("Client requested different time");
+      expect(rescheduled.status).toBe('rescheduled');
+      expect(rescheduled.notes).toContain('Client requested different time');
     });
 
-    it("should process campaign-driven outreach workflow", async () => {
+    it('should process campaign-driven outreach workflow', async () => {
       // Create campaign for warm lead re-engagement
       const targetAudience: CampaignAudience = {
-        leadTypes: ["warm"],
-        sources: ["meta_ads", "website"],
+        leadTypes: ['warm'],
+        sources: ['meta_ads', 'website'],
         qualificationScoreMin: 0.5,
-        tags: ["previous_interest"],
+        tags: ['previous_interest'],
       };
 
-      const steps: Omit<CampaignStep, "id">[] = [
+      const steps: Omit<CampaignStep, 'id'>[] = [
         {
           order: 1,
-          type: "email",
+          type: 'email',
           delayHours: 0,
-          content: "Re-engagement email with special offer",
+          content: 'Re-engagement email with special offer',
         },
         {
           order: 2,
-          type: "wait",
+          type: 'wait',
           delayHours: 72,
-          content: "Wait 3 days for response",
+          content: 'Wait 3 days for response',
         },
         {
           order: 3,
-          type: "callback",
+          type: 'callback',
           delayHours: 0,
-          content: "Follow-up call if no response",
+          content: 'Follow-up call if no response',
         },
         {
           order: 4,
-          type: "appointment",
+          type: 'appointment',
           delayHours: 24,
-          content: "Schedule site visit if interested",
+          content: 'Schedule site visit if interested',
         },
       ];
 
       const campaign = await coordinator.createCampaign(
-        "Warm Lead Re-engagement",
-        "re_engagement",
+        'Warm Lead Re-engagement',
+        're_engagement',
         targetAudience,
         steps
       );
@@ -190,7 +190,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       // Simulate lead responding to campaign
       const warmLead = LeadModel.create({
         ...testLead.data,
-        leadType: "warm",
+        leadType: 'warm',
         urgencyLevel: 5,
         qualificationData: {
           ...testLead.data.qualificationData,
@@ -219,10 +219,10 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       // Verify appointment was created
       const appointments = coordinator.getLeadAppointments(warmLead.id);
       expect(appointments).toHaveLength(1);
-      expect(appointments[0].type).toBe("consultation");
+      expect(appointments[0].type).toBe('consultation');
     });
 
-    it("should handle callback scheduling and processing workflow", async () => {
+    it('should handle callback scheduling and processing workflow', async () => {
       // Schedule multiple callbacks at different times
       const callback1Time = new Date(Date.now() - 60 * 1000); // 1 minute ago (due)
       const callback2Time = new Date(Date.now() - 30 * 1000); // 30 seconds ago (due)
@@ -241,13 +241,13 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
         callback3Time
       );
 
-      expect(callback1.status).toBe("pending");
-      expect(callback2.status).toBe("pending");
-      expect(callback3.status).toBe("pending");
+      expect(callback1.status).toBe('pending');
+      expect(callback2.status).toBe('pending');
+      expect(callback3.status).toBe('pending');
 
       // Mock the attemptCallback method for controlled testing
       let callAttempts = 0;
-      vi.spyOn(coordinator as any, "attemptCallback").mockImplementation(
+      vi.spyOn(coordinator as any, 'attemptCallback').mockImplementation(
         async (callback: any) => {
           callAttempts++;
           // First callback succeeds, second fails
@@ -267,47 +267,47 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       const updatedCallback2 = callbacks.get(callback2.id);
       const updatedCallback3 = callbacks.get(callback3.id);
 
-      expect(updatedCallback1.status).toBe("completed");
+      expect(updatedCallback1.status).toBe('completed');
       expect(updatedCallback1.attempts).toBe(1);
 
-      expect(updatedCallback2.status).toBe("pending"); // Still pending, will retry
+      expect(updatedCallback2.status).toBe('pending'); // Still pending, will retry
       expect(updatedCallback2.attempts).toBe(1);
 
-      expect(updatedCallback3.status).toBe("pending"); // Not due yet
+      expect(updatedCallback3.status).toBe('pending'); // Not due yet
       expect(updatedCallback3.attempts).toBe(0);
 
       expect(callAttempts).toBeGreaterThan(0);
     });
 
-    it("should track and optimize campaign performance", async () => {
+    it('should track and optimize campaign performance', async () => {
       // Create multiple campaigns with different performance characteristics
       const highPerformingCampaign = await coordinator.createCampaign(
-        "High Converting Campaign",
-        "appointment_booking",
-        { leadTypes: ["hot"], sources: ["website"] },
+        'High Converting Campaign',
+        'appointment_booking',
+        { leadTypes: ['hot'], sources: ['website'] },
         [
           {
             order: 1,
-            type: "callback",
+            type: 'callback',
             delayHours: 1,
-            content: "Quick callback",
+            content: 'Quick callback',
           },
           {
             order: 2,
-            type: "appointment",
+            type: 'appointment',
             delayHours: 2,
-            content: "Book appointment",
+            content: 'Book appointment',
           },
         ]
       );
 
       const lowPerformingCampaign = await coordinator.createCampaign(
-        "Low Converting Campaign",
-        "follow_up",
-        { leadTypes: ["cold"], sources: ["third_party"] },
+        'Low Converting Campaign',
+        'follow_up',
+        { leadTypes: ['cold'], sources: ['third_party'] },
         [
-          { order: 1, type: "email", delayHours: 24, content: "Cold email" },
-          { order: 2, type: "wait", delayHours: 168, content: "Wait a week" },
+          { order: 1, type: 'email', delayHours: 24, content: 'Cold email' },
+          { order: 2, type: 'wait', delayHours: 168, content: 'Wait a week' },
         ]
       );
 
@@ -364,50 +364,50 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       );
     });
 
-    it("should handle complex multi-channel campaign coordination", async () => {
+    it('should handle complex multi-channel campaign coordination', async () => {
       // Create a complex campaign that uses multiple communication channels
       const targetAudience: CampaignAudience = {
-        leadTypes: ["hot", "warm"],
-        sources: ["website", "meta_ads"],
+        leadTypes: ['hot', 'warm'],
+        sources: ['website', 'meta_ads'],
         qualificationScoreMin: 0.6,
       };
 
-      const steps: Omit<CampaignStep, "id">[] = [
+      const steps: Omit<CampaignStep, 'id'>[] = [
         {
           order: 1,
-          type: "email",
+          type: 'email',
           delayHours: 0,
-          content: "Welcome email with property details",
+          content: 'Welcome email with property details',
         },
         {
           order: 2,
-          type: "callback",
+          type: 'callback',
           delayHours: 2,
-          content: "Follow-up call to discuss interest",
+          content: 'Follow-up call to discuss interest',
         },
         {
           order: 3,
-          type: "message",
+          type: 'message',
           delayHours: 24,
-          content: "SMS with appointment booking link",
+          content: 'SMS with appointment booking link',
         },
         {
           order: 4,
-          type: "appointment",
+          type: 'appointment',
           delayHours: 48,
-          content: "Schedule property viewing",
+          content: 'Schedule property viewing',
         },
       ];
 
       const campaign = await coordinator.createCampaign(
-        "Multi-Channel Property Campaign",
-        "appointment_booking",
+        'Multi-Channel Property Campaign',
+        'appointment_booking',
         targetAudience,
         steps
       );
 
       // Execute campaign for multiple leads
-      const leads = [testLead.id, "lead-2", "lead-3"];
+      const leads = [testLead.id, 'lead-2', 'lead-3'];
 
       for (const leadId of leads) {
         for (const step of campaign.steps) {
@@ -430,7 +430,7 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       for (const leadId of leads) {
         const appointments = coordinator.getLeadAppointments(leadId);
         expect(appointments).toHaveLength(1);
-        expect(appointments[0].type).toBe("consultation");
+        expect(appointments[0].type).toBe('consultation');
       }
 
       // Check upcoming appointments
@@ -439,30 +439,30 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
     });
   });
 
-  describe("Error Recovery and Resilience", () => {
-    it("should handle partial campaign failures gracefully", async () => {
+  describe('Error Recovery and Resilience', () => {
+    it('should handle partial campaign failures gracefully', async () => {
       const campaign = await coordinator.createCampaign(
-        "Failure Test Campaign",
-        "callback_sequence",
-        { leadTypes: ["hot"], sources: ["website"] },
+        'Failure Test Campaign',
+        'callback_sequence',
+        { leadTypes: ['hot'], sources: ['website'] },
         [
           {
             order: 1,
-            type: "callback",
+            type: 'callback',
             delayHours: 1,
-            content: "First callback",
+            content: 'First callback',
           },
           {
             order: 2,
-            type: "appointment",
+            type: 'appointment',
             delayHours: 2,
-            content: "Book appointment",
+            content: 'Book appointment',
           },
           {
             order: 3,
-            type: "message",
+            type: 'message',
             delayHours: 3,
-            content: "Confirmation message",
+            content: 'Confirmation message',
           },
         ]
       );
@@ -471,18 +471,18 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
       let callCount = 0;
       const originalBookAppointment =
         coordinator.bookAppointment.bind(coordinator);
-      vi.spyOn(coordinator, "bookAppointment").mockImplementation(
+      vi.spyOn(coordinator, 'bookAppointment').mockImplementation(
         async (...args) => {
           callCount++;
           if (callCount === 1) {
-            throw new Error("Appointment booking system unavailable");
+            throw new Error('Appointment booking system unavailable');
           }
           return originalBookAppointment(...args);
         }
       );
 
       const consoleErrorSpy = vi
-        .spyOn(console, "error")
+        .spyOn(console, 'error')
         .mockImplementation(() => {});
 
       // Execute campaign steps
@@ -503,45 +503,45 @@ describe("AIAppointmentWorkflowCoordinator Integration Tests", () => {
 
       // Verify error was logged
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to execute campaign step"),
+        expect.stringContaining('Failed to execute campaign step'),
         expect.any(Error)
       );
 
       consoleErrorSpy.mockRestore();
     });
 
-    it("should maintain data consistency during concurrent operations", async () => {
+    it('should maintain data consistency during concurrent operations', async () => {
       // Create multiple campaigns and execute them concurrently
       const campaigns = await Promise.all([
         coordinator.createCampaign(
-          "Concurrent Campaign 1",
-          "callback_sequence",
-          { leadTypes: ["hot"], sources: ["website"] },
-          [{ order: 1, type: "callback", delayHours: 1, content: "Callback 1" }]
+          'Concurrent Campaign 1',
+          'callback_sequence',
+          { leadTypes: ['hot'], sources: ['website'] },
+          [{ order: 1, type: 'callback', delayHours: 1, content: 'Callback 1' }]
         ),
         coordinator.createCampaign(
-          "Concurrent Campaign 2",
-          "appointment_booking",
-          { leadTypes: ["warm"], sources: ["meta_ads"] },
+          'Concurrent Campaign 2',
+          'appointment_booking',
+          { leadTypes: ['warm'], sources: ['meta_ads'] },
           [
             {
               order: 1,
-              type: "appointment",
+              type: 'appointment',
               delayHours: 2,
-              content: "Appointment 1",
+              content: 'Appointment 1',
             },
           ]
         ),
         coordinator.createCampaign(
-          "Concurrent Campaign 3",
-          "follow_up",
-          { leadTypes: ["cold"], sources: ["third_party"] },
-          [{ order: 1, type: "message", delayHours: 0, content: "Message 1" }]
+          'Concurrent Campaign 3',
+          'follow_up',
+          { leadTypes: ['cold'], sources: ['third_party'] },
+          [{ order: 1, type: 'message', delayHours: 0, content: 'Message 1' }]
         ),
       ]);
 
       // Execute all campaigns concurrently for multiple leads
-      const leads = ["lead-1", "lead-2", "lead-3"];
+      const leads = ['lead-1', 'lead-2', 'lead-3'];
       const promises: Promise<boolean>[] = [];
 
       for (const campaign of campaigns) {

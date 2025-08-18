@@ -1,15 +1,15 @@
-import { Lead, LeadModel, QualificationData } from "../types/lead";
+import { Lead, LeadModel, QualificationData } from '../types/lead';
 import {
   Interaction,
   InteractionModel,
   CreateInteraction,
-} from "../types/interaction";
+} from '../types/interaction';
 
 /**
  * Voice AI configuration for speech processing
  */
 export interface VoiceAIConfig {
-  provider: "elevenlabs" | "azure" | "google";
+  provider: 'elevenlabs' | 'azure' | 'google';
   apiKey: string;
   voiceId?: string;
   language: string;
@@ -33,10 +33,10 @@ export interface QualificationScript {
  */
 export interface QualificationQuestion {
   id: string;
-  type: "budget" | "location" | "timeline" | "property_type" | "custom";
+  type: 'budget' | 'location' | 'timeline' | 'property_type' | 'custom';
   question: string;
   followUpQuestions?: string[];
-  expectedAnswerType: "number" | "text" | "boolean" | "choice";
+  expectedAnswerType: 'number' | 'text' | 'boolean' | 'choice';
   choices?: string[];
   required: boolean;
   weight: number; // For scoring
@@ -60,7 +60,7 @@ export interface CallSession {
   leadId: string;
   startTime: Date;
   endTime?: Date;
-  status: "active" | "completed" | "transferred" | "failed";
+  status: 'active' | 'completed' | 'transferred' | 'failed';
   transcript: CallTranscript[];
   qualificationData: Partial<QualificationData>;
   appointmentBooked: boolean;
@@ -73,7 +73,7 @@ export interface CallSession {
  */
 export interface CallTranscript {
   timestamp: Date;
-  speaker: "agent" | "customer";
+  speaker: 'agent' | 'customer';
   text: string;
   confidence?: number;
   sentiment?: number;
@@ -85,7 +85,7 @@ export interface CallTranscript {
 export interface AppointmentBooking {
   id: string;
   leadId: string;
-  type: "consultation" | "property_viewing" | "follow_up";
+  type: 'consultation' | 'property_viewing' | 'follow_up';
   scheduledAt: Date;
   duration: number; // in minutes
   location?: string;
@@ -102,11 +102,11 @@ export interface HumanTransferRequest {
   leadId: string;
   sessionId: string;
   reason:
-    | "complex_query"
-    | "technical_issue"
-    | "customer_request"
-    | "escalation";
-  priority: "low" | "medium" | "high" | "urgent";
+    | 'complex_query'
+    | 'technical_issue'
+    | 'customer_request'
+    | 'escalation';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   context: string;
   transferredAt: Date;
   assignedAgent?: string;
@@ -120,7 +120,7 @@ export interface VSAConfig {
   voiceAI: VoiceAIConfig;
   qualificationScripts: QualificationScript[];
   appointmentBooking: {
-    calendarIntegration: "google" | "outlook" | "calendly";
+    calendarIntegration: 'google' | 'outlook' | 'calendly';
     defaultDuration: number;
     availableTimeSlots: string[];
     bufferTime: number; // minutes between appointments
@@ -139,15 +139,15 @@ export interface VSAConfig {
  */
 const DEFAULT_VSA_CONFIG: VSAConfig = {
   voiceAI: {
-    provider: "elevenlabs",
-    apiKey: process.env.ELEVENLABS_API_KEY || "",
-    language: "en-US",
+    provider: 'elevenlabs',
+    apiKey: process.env.ELEVENLABS_API_KEY || '',
+    language: 'en-US',
   },
   qualificationScripts: [],
   appointmentBooking: {
-    calendarIntegration: "google",
+    calendarIntegration: 'google',
     defaultDuration: 30,
-    availableTimeSlots: ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
+    availableTimeSlots: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
     bufferTime: 15,
   },
   humanTransfer: {
@@ -185,67 +185,67 @@ export class VirtualSalesAssistant {
   private initializeDefaultScripts(): void {
     if (this.config.qualificationScripts.length === 0) {
       const defaultScript: QualificationScript = {
-        id: "real-estate-basic",
-        name: "Basic Real Estate Qualification",
+        id: 'real-estate-basic',
+        name: 'Basic Real Estate Qualification',
         questions: [
           {
-            id: "budget",
-            type: "budget",
+            id: 'budget',
+            type: 'budget',
             question: "What's your budget range for this property purchase?",
             followUpQuestions: [
-              "Is this your maximum budget or are you flexible?",
-              "Do you have pre-approval for financing?",
+              'Is this your maximum budget or are you flexible?',
+              'Do you have pre-approval for financing?',
             ],
-            expectedAnswerType: "text",
+            expectedAnswerType: 'text',
             required: true,
             weight: 0.3,
           },
           {
-            id: "location",
-            type: "location",
+            id: 'location',
+            type: 'location',
             question:
-              "Which areas or neighborhoods are you most interested in?",
+              'Which areas or neighborhoods are you most interested in?',
             followUpQuestions: [
-              "Are you open to nearby areas as well?",
+              'Are you open to nearby areas as well?',
               "What's most important about the location for you?",
             ],
-            expectedAnswerType: "text",
+            expectedAnswerType: 'text',
             required: true,
             weight: 0.2,
           },
           {
-            id: "timeline",
-            type: "timeline",
-            question: "When are you looking to make a purchase?",
+            id: 'timeline',
+            type: 'timeline',
+            question: 'When are you looking to make a purchase?',
             followUpQuestions: [
-              "Is this timeline flexible?",
-              "Do you need to sell your current home first?",
+              'Is this timeline flexible?',
+              'Do you need to sell your current home first?',
             ],
-            expectedAnswerType: "choice",
+            expectedAnswerType: 'choice',
             choices: [
-              "Within 30 days",
-              "1-3 months",
-              "3-6 months",
-              "6+ months",
+              'Within 30 days',
+              '1-3 months',
+              '3-6 months',
+              '6+ months',
             ],
             required: true,
             weight: 0.25,
           },
           {
-            id: "property_type",
-            type: "property_type",
-            question: "What type of property are you looking for?",
+            id: 'property_type',
+            type: 'property_type',
+            question: 'What type of property are you looking for?',
             followUpQuestions: [
-              "How many bedrooms and bathrooms do you need?",
-              "Any specific features that are must-haves?",
+              'How many bedrooms and bathrooms do you need?',
+              'Any specific features that are must-haves?',
             ],
-            expectedAnswerType: "choice",
+            expectedAnswerType: 'choice',
             choices: [
-              "Single Family Home",
-              "Condo",
-              "Townhouse",
-              "Multi-family",
-              "Other",
+              'Single Family Home',
+              'Condo',
+              'Townhouse',
+              'Multi-family',
+              'Other',
             ],
             required: false,
             weight: 0.15,
@@ -253,22 +253,22 @@ export class VirtualSalesAssistant {
         ],
         scoringRules: [
           {
-            questionId: "budget",
-            condition: "budget_mentioned",
+            questionId: 'budget',
+            condition: 'budget_mentioned',
             score: 0.3,
-            description: "Customer provided budget information",
+            description: 'Customer provided budget information',
           },
           {
-            questionId: "timeline",
-            condition: "timeline_within_3_months",
+            questionId: 'timeline',
+            condition: 'timeline_within_3_months',
             score: 0.25,
-            description: "Customer has near-term timeline",
+            description: 'Customer has near-term timeline',
           },
           {
-            questionId: "location",
-            condition: "specific_location_mentioned",
+            questionId: 'location',
+            condition: 'specific_location_mentioned',
             score: 0.2,
-            description: "Customer has specific location preferences",
+            description: 'Customer has specific location preferences',
           },
         ],
         enabled: true,
@@ -284,7 +284,7 @@ export class VirtualSalesAssistant {
   async initiateCall(lead: Lead): Promise<CallSession> {
     // Validate lead has phone number
     if (!lead.contactInfo.phone) {
-      throw new Error("Lead must have phone number for voice call");
+      throw new Error('Lead must have phone number for voice call');
     }
 
     // Create call session
@@ -292,7 +292,7 @@ export class VirtualSalesAssistant {
       id: this.generateSessionId(),
       leadId: lead.id,
       startTime: new Date(),
-      status: "active",
+      status: 'active',
       transcript: [],
       qualificationData: {},
       appointmentBooked: false,
@@ -308,17 +308,17 @@ export class VirtualSalesAssistant {
       // Add initial greeting to transcript
       await this.addToTranscript(
         session.id,
-        "agent",
+        'agent',
         this.generateGreeting(lead)
       );
 
       return session;
     } catch (error) {
-      session.status = "failed";
+      session.status = 'failed';
       this.activeSessions.set(session.id, session);
       throw new Error(
         `Failed to initiate call: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -346,7 +346,7 @@ export class VirtualSalesAssistant {
    */
   private generateGreeting(lead: Lead): string {
     const timeOfDay = this.getTimeOfDay();
-    const name = lead.contactInfo.name.split(" ")[0]; // Use first name
+    const name = lead.contactInfo.name.split(' ')[0]; // Use first name
 
     return `Good ${timeOfDay}, ${name}! This is Sarah from Premier Real Estate. Thank you for your interest in our properties. I'm calling to help you find exactly what you're looking for. Do you have a few minutes to chat about your real estate needs?`;
   }
@@ -356,9 +356,9 @@ export class VirtualSalesAssistant {
    */
   private getTimeOfDay(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return "morning";
-    if (hour < 17) return "afternoon";
-    return "evening";
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'afternoon';
+    return 'evening';
   }
 
   /**
@@ -369,19 +369,19 @@ export class VirtualSalesAssistant {
     response: string
   ): Promise<string> {
     const session = this.activeSessions.get(sessionId);
-    if (!session || session.status !== "active") {
-      throw new Error("Invalid or inactive session");
+    if (!session || session.status !== 'active') {
+      throw new Error('Invalid or inactive session');
     }
 
     // Add customer response to transcript
-    await this.addToTranscript(sessionId, "customer", response);
+    await this.addToTranscript(sessionId, 'customer', response);
 
     // Analyze response for intent and sentiment
     const analysis = await this.analyzeResponse(response);
 
     // Check if human transfer is needed
     if (this.shouldTransferToHuman(analysis, session)) {
-      return await this.initiateHumanTransfer(sessionId, "complex_query");
+      return await this.initiateHumanTransfer(sessionId, 'complex_query');
     }
 
     // Continue with qualification script
@@ -391,7 +391,7 @@ export class VirtualSalesAssistant {
     );
 
     if (nextQuestion) {
-      await this.addToTranscript(sessionId, "agent", nextQuestion);
+      await this.addToTranscript(sessionId, 'agent', nextQuestion);
       return nextQuestion;
     }
 
@@ -404,7 +404,7 @@ export class VirtualSalesAssistant {
    */
   private async addToTranscript(
     sessionId: string,
-    speaker: "agent" | "customer",
+    speaker: 'agent' | 'customer',
     text: string
   ): Promise<void> {
     const session = this.activeSessions.get(sessionId);
@@ -414,7 +414,7 @@ export class VirtualSalesAssistant {
       timestamp: new Date(),
       speaker,
       text,
-      confidence: speaker === "customer" ? 0.85 : 1.0, // Simulated confidence
+      confidence: speaker === 'customer' ? 0.85 : 1.0, // Simulated confidence
     };
 
     session.transcript.push(transcriptEntry);
@@ -439,14 +439,14 @@ export class VirtualSalesAssistant {
 
     // Sentiment analysis (simplified)
     const positiveWords = [
-      "yes",
-      "interested",
-      "great",
-      "perfect",
-      "love",
-      "excited",
+      'yes',
+      'interested',
+      'great',
+      'perfect',
+      'love',
+      'excited',
     ];
-    const negativeWords = ["no", "not", "don't", "can't", "won't", "difficult"];
+    const negativeWords = ['no', 'not', "don't", "can't", "won't", 'difficult'];
 
     positiveWords.forEach((word) => {
       if (lowerResponse.includes(word)) sentiment += 0.2;
@@ -458,17 +458,17 @@ export class VirtualSalesAssistant {
 
     // Enhanced complexity analysis
     const complexPhrases = [
-      "it depends",
-      "complicated",
-      "not sure",
-      "maybe",
-      "let me think",
-      "coordinate with",
-      "financial arrangements",
-      "various factors",
-      "need to discuss",
-      "have to check",
-      "depends on",
+      'it depends',
+      'complicated',
+      'not sure',
+      'maybe',
+      'let me think',
+      'coordinate with',
+      'financial arrangements',
+      'various factors',
+      'need to discuss',
+      'have to check',
+      'depends on',
       "it's complex",
     ];
 
@@ -478,17 +478,17 @@ export class VirtualSalesAssistant {
 
     // Additional complexity indicators
     const complexityIndicators = [
-      "because",
-      "however",
-      "although",
-      "but",
-      "except",
-      "unless",
-      "spouse",
-      "partner",
-      "family",
-      "lawyer",
-      "accountant",
+      'because',
+      'however',
+      'although',
+      'but',
+      'except',
+      'unless',
+      'spouse',
+      'partner',
+      'family',
+      'lawyer',
+      'accountant',
     ];
 
     complexityIndicators.forEach((indicator) => {
@@ -507,20 +507,20 @@ export class VirtualSalesAssistant {
 
     // Keyword extraction (simplified)
     const realEstateKeywords = [
-      "budget",
-      "price",
-      "location",
-      "bedroom",
-      "bathroom",
-      "house",
-      "condo",
+      'budget',
+      'price',
+      'location',
+      'bedroom',
+      'bathroom',
+      'house',
+      'condo',
     ];
     realEstateKeywords.forEach((keyword) => {
       if (lowerResponse.includes(keyword)) keywords.push(keyword);
     });
 
     return {
-      intent: keywords.length > 0 ? "property_inquiry" : "general",
+      intent: keywords.length > 0 ? 'property_inquiry' : 'general',
       sentiment: Math.max(-1, Math.min(1, sentiment)),
       complexity: Math.max(0, Math.min(1, complexity)),
       keywords,
@@ -538,8 +538,8 @@ export class VirtualSalesAssistant {
 
     // Transfer if customer explicitly requests human agent
     if (
-      analysis.keywords.includes("human") ||
-      analysis.keywords.includes("agent")
+      analysis.keywords.includes('human') ||
+      analysis.keywords.includes('agent')
     ) {
       return true;
     }
@@ -605,18 +605,18 @@ export class VirtualSalesAssistant {
   ): boolean {
     // Check if we have qualification data for this question type
     switch (questionId) {
-      case "budget":
+      case 'budget':
         return !!session.qualificationData.budget;
-      case "location":
+      case 'location':
         return !!session.qualificationData.location;
-      case "timeline":
+      case 'timeline':
         return !!session.qualificationData.timeline;
-      case "property_type":
+      case 'property_type':
         return !!session.qualificationData.propertyType;
       default:
         // For custom questions, check if keywords were mentioned
         const questionTypes = {
-          urgency: ["urgent", "rush", "soon", "quickly"],
+          urgency: ['urgent', 'rush', 'soon', 'quickly'],
         };
 
         const question = this.config.qualificationScripts
@@ -630,7 +630,7 @@ export class VirtualSalesAssistant {
 
         return session.transcript.some(
           (entry) =>
-            entry.speaker === "customer" &&
+            entry.speaker === 'customer' &&
             relevantWords.some((word) =>
               entry.text.toLowerCase().includes(word)
             )
@@ -662,7 +662,7 @@ export class VirtualSalesAssistant {
     // Extract budget information
     const budgetMatch = response.match(/\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
     if (budgetMatch && !session.qualificationData.budget) {
-      const amount = parseInt(budgetMatch[1].replace(/,/g, ""));
+      const amount = parseInt(budgetMatch[1].replace(/,/g, ''));
       session.qualificationData.budget = {
         min: amount * 0.8,
         max: amount * 1.2,
@@ -671,11 +671,11 @@ export class VirtualSalesAssistant {
 
     // Extract location information
     const locationKeywords = [
-      "downtown",
-      "area",
-      "neighborhood",
-      "location",
-      "district",
+      'downtown',
+      'area',
+      'neighborhood',
+      'location',
+      'district',
     ];
     if (
       locationKeywords.some((keyword) => lowerResponse.includes(keyword)) &&
@@ -685,7 +685,7 @@ export class VirtualSalesAssistant {
     }
 
     // Extract timeline information
-    const timelineKeywords = ["month", "week", "day", "soon", "urgent", "time"];
+    const timelineKeywords = ['month', 'week', 'day', 'soon', 'urgent', 'time'];
     if (
       timelineKeywords.some((keyword) => lowerResponse.includes(keyword)) &&
       !session.qualificationData.timeline
@@ -695,12 +695,12 @@ export class VirtualSalesAssistant {
 
     // Extract property type information
     const propertyKeywords = [
-      "house",
-      "condo",
-      "apartment",
-      "townhouse",
-      "home",
-      "bedroom",
+      'house',
+      'condo',
+      'apartment',
+      'townhouse',
+      'home',
+      'bedroom',
     ];
     if (
       propertyKeywords.some((keyword) => lowerResponse.includes(keyword)) &&
@@ -729,14 +729,14 @@ export class VirtualSalesAssistant {
 
       // Apply scoring rule (simplified logic)
       switch (rule.condition) {
-        case "budget_mentioned":
+        case 'budget_mentioned':
           if (session.qualificationData.budget) score += rule.score;
           break;
-        case "timeline_within_3_months":
-          if (session.qualificationData.timeline?.includes("month"))
+        case 'timeline_within_3_months':
+          if (session.qualificationData.timeline?.includes('month'))
             score += rule.score;
           break;
-        case "specific_location_mentioned":
+        case 'specific_location_mentioned':
           if (session.qualificationData.location) score += rule.score;
           break;
       }
@@ -750,12 +750,12 @@ export class VirtualSalesAssistant {
    */
   private async attemptAppointmentBooking(sessionId: string): Promise<string> {
     const session = this.activeSessions.get(sessionId);
-    if (!session) throw new Error("Session not found");
+    if (!session) throw new Error('Session not found');
 
     // Generate appointment booking message
     const bookingMessage = `Based on what you've told me, I'd love to schedule a consultation to show you some properties that match your criteria. I have availability ${this.getAvailableSlots()}. What works best for you?`;
 
-    await this.addToTranscript(sessionId, "agent", bookingMessage);
+    await this.addToTranscript(sessionId, 'agent', bookingMessage);
     return bookingMessage;
   }
 
@@ -767,7 +767,7 @@ export class VirtualSalesAssistant {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const slots = this.config.appointmentBooking.availableTimeSlots.slice(0, 3);
-    return slots.map((slot) => `tomorrow at ${slot}`).join(", or ");
+    return slots.map((slot) => `tomorrow at ${slot}`).join(', or ');
   }
 
   /**
@@ -776,14 +776,14 @@ export class VirtualSalesAssistant {
   async bookAppointment(
     sessionId: string,
     appointmentDetails: {
-      type: AppointmentBooking["type"];
+      type: AppointmentBooking['type'];
       scheduledAt: Date;
       location?: string;
       notes?: string;
     }
   ): Promise<AppointmentBooking> {
     const session = this.activeSessions.get(sessionId);
-    if (!session) throw new Error("Session not found");
+    if (!session) throw new Error('Session not found');
 
     const appointment: AppointmentBooking = {
       id: this.generateAppointmentId(),
@@ -808,7 +808,7 @@ export class VirtualSalesAssistant {
       appointment.type
     } for ${appointment.scheduledAt.toLocaleDateString()} at ${appointment.scheduledAt.toLocaleTimeString()}. You'll receive a confirmation email shortly with all the details.`;
 
-    await this.addToTranscript(sessionId, "agent", confirmationMessage);
+    await this.addToTranscript(sessionId, 'agent', confirmationMessage);
 
     return appointment;
   }
@@ -818,10 +818,10 @@ export class VirtualSalesAssistant {
    */
   async initiateHumanTransfer(
     sessionId: string,
-    reason: HumanTransferRequest["reason"]
+    reason: HumanTransferRequest['reason']
   ): Promise<string> {
     const session = this.activeSessions.get(sessionId);
-    if (!session) throw new Error("Session not found");
+    if (!session) throw new Error('Session not found');
 
     const transferRequest: HumanTransferRequest = {
       id: this.generateTransferId(),
@@ -837,14 +837,14 @@ export class VirtualSalesAssistant {
     this.transferRequests.set(transferRequest.id, transferRequest);
 
     // Update session status
-    session.status = "transferred";
+    session.status = 'transferred';
     session.transferReason = reason;
     this.activeSessions.set(sessionId, session);
 
     const transferMessage =
-      "I understand this requires more detailed discussion. Let me connect you with one of our senior agents who can better assist you. Please hold for just a moment.";
+      'I understand this requires more detailed discussion. Let me connect you with one of our senior agents who can better assist you. Please hold for just a moment.';
 
-    await this.addToTranscript(sessionId, "agent", transferMessage);
+    await this.addToTranscript(sessionId, 'agent', transferMessage);
 
     // Attempt to find available human agent
     await this.findAvailableAgent(transferRequest.id);
@@ -856,13 +856,13 @@ export class VirtualSalesAssistant {
    * Determine transfer priority
    */
   private determinePriority(
-    reason: HumanTransferRequest["reason"],
+    reason: HumanTransferRequest['reason'],
     session: CallSession
-  ): HumanTransferRequest["priority"] {
-    if (reason === "escalation") return "urgent";
-    if (session.qualificationScore > 0.8) return "high";
-    if (reason === "complex_query") return "medium";
-    return "low";
+  ): HumanTransferRequest['priority'] {
+    if (reason === 'escalation') return 'urgent';
+    if (session.qualificationScore > 0.8) return 'high';
+    if (reason === 'complex_query') return 'medium';
+    return 'low';
   }
 
   /**
@@ -886,16 +886,16 @@ export class VirtualSalesAssistant {
     const keyPoints: string[] = [];
 
     transcript.forEach((entry) => {
-      if (entry.speaker === "customer") {
+      if (entry.speaker === 'customer') {
         const text = entry.text.toLowerCase();
-        if (text.includes("budget") || text.includes("price")) {
-          keyPoints.push("Discussed budget/pricing");
+        if (text.includes('budget') || text.includes('price')) {
+          keyPoints.push('Discussed budget/pricing');
         }
-        if (text.includes("location") || text.includes("area")) {
-          keyPoints.push("Discussed location preferences");
+        if (text.includes('location') || text.includes('area')) {
+          keyPoints.push('Discussed location preferences');
         }
-        if (text.includes("urgent") || text.includes("soon")) {
-          keyPoints.push("Expressed urgency");
+        if (text.includes('urgent') || text.includes('soon')) {
+          keyPoints.push('Expressed urgency');
         }
       }
     });
@@ -924,26 +924,26 @@ export class VirtualSalesAssistant {
    */
   async completeCall(sessionId: string): Promise<Interaction> {
     const session = this.activeSessions.get(sessionId);
-    if (!session) throw new Error("Session not found");
+    if (!session) throw new Error('Session not found');
 
-    const wasTransferred = session.status === "transferred";
+    const wasTransferred = session.status === 'transferred';
 
     session.endTime = new Date();
     // Only set to completed if it wasn't transferred
-    if (session.status !== "transferred") {
-      session.status = "completed";
+    if (session.status !== 'transferred') {
+      session.status = 'completed';
     }
     this.activeSessions.set(sessionId, session);
 
     // Create interaction record
     const interaction = InteractionModel.create({
       leadId: session.leadId,
-      agentId: "virtual-sales-assistant",
-      type: "call",
-      direction: "outbound",
+      agentId: 'virtual-sales-assistant',
+      type: 'call',
+      direction: 'outbound',
       content: this.generateCallSummary(session),
       outcome: {
-        status: wasTransferred ? "transferred" : "successful",
+        status: wasTransferred ? 'transferred' : 'successful',
         appointmentBooked: session.appointmentBooked,
         qualificationUpdated: session.qualificationScore > 0,
         escalationRequired: wasTransferred,
@@ -974,10 +974,10 @@ export class VirtualSalesAssistant {
     )}%. `;
 
     if (session.appointmentBooked) {
-      summary += "Appointment successfully booked. ";
+      summary += 'Appointment successfully booked. ';
     }
 
-    if (session.status === "transferred") {
+    if (session.status === 'transferred') {
       summary += `Transferred to human agent due to: ${session.transferReason}. `;
     }
 
@@ -995,7 +995,7 @@ export class VirtualSalesAssistant {
    */
   getActiveSessions(): CallSession[] {
     return Array.from(this.activeSessions.values()).filter(
-      (session) => session.status === "active"
+      (session) => session.status === 'active'
     );
   }
 

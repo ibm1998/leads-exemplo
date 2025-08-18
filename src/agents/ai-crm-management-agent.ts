@@ -1,9 +1,9 @@
-import axios from "axios";
-import { DatabaseManager } from "../database/manager";
-import { GoHighLevelClient } from "../integrations/gohighlevel/client";
-import { Lead, LeadModel, LeadStatus } from "../types/lead";
-import { Interaction } from "../types/interaction";
-import { logger } from "../utils/logger";
+import axios from 'axios';
+import { DatabaseManager } from '../database/manager';
+import { GoHighLevelClient } from '../integrations/gohighlevel/client';
+import { Lead, LeadModel, LeadStatus } from '../types/lead';
+import { Interaction } from '../types/interaction';
+import { logger } from '../utils/logger';
 
 export interface CRMSyncResult {
   success: boolean;
@@ -13,8 +13,8 @@ export interface CRMSyncResult {
 }
 
 export interface DataQualityIssue {
-  type: "duplicate" | "validation" | "missing_data" | "inconsistency";
-  severity: "low" | "medium" | "high" | "critical";
+  type: 'duplicate' | 'validation' | 'missing_data' | 'inconsistency';
+  severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   affectedRecords: string[];
   suggestedAction: string;
@@ -27,9 +27,9 @@ export interface AICRMOptions {
 
 export interface AuditLogEntry {
   id: string;
-  entityType: "lead" | "interaction" | "sync";
+  entityType: 'lead' | 'interaction' | 'sync';
   entityId: string;
-  action: "create" | "update" | "delete" | "sync";
+  action: 'create' | 'update' | 'delete' | 'sync';
   changes: Record<string, { old: any; new: any }>;
   userId?: string;
   agentId: string;
@@ -45,14 +45,14 @@ export interface CRMManagementConfig {
   duplicateThreshold: number;
 }
 
-const N8N_WEBHOOK_URL = "http://localhost:5678/webhook-test/lead";
+const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook-test/lead';
 const N8N_API_KEY = process.env.N8N_API_KEY;
 
 async function syncLeadToN8n(lead: Lead) {
   await axios.post(N8N_WEBHOOK_URL, lead, {
     headers: {
-      "Content-Type": "application/json",
-      "X-N8N-API-KEY": N8N_API_KEY,
+      'Content-Type': 'application/json',
+      'X-N8N-API-KEY': N8N_API_KEY,
     },
   });
 }
@@ -60,8 +60,8 @@ async function syncLeadToN8n(lead: Lead) {
 async function syncInteractionToN8n(interaction: Interaction, contactId: string) {
   await axios.post(N8N_WEBHOOK_URL, { interaction, contactId }, {
     headers: {
-      "Content-Type": "application/json",
-      "X-N8N-API-KEY": N8N_API_KEY,
+      'Content-Type': 'application/json',
+      'X-N8N-API-KEY': N8N_API_KEY,
     },
   });
 }
@@ -119,11 +119,11 @@ export class AICRMManagementAgent {
 
       // Log audit entry
       await this.createAuditLog({
-        entityType: "interaction",
+        entityType: 'interaction',
         entityId: interaction.id,
-        action: "create",
+        action: 'create',
         changes: { interaction: { old: null, new: interaction } },
-        agentId: "ai-crm-management-agent",
+        agentId: 'ai-crm-management-agent',
         timestamp: new Date(),
         metadata: {
           syncTime,
@@ -138,7 +138,7 @@ export class AICRMManagementAgent {
 
       // Queue for retry if within SLA timeout
       if (syncTime < this.config.syncTimeoutMs) {
-        this.queueForRetry("interaction", interaction.id, interaction);
+        this.queueForRetry('interaction', interaction.id, interaction);
       }
 
       return {
@@ -188,9 +188,9 @@ export class AICRMManagementAgent {
 
       // Create audit log
       await this.createAuditLog({
-        entityType: "lead",
+        entityType: 'lead',
         entityId: leadId,
-        action: "update",
+        action: 'update',
         changes: { status: { old: oldStatus, new: newStatus } },
         agentId,
         timestamp: new Date(),
@@ -222,7 +222,7 @@ export class AICRMManagementAgent {
    */
   async detectDuplicates(): Promise<DataQualityIssue[]> {
     try {
-      logger.info("Starting duplicate detection process");
+      logger.info('Starting duplicate detection process');
 
       const duplicateIssues: DataQualityIssue[] = [];
 
@@ -230,11 +230,11 @@ export class AICRMManagementAgent {
       const emailDuplicates = await this.findDuplicatesByEmail();
       if (emailDuplicates.length > 0) {
         duplicateIssues.push({
-          type: "duplicate",
-          severity: "high",
+          type: 'duplicate',
+          severity: 'high',
           description: `Found ${emailDuplicates.length} sets of leads with duplicate email addresses`,
           affectedRecords: emailDuplicates.flat(),
-          suggestedAction: "Merge duplicate leads or mark as separate contacts",
+          suggestedAction: 'Merge duplicate leads or mark as separate contacts',
         });
       }
 
@@ -242,12 +242,12 @@ export class AICRMManagementAgent {
       const phoneDuplicates = await this.findDuplicatesByPhone();
       if (phoneDuplicates.length > 0) {
         duplicateIssues.push({
-          type: "duplicate",
-          severity: "medium",
+          type: 'duplicate',
+          severity: 'medium',
           description: `Found ${phoneDuplicates.length} sets of leads with duplicate phone numbers`,
           affectedRecords: phoneDuplicates.flat(),
           suggestedAction:
-            "Verify if these are the same person or family members",
+            'Verify if these are the same person or family members',
         });
       }
 
@@ -255,11 +255,11 @@ export class AICRMManagementAgent {
       const nameDuplicates = await this.findDuplicatesByName();
       if (nameDuplicates.length > 0) {
         duplicateIssues.push({
-          type: "duplicate",
-          severity: "low",
+          type: 'duplicate',
+          severity: 'low',
           description: `Found ${nameDuplicates.length} sets of leads with similar names`,
           affectedRecords: nameDuplicates.flat(),
-          suggestedAction: "Review manually to confirm if these are duplicates",
+          suggestedAction: 'Review manually to confirm if these are duplicates',
         });
       }
 
@@ -268,7 +268,7 @@ export class AICRMManagementAgent {
       );
       return duplicateIssues;
     } catch (error: any) {
-      logger.error("Duplicate detection failed", error);
+      logger.error('Duplicate detection failed', error);
       throw error;
     }
   }
@@ -278,7 +278,7 @@ export class AICRMManagementAgent {
    */
   async validateDataQuality(): Promise<DataQualityIssue[]> {
     try {
-      logger.info("Starting data quality validation");
+      logger.info('Starting data quality validation');
 
       const issues: DataQualityIssue[] = [];
 
@@ -286,11 +286,11 @@ export class AICRMManagementAgent {
       const missingContactInfo = await this.findLeadsWithMissingContactInfo();
       if (missingContactInfo.length > 0) {
         issues.push({
-          type: "missing_data",
-          severity: "high",
+          type: 'missing_data',
+          severity: 'high',
           description: `${missingContactInfo.length} leads missing essential contact information`,
           affectedRecords: missingContactInfo,
-          suggestedAction: "Request missing contact information from leads",
+          suggestedAction: 'Request missing contact information from leads',
         });
       }
 
@@ -298,12 +298,12 @@ export class AICRMManagementAgent {
       const invalidEmails = await this.findLeadsWithInvalidEmails();
       if (invalidEmails.length > 0) {
         issues.push({
-          type: "validation",
-          severity: "medium",
+          type: 'validation',
+          severity: 'medium',
           description: `${invalidEmails.length} leads have invalid email formats`,
           affectedRecords: invalidEmails,
           suggestedAction:
-            "Correct email formats or request valid email addresses",
+            'Correct email formats or request valid email addresses',
         });
       }
 
@@ -311,11 +311,11 @@ export class AICRMManagementAgent {
       const inconsistentData = await this.findDataInconsistencies();
       if (inconsistentData.length > 0) {
         issues.push({
-          type: "inconsistency",
-          severity: "medium",
+          type: 'inconsistency',
+          severity: 'medium',
           description: `${inconsistentData.length} leads have data inconsistencies`,
           affectedRecords: inconsistentData,
-          suggestedAction: "Review and standardize data formats",
+          suggestedAction: 'Review and standardize data formats',
         });
       }
 
@@ -324,7 +324,7 @@ export class AICRMManagementAgent {
       );
       return issues;
     } catch (error: any) {
-      logger.error("Data quality validation failed", error);
+      logger.error('Data quality validation failed', error);
       throw error;
     }
   }
@@ -332,7 +332,7 @@ export class AICRMManagementAgent {
   /**
    * Create comprehensive audit log entry
    */
-  async createAuditLog(entry: Omit<AuditLogEntry, "id">): Promise<void> {
+  async createAuditLog(entry: Omit<AuditLogEntry, 'id'>): Promise<void> {
     try {
       const auditEntry: AuditLogEntry = {
         ...entry,
@@ -361,7 +361,7 @@ export class AICRMManagementAgent {
         `Audit log created for ${entry.entityType} ${entry.entityId}`
       );
     } catch (error: any) {
-      logger.error("Failed to create audit log", error);
+      logger.error('Failed to create audit log', error);
       // Don't throw here to avoid breaking main operations
     }
   }
@@ -374,7 +374,7 @@ export class AICRMManagementAgent {
     interactions: { success: number; failed: number };
   }> {
     try {
-      logger.info("Starting full data synchronization");
+      logger.info('Starting full data synchronization');
 
       // Get all leads that need syncing
       const pendingLeads = await this.getPendingLeadsForSync();
@@ -413,10 +413,10 @@ export class AICRMManagementAgent {
         },
       };
 
-      logger.info("Full data synchronization completed", results);
+      logger.info('Full data synchronization completed', results);
       return results;
     } catch (error: any) {
-      logger.error("Full data synchronization failed", error);
+      logger.error('Full data synchronization failed', error);
       throw error;
     }
   }
@@ -486,7 +486,7 @@ export class AICRMManagementAgent {
 
   private async getLeadFromDatabase(leadId: string): Promise<Lead | null> {
     const result = await this.db.query(
-      "SELECT * FROM leads WHERE id = $1",
+      'SELECT * FROM leads WHERE id = $1',
       [leadId]
     );
 
@@ -570,14 +570,14 @@ export class AICRMManagementAgent {
     newStatus: LeadStatus
   ): boolean {
     const validTransitions: Record<LeadStatus, LeadStatus[]> = {
-      new: ["contacted", "lost"],
-      contacted: ["qualified", "lost", "dormant"],
-      qualified: ["appointment_scheduled", "lost", "dormant"],
-      appointment_scheduled: ["in_progress", "lost", "dormant"],
-      in_progress: ["converted", "lost", "dormant"],
-      converted: ["dormant"],
-      lost: ["contacted"],
-      dormant: ["contacted"],
+      new: ['contacted', 'lost'],
+      contacted: ['qualified', 'lost', 'dormant'],
+      qualified: ['appointment_scheduled', 'lost', 'dormant'],
+      appointment_scheduled: ['in_progress', 'lost', 'dormant'],
+      in_progress: ['converted', 'lost', 'dormant'],
+      converted: ['dormant'],
+      lost: ['contacted'],
+      dormant: ['contacted'],
     };
 
     return validTransitions[currentStatus]?.includes(newStatus) ?? false;
@@ -739,11 +739,11 @@ export class AICRMManagementAgent {
   }
 
   private generateUUID(): string {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
       /[xy]/g,
       function (c) {
         const r = (Math.random() * 16) | 0;
-        const v = c == "x" ? r : (r & 0x3) | 0x8;
+        const v = c == 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
       }
     );

@@ -1,17 +1,17 @@
-import { Lead, LeadModel, LeadType, LeadStatus } from "../types/lead";
+import { Lead, LeadModel, LeadType, LeadStatus } from '../types/lead';
 import {
   Interaction,
   InteractionModel,
   CreateInteraction,
-} from "../types/interaction";
-import { AgentPerformanceModel } from "../types/agent-performance";
+} from '../types/interaction';
+import { AgentPerformanceModel } from '../types/agent-performance';
 
 // Campaign types and interfaces
 export interface Campaign {
   id: string;
   name: string;
-  type: "cold_follow_up" | "warm_reengagement" | "promotional";
-  status: "active" | "paused" | "completed";
+  type: 'cold_follow_up' | 'warm_reengagement' | 'promotional';
+  status: 'active' | 'paused' | 'completed';
   targetAudience: AudienceSegment;
   messageTemplates: MessageTemplate[];
   schedule: CampaignSchedule;
@@ -41,17 +41,17 @@ export interface SegmentationCriteria {
 export interface MessageTemplate {
   id: string;
   name: string;
-  channel: "email" | "sms" | "whatsapp";
+  channel: 'email' | 'sms' | 'whatsapp';
   subject?: string;
   content: string;
   personalizationFields: string[];
-  abTestVariant?: "A" | "B";
+  abTestVariant?: 'A' | 'B';
 }
 
 export interface CampaignSchedule {
   startDate: Date;
   endDate?: Date;
-  frequency: "immediate" | "daily" | "weekly" | "monthly";
+  frequency: 'immediate' | 'daily' | 'weekly' | 'monthly';
   timeOfDay?: string; // HH:MM format
   timezone: string;
   maxContactsPerDay?: number;
@@ -61,7 +61,7 @@ export interface ABTestConfig {
   enabled: boolean;
   splitRatio: number; // 0.5 for 50/50 split
   testDurationDays: number;
-  primaryMetric: "open_rate" | "response_rate" | "conversion_rate";
+  primaryMetric: 'open_rate' | 'response_rate' | 'conversion_rate';
   minimumSampleSize: number;
 }
 
@@ -72,7 +72,7 @@ export interface OutboundSequence {
   currentStep: number;
   totalSteps: number;
   nextScheduledAt: Date;
-  status: "active" | "paused" | "completed" | "failed";
+  status: 'active' | 'paused' | 'completed' | 'failed';
   interactions: string[]; // Interaction IDs
   createdAt: Date;
   updatedAt: Date;
@@ -105,7 +105,7 @@ export interface CampaignPerformance {
 export interface ABTestResults {
   variantA: VariantPerformance;
   variantB: VariantPerformance;
-  winner?: "A" | "B" | "inconclusive";
+  winner?: 'A' | 'B' | 'inconclusive';
   confidenceLevel: number;
   statisticalSignificance: boolean;
 }
@@ -130,7 +130,7 @@ export class AILeadGenerationAgent {
   private sequences: Map<string, OutboundSequence> = new Map();
   private performanceData: Map<string, CampaignPerformance> = new Map();
 
-  constructor(agentId: string = "ai-lead-generation-agent") {
+  constructor(agentId: string = 'ai-lead-generation-agent') {
     this.agentId = agentId;
   }
 
@@ -141,8 +141,8 @@ export class AILeadGenerationAgent {
     const coldLeads = leads.filter(
       (lead) =>
         lead &&
-        lead.leadType === "cold" &&
-        lead.status === "contacted" &&
+        lead.leadType === 'cold' &&
+        lead.status === 'contacted' &&
         this.shouldFollowUpColdLead(lead)
     );
 
@@ -173,7 +173,7 @@ export class AILeadGenerationAgent {
     const warmLeads = leads.filter(
       (lead) =>
         lead &&
-        lead.leadType === "warm" &&
+        lead.leadType === 'warm' &&
         this.shouldReengageWarmLead(lead, interactionHistory.get(lead.id) || [])
     );
 
@@ -260,11 +260,11 @@ export class AILeadGenerationAgent {
     const sequence: OutboundSequence = {
       id: sequenceId,
       leadId: lead.id,
-      campaignId: "cold-follow-up-default",
+      campaignId: 'cold-follow-up-default',
       currentStep: 0,
       totalSteps: 5, // 5-step cold follow-up sequence
       nextScheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Start in 24 hours
-      status: "active",
+      status: 'active',
       interactions: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -290,11 +290,11 @@ export class AILeadGenerationAgent {
     const sequence: OutboundSequence = {
       id: sequenceId,
       leadId: lead.id,
-      campaignId: "warm-reengagement-default",
+      campaignId: 'warm-reengagement-default',
       currentStep: 0,
       totalSteps: sequenceStrategy.totalSteps,
       nextScheduledAt: this.calculateNextContactTime(lastInteraction),
-      status: "active",
+      status: 'active',
       interactions: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -320,7 +320,7 @@ export class AILeadGenerationAgent {
       currentStep: 0,
       totalSteps: campaign.messageTemplates.length,
       nextScheduledAt: campaign.schedule.startDate,
-      status: "active",
+      status: 'active',
       interactions: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -335,7 +335,7 @@ export class AILeadGenerationAgent {
    */
   private async executeSequenceStep(sequence: OutboundSequence): Promise<void> {
     if (sequence.currentStep >= sequence.totalSteps) {
-      sequence.status = "completed";
+      sequence.status = 'completed';
       return;
     }
 
@@ -369,14 +369,14 @@ export class AILeadGenerationAgent {
           sequence.nextScheduledAt
         );
       } else {
-        sequence.status = "completed";
+        sequence.status = 'completed';
       }
     } catch (error) {
       console.error(
         `Failed to execute sequence step for ${sequence.id}:`,
         error
       );
-      sequence.status = "failed";
+      sequence.status = 'failed';
     }
   }
 
@@ -465,8 +465,8 @@ export class AILeadGenerationAgent {
     // This would typically fetch lead data from database
     // For now, we'll simulate personalization
     const personalization: MessagePersonalization = {
-      leadName: "Valued Customer", // Would be fetched from lead data
-      companyName: "Your Company",
+      leadName: 'Valued Customer', // Would be fetched from lead data
+      companyName: 'Your Company',
       customFields: {},
     };
 
@@ -489,16 +489,16 @@ export class AILeadGenerationAgent {
     field: string
   ): string {
     switch (field) {
-      case "leadName":
+      case 'leadName':
         return personalization.leadName;
-      case "companyName":
-        return personalization.companyName || "Your Company";
-      case "lastInteractionDate":
-        return personalization.lastInteractionDate || "recently";
-      case "propertyInterest":
-        return personalization.propertyInterest || "your area of interest";
-      case "location":
-        return personalization.location || "your area";
+      case 'companyName':
+        return personalization.companyName || 'Your Company';
+      case 'lastInteractionDate':
+        return personalization.lastInteractionDate || 'recently';
+      case 'propertyInterest':
+        return personalization.propertyInterest || 'your area of interest';
+      case 'location':
+        return personalization.location || 'your area';
       default:
         return personalization.customFields[field] || `[${field}]`;
     }
@@ -509,18 +509,18 @@ export class AILeadGenerationAgent {
    */
   private async createOutboundInteraction(
     leadId: string,
-    channel: "email" | "sms" | "whatsapp",
+    channel: 'email' | 'sms' | 'whatsapp',
     content: string
   ): Promise<InteractionModel> {
     const interactionData: CreateInteraction = {
       leadId,
       agentId: this.agentId,
       type:
-        channel === "email" ? "email" : channel === "sms" ? "sms" : "whatsapp",
-      direction: "outbound",
+        channel === 'email' ? 'email' : channel === 'sms' ? 'sms' : 'whatsapp',
+      direction: 'outbound',
       content,
       outcome: {
-        status: "pending",
+        status: 'pending',
         appointmentBooked: false,
         qualificationUpdated: false,
         escalationRequired: false,
@@ -584,9 +584,9 @@ export class AILeadGenerationAgent {
       if (results.statisticalSignificance) {
         const rateA = successA / totalA;
         const rateB = successB / totalB;
-        results.winner = rateA > rateB ? "A" : "B";
+        results.winner = rateA > rateB ? 'A' : 'B';
       } else {
-        results.winner = "inconclusive";
+        results.winner = 'inconclusive';
       }
     }
   }
@@ -596,11 +596,11 @@ export class AILeadGenerationAgent {
    */
   private getSuccessCount(variant: VariantPerformance, metric: string): number {
     switch (metric) {
-      case "open_rate":
+      case 'open_rate':
         return variant.opened;
-      case "response_rate":
+      case 'response_rate':
         return variant.responded;
-      case "conversion_rate":
+      case 'conversion_rate':
         return variant.converted;
       default:
         return variant.responded;
@@ -664,9 +664,9 @@ export class AILeadGenerationAgent {
     const totalInteractions = interactions.length;
 
     if (positiveInteractions / totalInteractions > 0.6) {
-      return { totalSteps: 3, strategy: "gentle_reengagement" };
+      return { totalSteps: 3, strategy: 'gentle_reengagement' };
     } else {
-      return { totalSteps: 5, strategy: "value_focused_reengagement" };
+      return { totalSteps: 5, strategy: 'value_focused_reengagement' };
     }
   }
 
@@ -675,7 +675,7 @@ export class AILeadGenerationAgent {
     const hourCounts = new Array(24).fill(0);
 
     interactions.forEach((interaction) => {
-      if (interaction.outcome.status === "successful") {
+      if (interaction.outcome.status === 'successful') {
         const hour = interaction.timestamp.getHours();
         hourCounts[hour]++;
       }
@@ -696,7 +696,7 @@ export class AILeadGenerationAgent {
     let multiplier = 1;
 
     // Increase delay based on interaction outcome
-    if (lastInteraction.outcome.status === "failed") {
+    if (lastInteraction.outcome.status === 'failed') {
       multiplier = 3; // Wait 3 days after failed interaction
     } else if (
       lastInteraction.sentiment &&
@@ -729,9 +729,9 @@ export class AILeadGenerationAgent {
   private getDefaultTemplatesForSequence(
     sequence: OutboundSequence
   ): MessageTemplate[] {
-    if (sequence.campaignId.includes("cold")) {
+    if (sequence.campaignId.includes('cold')) {
       return this.getColdFollowUpTemplates();
-    } else if (sequence.campaignId.includes("warm")) {
+    } else if (sequence.campaignId.includes('warm')) {
       return this.getWarmReengagementTemplates();
     } else {
       return this.getDefaultCampaignTemplates();
@@ -741,22 +741,22 @@ export class AILeadGenerationAgent {
   private getColdFollowUpTemplates(): MessageTemplate[] {
     return [
       {
-        id: "cold-1",
-        name: "Initial Follow-up",
-        channel: "email",
-        subject: "Following up on your inquiry",
+        id: 'cold-1',
+        name: 'Initial Follow-up',
+        channel: 'email',
+        subject: 'Following up on your inquiry',
         content:
-          "Hi {{leadName}}, I wanted to follow up on your recent inquiry about {{propertyInterest}}. Are you still looking for properties in {{location}}?",
-        personalizationFields: ["leadName", "propertyInterest", "location"],
+          'Hi {{leadName}}, I wanted to follow up on your recent inquiry about {{propertyInterest}}. Are you still looking for properties in {{location}}?',
+        personalizationFields: ['leadName', 'propertyInterest', 'location'],
       },
       {
-        id: "cold-2",
-        name: "Value Proposition",
-        channel: "email",
-        subject: "Exclusive properties in {{location}}",
+        id: 'cold-2',
+        name: 'Value Proposition',
+        channel: 'email',
+        subject: 'Exclusive properties in {{location}}',
         content:
-          "Hi {{leadName}}, I have some exclusive listings in {{location}} that might interest you. Would you like to schedule a quick call to discuss?",
-        personalizationFields: ["leadName", "location"],
+          'Hi {{leadName}}, I have some exclusive listings in {{location}} that might interest you. Would you like to schedule a quick call to discuss?',
+        personalizationFields: ['leadName', 'location'],
       },
     ];
   }
@@ -764,16 +764,16 @@ export class AILeadGenerationAgent {
   private getWarmReengagementTemplates(): MessageTemplate[] {
     return [
       {
-        id: "warm-1",
-        name: "Gentle Re-engagement",
-        channel: "email",
+        id: 'warm-1',
+        name: 'Gentle Re-engagement',
+        channel: 'email',
         subject: "Hope you're doing well, {{leadName}}",
         content:
           "Hi {{leadName}}, It's been a while since we last spoke on {{lastInteractionDate}}. I wanted to check in and see if you're still interested in {{propertyInterest}}.",
         personalizationFields: [
-          "leadName",
-          "lastInteractionDate",
-          "propertyInterest",
+          'leadName',
+          'lastInteractionDate',
+          'propertyInterest',
         ],
       },
     ];
@@ -782,13 +782,13 @@ export class AILeadGenerationAgent {
   private getDefaultCampaignTemplates(): MessageTemplate[] {
     return [
       {
-        id: "campaign-1",
-        name: "Campaign Message",
-        channel: "email",
-        subject: "Special offer for {{leadName}}",
+        id: 'campaign-1',
+        name: 'Campaign Message',
+        channel: 'email',
+        subject: 'Special offer for {{leadName}}',
         content:
           "Hi {{leadName}}, We have a special offer that might interest you. Let's discuss how we can help with your property needs.",
-        personalizationFields: ["leadName"],
+        personalizationFields: ['leadName'],
       },
     ];
   }
@@ -818,7 +818,7 @@ export class AILeadGenerationAgent {
    */
   getActiveSequences(): OutboundSequence[] {
     return Array.from(this.sequences.values()).filter(
-      (seq) => seq.status === "active"
+      (seq) => seq.status === 'active'
     );
   }
 
@@ -836,8 +836,8 @@ export class AILeadGenerationAgent {
    */
   pauseSequence(sequenceId: string): boolean {
     const sequence = this.sequences.get(sequenceId);
-    if (sequence && sequence.status === "active") {
-      sequence.status = "paused";
+    if (sequence && sequence.status === 'active') {
+      sequence.status = 'paused';
       sequence.updatedAt = new Date();
       return true;
     }
@@ -849,8 +849,8 @@ export class AILeadGenerationAgent {
    */
   resumeSequence(sequenceId: string): boolean {
     const sequence = this.sequences.get(sequenceId);
-    if (sequence && sequence.status === "paused") {
-      sequence.status = "active";
+    if (sequence && sequence.status === 'paused') {
+      sequence.status = 'active';
       sequence.updatedAt = new Date();
       return true;
     }
@@ -877,9 +877,9 @@ export class AILeadGenerationAgent {
 
     return {
       totalCampaigns: campaigns.length,
-      activeSequences: sequences.filter((seq) => seq.status === "active")
+      activeSequences: sequences.filter((seq) => seq.status === 'active')
         .length,
-      completedSequences: sequences.filter((seq) => seq.status === "completed")
+      completedSequences: sequences.filter((seq) => seq.status === 'completed')
         .length,
       averageConversionRate: totalSent > 0 ? totalConversions / totalSent : 0,
     };

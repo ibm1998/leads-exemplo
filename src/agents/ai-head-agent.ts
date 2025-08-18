@@ -1,9 +1,9 @@
-import { Lead, LeadType, LeadSource, LeadStatus } from "../types/lead";
-import { Interaction } from "../types/interaction";
+import { Lead, LeadType, LeadSource, LeadStatus } from '../types/lead';
+import { Interaction } from '../types/interaction';
 import {
   AgentPerformance,
   PerformanceMetrics,
-} from "../types/agent-performance";
+} from '../types/agent-performance';
 
 /**
  * Lead analysis result containing evaluation metrics
@@ -23,8 +23,8 @@ export interface LeadAnalysisResult {
  * Routing decision with agent assignment and reasoning
  */
 export interface RoutingDecision {
-  targetAgent: "inbound" | "outbound";
-  priority: "high" | "medium" | "low";
+  targetAgent: 'inbound' | 'outbound';
+  priority: 'high' | 'medium' | 'low';
   reasoning: string[];
   estimatedResponseTime: number; // in seconds
   suggestedActions: string[];
@@ -118,7 +118,7 @@ export class AIHeadAgent {
 
   constructor(config: Partial<AIHeadAgentConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    if (!config.hasOwnProperty("routingRules") || !config.routingRules) {
+    if (!config.hasOwnProperty('routingRules') || !config.routingRules) {
       this.initializeDefaultRoutingRules();
     }
   }
@@ -129,74 +129,74 @@ export class AIHeadAgent {
   private initializeDefaultRoutingRules(): void {
     const defaultRules: RoutingRule[] = [
       {
-        id: "hot-lead-immediate",
-        name: "Hot Lead Immediate Response",
+        id: 'hot-lead-immediate',
+        name: 'Hot Lead Immediate Response',
         condition: (lead, analysis) =>
-          analysis.leadType === "hot" ||
+          analysis.leadType === 'hot' ||
           analysis.urgencyLevel >= this.config.urgencyThresholds.high,
         action: {
-          targetAgent: "inbound",
-          priority: "high",
+          targetAgent: 'inbound',
+          priority: 'high',
           reasoning: [
-            "Hot lead requires immediate attention",
-            "High urgency level detected",
+            'Hot lead requires immediate attention',
+            'High urgency level detected',
           ],
           estimatedResponseTime: 30,
           suggestedActions: [
-            "Activate Virtual Sales Assistant",
-            "Schedule immediate callback",
+            'Activate Virtual Sales Assistant',
+            'Schedule immediate callback',
           ],
         },
         priority: 1,
         enabled: true,
       },
       {
-        id: "direct-inquiry-inbound",
-        name: "Direct Inquiry to Inbound",
+        id: 'direct-inquiry-inbound',
+        name: 'Direct Inquiry to Inbound',
         condition: (lead, analysis) =>
-          lead.source === "website" &&
+          lead.source === 'website' &&
           analysis.intentScore >= this.config.intentThresholds.high,
         action: {
-          targetAgent: "inbound",
-          priority: "high",
-          reasoning: ["Direct website inquiry", "High intent signals detected"],
+          targetAgent: 'inbound',
+          priority: 'high',
+          reasoning: ['Direct website inquiry', 'High intent signals detected'],
           estimatedResponseTime: 45,
-          suggestedActions: ["Qualification call", "Appointment booking"],
+          suggestedActions: ['Qualification call', 'Appointment booking'],
         },
         priority: 2,
         enabled: true,
       },
       {
-        id: "warm-lead-nurture",
-        name: "Warm Lead Nurturing",
+        id: 'warm-lead-nurture',
+        name: 'Warm Lead Nurturing',
         condition: (lead, analysis) =>
-          analysis.leadType === "warm" &&
+          analysis.leadType === 'warm' &&
           analysis.intentScore >= this.config.intentThresholds.medium,
         action: {
-          targetAgent: "outbound",
-          priority: "medium",
-          reasoning: ["Warm lead needs nurturing", "Medium intent level"],
+          targetAgent: 'outbound',
+          priority: 'medium',
+          reasoning: ['Warm lead needs nurturing', 'Medium intent level'],
           estimatedResponseTime: 120,
-          suggestedActions: ["Follow-up sequence", "Educational content"],
+          suggestedActions: ['Follow-up sequence', 'Educational content'],
         },
         priority: 3,
         enabled: true,
       },
       {
-        id: "cold-lead-outbound",
-        name: "Cold Lead Outbound Processing",
+        id: 'cold-lead-outbound',
+        name: 'Cold Lead Outbound Processing',
         condition: (lead, analysis) =>
-          analysis.leadType === "cold" ||
+          analysis.leadType === 'cold' ||
           analysis.intentScore < this.config.intentThresholds.medium,
         action: {
-          targetAgent: "outbound",
-          priority: "low",
+          targetAgent: 'outbound',
+          priority: 'low',
           reasoning: [
-            "Cold lead requires outbound approach",
-            "Low intent signals",
+            'Cold lead requires outbound approach',
+            'Low intent signals',
           ],
           estimatedResponseTime: 300,
-          suggestedActions: ["Cold outreach sequence", "Lead warming campaign"],
+          suggestedActions: ['Cold outreach sequence', 'Lead warming campaign'],
         },
         priority: 4,
         enabled: true,
@@ -214,8 +214,8 @@ export class AIHeadAgent {
 
     try {
       // Validate lead data first
-      if (!lead.id || lead.id.trim() === "") {
-        throw new Error("Lead ID is required and cannot be empty");
+      if (!lead.id || lead.id.trim() === '') {
+        throw new Error('Lead ID is required and cannot be empty');
       }
 
       // Evaluate lead type based on existing data and signals
@@ -264,7 +264,7 @@ export class AIHeadAgent {
     } catch (error) {
       throw new Error(
         `Lead analysis failed for ${lead.id}: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
@@ -319,7 +319,7 @@ export class AIHeadAgent {
     const hasPhone = !!lead.contactInfo.phone;
     if (hasEmail && hasPhone) {
       score += 1;
-      factors.push("Complete contact info (+1)");
+      factors.push('Complete contact info (+1)');
     }
 
     // Urgency level influence
@@ -333,11 +333,11 @@ export class AIHeadAgent {
 
     // Determine lead type based on total score
     if (score >= 6) {
-      return "hot";
+      return 'hot';
     } else if (score >= 3) {
-      return "warm";
+      return 'warm';
     } else {
-      return "cold";
+      return 'cold';
     }
   }
 
@@ -350,17 +350,17 @@ export class AIHeadAgent {
     const qualificationScore = lead.qualificationData.qualificationScore;
 
     switch (lead.leadType) {
-      case "hot":
+      case 'hot':
         return (
           urgencyLevel >= 7 || intentSignals >= 3 || qualificationScore >= 0.7
         );
-      case "warm":
+      case 'warm':
         return (
           (urgencyLevel >= 4 && urgencyLevel < 8) ||
           (intentSignals >= 1 && intentSignals < 3) ||
           (qualificationScore >= 0.3 && qualificationScore < 0.7)
         );
-      case "cold":
+      case 'cold':
         return (
           urgencyLevel < 5 && intentSignals < 2 && qualificationScore < 0.4
         );
@@ -481,14 +481,14 @@ export class AIHeadAgent {
 
     // Fallback routing if no rules match
     return {
-      targetAgent: "outbound",
-      priority: "low",
+      targetAgent: 'outbound',
+      priority: 'low',
       reasoning: [
-        "No specific routing rule matched",
-        "Using default outbound processing",
+        'No specific routing rule matched',
+        'Using default outbound processing',
       ],
       estimatedResponseTime: 300,
-      suggestedActions: ["Standard follow-up sequence"],
+      suggestedActions: ['Standard follow-up sequence'],
     };
   }
 
@@ -811,9 +811,9 @@ export class AIHeadAgent {
         }
       }
 
-      console.log("Applied optimization feedback to AI Head Agent");
+      console.log('Applied optimization feedback to AI Head Agent');
     } catch (error) {
-      console.error("Error applying optimization feedback:", error);
+      console.error('Error applying optimization feedback:', error);
       throw error;
     }
   }

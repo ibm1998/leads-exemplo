@@ -6,8 +6,8 @@ import {
   ExecutiveReport,
   SystemOverride,
   StrategicDirective,
-} from "../agents/chief-agent";
-import { Express, Request, Response } from "express";
+} from '../agents/chief-agent';
+import { Express, Request, Response } from 'express';
 
 /**
  * Dashboard configuration
@@ -80,48 +80,48 @@ export class DashboardService {
    */
   setupRoutes(app: Express): void {
     // Dashboard data endpoint
-    app.get("/api/dashboard", this.getDashboardData.bind(this));
+    app.get('/api/dashboard', this.getDashboardData.bind(this));
 
     // Real-time updates via Server-Sent Events
-    app.get("/api/dashboard/stream", this.streamDashboardUpdates.bind(this));
+    app.get('/api/dashboard/stream', this.streamDashboardUpdates.bind(this));
 
     // Agent status endpoints
-    app.get("/api/agents", this.getAgentStatuses.bind(this));
-    app.get("/api/agents/:agentId", this.getAgentStatus.bind(this));
-    app.put("/api/agents/:agentId/status", this.updateAgentStatus.bind(this));
+    app.get('/api/agents', this.getAgentStatuses.bind(this));
+    app.get('/api/agents/:agentId', this.getAgentStatus.bind(this));
+    app.put('/api/agents/:agentId/status', this.updateAgentStatus.bind(this));
 
     // System override endpoints
-    app.post("/api/overrides", this.createSystemOverride.bind(this));
-    app.get("/api/overrides", this.getSystemOverrides.bind(this));
+    app.post('/api/overrides', this.createSystemOverride.bind(this));
+    app.get('/api/overrides', this.getSystemOverrides.bind(this));
     app.delete(
-      "/api/overrides/:overrideId",
+      '/api/overrides/:overrideId',
       this.cancelSystemOverride.bind(this)
     );
 
     // Strategic directive endpoints
-    app.post("/api/directives", this.createStrategicDirective.bind(this));
-    app.get("/api/directives", this.getStrategicDirectives.bind(this));
+    app.post('/api/directives', this.createStrategicDirective.bind(this));
+    app.get('/api/directives', this.getStrategicDirectives.bind(this));
     app.put(
-      "/api/directives/:directiveId/activate",
+      '/api/directives/:directiveId/activate',
       this.activateStrategicDirective.bind(this)
     );
 
     // Alert management endpoints
-    app.get("/api/alerts", this.getSystemAlerts.bind(this));
+    app.get('/api/alerts', this.getSystemAlerts.bind(this));
     app.put(
-      "/api/alerts/:alertId/acknowledge",
+      '/api/alerts/:alertId/acknowledge',
       this.acknowledgeAlert.bind(this)
     );
 
     // Executive reports endpoints
     app.get(
-      "/api/reports/:reportType",
+      '/api/reports/:reportType',
       this.generateExecutiveReport.bind(this)
     );
-    app.get("/api/reports", this.getAvailableReports.bind(this));
+    app.get('/api/reports', this.getAvailableReports.bind(this));
 
     // System health endpoint
-    app.get("/api/health", this.getSystemHealth.bind(this));
+    app.get('/api/health', this.getSystemHealth.bind(this));
   }
 
   /**
@@ -139,7 +139,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -149,16 +149,16 @@ export class DashboardService {
    */
   private streamDashboardUpdates(req: Request, res: Response): void {
     if (!this.config.enableRealTimeUpdates) {
-      res.status(404).json({ error: "Real-time updates disabled" });
+      res.status(404).json({ error: 'Real-time updates disabled' });
       return;
     }
 
     // Setup Server-Sent Events
     res.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-      "Access-Control-Allow-Origin": "*",
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
     });
 
     // Add client to active connections
@@ -179,7 +179,7 @@ export class DashboardService {
     }, this.config.refreshInterval);
 
     // Handle client disconnect
-    req.on("close", () => {
+    req.on('close', () => {
       clearInterval(updateInterval);
       this.dashboardClients.delete(res);
     });
@@ -195,7 +195,7 @@ export class DashboardService {
 
       res.write(`data: ${data}\n\n`);
     } catch (error) {
-      console.error("Error sending dashboard update:", error);
+      console.error('Error sending dashboard update:', error);
     }
   }
 
@@ -217,7 +217,7 @@ export class DashboardService {
 
     // Get active overrides and directives
     const activeOverrides = Array.from(
-      this.chiefAgent["systemOverrides"].values()
+      this.chiefAgent['systemOverrides'].values()
     ).filter((override) => override.isActive);
     const activeDirectives = this.chiefAgent.getActiveStrategicDirectives();
 
@@ -254,7 +254,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -270,7 +270,7 @@ export class DashboardService {
       if (!agentStatus) {
         res.status(404).json({
           success: false,
-          error: "Agent not found",
+          error: 'Agent not found',
         });
         return;
       }
@@ -282,7 +282,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -299,12 +299,12 @@ export class DashboardService {
 
       res.json({
         success: true,
-        message: "Agent status updated successfully",
+        message: 'Agent status updated successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -327,7 +327,7 @@ export class DashboardService {
       ) {
         res.status(400).json({
           success: false,
-          error: "Missing required fields: type, reason, issuedBy",
+          error: 'Missing required fields: type, reason, issuedBy',
         });
         return;
       }
@@ -337,12 +337,12 @@ export class DashboardService {
       res.json({
         success: true,
         data: { overrideId },
-        message: "System override created successfully",
+        message: 'System override created successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -352,7 +352,7 @@ export class DashboardService {
    */
   private async getSystemOverrides(req: Request, res: Response): Promise<void> {
     try {
-      const overrides = Array.from(this.chiefAgent["systemOverrides"].values());
+      const overrides = Array.from(this.chiefAgent['systemOverrides'].values());
 
       res.json({
         success: true,
@@ -361,7 +361,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -380,7 +380,7 @@ export class DashboardService {
       if (!reason) {
         res.status(400).json({
           success: false,
-          error: "Cancellation reason is required",
+          error: 'Cancellation reason is required',
         });
         return;
       }
@@ -389,12 +389,12 @@ export class DashboardService {
 
       res.json({
         success: true,
-        message: "System override cancelled successfully",
+        message: 'System override cancelled successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -411,12 +411,12 @@ export class DashboardService {
 
       // Validate required fields
       const requiredFields = [
-        "title",
-        "description",
-        "type",
-        "priority",
-        "targetAgents",
-        "createdBy",
+        'title',
+        'description',
+        'type',
+        'priority',
+        'targetAgents',
+        'createdBy',
       ];
       const missingFields = requiredFields.filter(
         (field) => !directiveData[field]
@@ -425,7 +425,7 @@ export class DashboardService {
       if (missingFields.length > 0) {
         res.status(400).json({
           success: false,
-          error: `Missing required fields: ${missingFields.join(", ")}`,
+          error: `Missing required fields: ${missingFields.join(', ')}`,
         });
         return;
       }
@@ -436,12 +436,12 @@ export class DashboardService {
       res.json({
         success: true,
         data: { directiveId },
-        message: "Strategic directive created successfully",
+        message: 'Strategic directive created successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -470,7 +470,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -489,12 +489,12 @@ export class DashboardService {
 
       res.json({
         success: true,
-        message: "Strategic directive activated successfully",
+        message: 'Strategic directive activated successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -508,7 +508,7 @@ export class DashboardService {
       const filters = this.parseFilters(req.query);
 
       const alerts = this.filterAlerts(
-        this.chiefAgent.getSystemAlerts(includeAcknowledged === "true"),
+        this.chiefAgent.getSystemAlerts(includeAcknowledged === 'true'),
         filters
       );
 
@@ -519,7 +519,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -535,12 +535,12 @@ export class DashboardService {
 
       res.json({
         success: true,
-        message: "Alert acknowledged successfully",
+        message: 'Alert acknowledged successfully',
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -565,7 +565,7 @@ export class DashboardService {
       }
 
       const report = this.chiefAgent.generateExecutiveReport(
-        reportType as ExecutiveReport["reportType"],
+        reportType as ExecutiveReport['reportType'],
         period
       );
 
@@ -576,7 +576,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -589,24 +589,24 @@ export class DashboardService {
     res: Response
   ): Promise<void> {
     try {
-      const reportTypes = ["daily", "weekly", "monthly", "custom"];
+      const reportTypes = ['daily', 'weekly', 'monthly', 'custom'];
 
       res.json({
         success: true,
         data: {
           reportTypes,
           description: {
-            daily: "Daily performance and activity summary",
-            weekly: "Weekly trends and performance analysis",
-            monthly: "Monthly executive summary with insights",
-            custom: "Custom date range report",
+            daily: 'Daily performance and activity summary',
+            weekly: 'Weekly trends and performance analysis',
+            monthly: 'Monthly executive summary with insights',
+            custom: 'Custom date range report',
           },
         },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -638,7 +638,7 @@ export class DashboardService {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -752,7 +752,7 @@ export class DashboardService {
           this.dashboardClients.delete(client);
         }
       } catch (error) {
-        console.error("Error broadcasting to client:", error);
+        console.error('Error broadcasting to client:', error);
         this.dashboardClients.delete(client);
       }
     }
@@ -768,7 +768,7 @@ export class DashboardService {
     activeDirectives: number;
   } {
     const activeOverrides = Array.from(
-      this.chiefAgent["systemOverrides"].values()
+      this.chiefAgent['systemOverrides'].values()
     ).filter((override) => override.isActive).length;
     const activeDirectives =
       this.chiefAgent.getActiveStrategicDirectives().length;

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   ReviewFeedbackCollectorAgent,
   ProjectCompletionTrigger,
@@ -7,12 +7,12 @@ import {
   FeedbackSession,
   FeedbackAnalysis,
   IssueEscalation,
-} from "../review-feedback-collector";
-import { Lead, LeadModel } from "../../types/lead";
-import { Interaction, InteractionModel } from "../../types/interaction";
-import { generateUUID } from "../../types/validation";
+} from '../review-feedback-collector';
+import { Lead, LeadModel } from '../../types/lead';
+import { Interaction, InteractionModel } from '../../types/interaction';
+import { generateUUID } from '../../types/validation';
 
-describe("ReviewFeedbackCollectorAgent", () => {
+describe('ReviewFeedbackCollectorAgent', () => {
   let agent: ReviewFeedbackCollectorAgent;
   let mockLead: Lead;
   let mockInteractions: Interaction[];
@@ -27,28 +27,28 @@ describe("ReviewFeedbackCollectorAgent", () => {
     // Create mock lead data
     mockLead = {
       id: leadId,
-      source: "website",
+      source: 'website',
       contactInfo: {
-        name: "John Smith",
-        email: "john.smith@example.com",
-        phone: "+1234567890",
-        preferredChannel: "email",
-        timezone: "UTC",
+        name: 'John Smith',
+        email: 'john.smith@example.com',
+        phone: '+1234567890',
+        preferredChannel: 'email',
+        timezone: 'UTC',
       },
-      leadType: "warm",
+      leadType: 'warm',
       urgencyLevel: 5,
       intentSignals: [],
       qualificationData: {
         budget: { min: 300000, max: 500000 },
-        location: "Downtown",
-        propertyType: "condo",
-        timeline: "3 months",
+        location: 'Downtown',
+        propertyType: 'condo',
+        timeline: '3 months',
         qualificationScore: 0.8,
       },
-      status: "converted",
+      status: 'converted',
       assignedAgent: agentId,
-      createdAt: new Date("2024-01-01"),
-      updatedAt: new Date("2024-01-15"),
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-15'),
     };
 
     // Create mock interactions
@@ -56,46 +56,46 @@ describe("ReviewFeedbackCollectorAgent", () => {
       {
         id: interactionId,
         leadId: leadId,
-        agentId: "virtual-sales-assistant",
-        type: "call",
-        direction: "outbound",
-        content: "Closing completed successfully",
+        agentId: 'virtual-sales-assistant',
+        type: 'call',
+        direction: 'outbound',
+        content: 'Closing completed successfully',
         outcome: {
-          status: "successful",
+          status: 'successful',
           appointmentBooked: false,
           qualificationUpdated: false,
           escalationRequired: false,
         },
-        timestamp: new Date("2024-01-15"),
+        timestamp: new Date('2024-01-15'),
       },
     ];
 
     // Mock console methods to avoid noise in tests
-    vi.spyOn(console, "log").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  describe("Initialization", () => {
-    it("should initialize with default configuration", () => {
+  describe('Initialization', () => {
+    it('should initialize with default configuration', () => {
       const agent = new ReviewFeedbackCollectorAgent();
       expect(agent).toBeDefined();
       expect(agent.getActiveSessions()).toHaveLength(0);
       expect(agent.getEscalations()).toHaveLength(0);
     });
 
-    it("should accept custom configuration", () => {
+    it('should accept custom configuration', () => {
       const customConfig = {
         followUpDelayHours: 48,
         maxFollowUpAttempts: 3,
         sentimentAnalysis: {
           positiveThreshold: 0.5,
           negativeThreshold: -0.5,
-          issueKeywords: ["custom", "issue"],
-          positiveKeywords: ["custom", "great"],
+          issueKeywords: ['custom', 'issue'],
+          positiveKeywords: ['custom', 'great'],
         },
       };
 
@@ -104,8 +104,8 @@ describe("ReviewFeedbackCollectorAgent", () => {
     });
   });
 
-  describe("Project Completion Detection", () => {
-    it("should detect completed projects based on lead status", async () => {
+  describe('Project Completion Detection', () => {
+    it('should detect completed projects based on lead status', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
 
@@ -113,11 +113,11 @@ describe("ReviewFeedbackCollectorAgent", () => {
 
       expect(sessions).toHaveLength(1);
       expect(sessions[0].leadId).toBe(mockLead.id);
-      expect(sessions[0].status).toBe("active");
+      expect(sessions[0].status).toBe('active');
       expect(sessions[0].feedbackReceived).toBe(false);
     });
 
-    it("should not trigger for leads that already have active sessions", async () => {
+    it('should not trigger for leads that already have active sessions', async () => {
       // First detection
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
@@ -134,19 +134,19 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(agent.getActiveSessions()).toHaveLength(1);
     });
 
-    it("should handle multiple leads with different completion states", async () => {
+    it('should handle multiple leads with different completion states', async () => {
       const completedLeadId = generateUUID();
       const incompleteLeadId = generateUUID();
 
       const completedLead = {
         ...mockLead,
         id: completedLeadId,
-        status: "converted" as const,
+        status: 'converted' as const,
       };
       const incompleteLead = {
         ...mockLead,
         id: incompleteLeadId,
-        status: "in_progress" as const,
+        status: 'in_progress' as const,
       };
 
       const leads = [completedLead, incompleteLead];
@@ -162,7 +162,7 @@ describe("ReviewFeedbackCollectorAgent", () => {
     });
   });
 
-  describe("Feedback Collection", () => {
+  describe('Feedback Collection', () => {
     let session: FeedbackSession;
 
     beforeEach(async () => {
@@ -172,22 +172,22 @@ describe("ReviewFeedbackCollectorAgent", () => {
       session = sessions[0];
     });
 
-    it("should start feedback collection session", () => {
+    it('should start feedback collection session', () => {
       expect(session).toBeDefined();
       expect(session.leadId).toBe(mockLead.id);
-      expect(session.status).toBe("active");
+      expect(session.status).toBe('active');
       expect(session.feedbackReceived).toBe(false);
       expect(session.reviewRequested).toBe(false);
     });
 
-    it("should handle positive feedback response", async () => {
+    it('should handle positive feedback response', async () => {
       const positiveFeedback =
-        "The service was excellent! Sarah was very professional and helpful throughout the entire process. I would definitely recommend your company to others.";
+        'The service was excellent! Sarah was very professional and helpful throughout the entire process. I would definitely recommend your company to others.';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         positiveFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.sentiment.score).toBeGreaterThan(0);
@@ -198,18 +198,18 @@ describe("ReviewFeedbackCollectorAgent", () => {
 
       const updatedSession = agent.getSession(session.id);
       expect(updatedSession?.feedbackReceived).toBe(true);
-      expect(updatedSession?.status).toBe("completed");
-      expect(updatedSession?.outcome).toBe("positive_review");
+      expect(updatedSession?.status).toBe('completed');
+      expect(updatedSession?.outcome).toBe('positive_review');
     });
 
-    it("should handle negative feedback response", async () => {
+    it('should handle negative feedback response', async () => {
       const negativeFeedback =
-        "I had a terrible experience. The agent was unprofessional and there were many delays. The process was much more expensive than promised with hidden fees.";
+        'I had a terrible experience. The agent was unprofessional and there were many delays. The process was much more expensive than promised with hidden fees.';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         negativeFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.sentiment.score).toBeLessThan(0);
@@ -220,24 +220,24 @@ describe("ReviewFeedbackCollectorAgent", () => {
 
       const updatedSession = agent.getSession(session.id);
       expect(updatedSession?.feedbackReceived).toBe(true);
-      expect(updatedSession?.status).toBe("escalated");
+      expect(updatedSession?.status).toBe('escalated');
       expect(updatedSession?.escalationRequired).toBe(true);
 
       // Check that escalation was created
       const escalations = agent.getEscalations();
       expect(escalations).toHaveLength(1);
       expect(escalations[0].leadId).toBe(mockLead.id);
-      expect(escalations[0].severity).toBe("high");
+      expect(escalations[0].severity).toBe('high');
     });
 
-    it("should handle neutral feedback response", async () => {
+    it('should handle neutral feedback response', async () => {
       const neutralFeedback =
-        "The process was completed. Everything went as expected.";
+        'The process was completed. Everything went as expected.';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         neutralFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.sentiment.score).toBeCloseTo(0, 1);
@@ -246,18 +246,18 @@ describe("ReviewFeedbackCollectorAgent", () => {
 
       const updatedSession = agent.getSession(session.id);
       expect(updatedSession?.feedbackReceived).toBe(true);
-      expect(updatedSession?.status).toBe("completed");
-      expect(updatedSession?.outcome).toBe("neutral");
+      expect(updatedSession?.status).toBe('completed');
+      expect(updatedSession?.outcome).toBe('neutral');
     });
 
-    it("should throw error for feedback without active session", async () => {
+    it('should throw error for feedback without active session', async () => {
       await expect(
-        agent.handleFeedbackResponse("nonexistent-lead", "feedback", "email")
-      ).rejects.toThrow("No active feedback session found for lead");
+        agent.handleFeedbackResponse('nonexistent-lead', 'feedback', 'email')
+      ).rejects.toThrow('No active feedback session found for lead');
     });
   });
 
-  describe("Sentiment Analysis", () => {
+  describe('Sentiment Analysis', () => {
     let session: FeedbackSession;
 
     beforeEach(async () => {
@@ -267,14 +267,14 @@ describe("ReviewFeedbackCollectorAgent", () => {
       session = sessions[0];
     });
 
-    it("should correctly identify positive sentiment", async () => {
+    it('should correctly identify positive sentiment', async () => {
       const positiveFeedback =
-        "Excellent service! Amazing experience! Outstanding professional work!";
+        'Excellent service! Amazing experience! Outstanding professional work!';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         positiveFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.sentiment.score).toBeGreaterThan(0.5);
@@ -282,62 +282,62 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(analysis.reviewWorthy).toBe(true);
     });
 
-    it("should correctly identify negative sentiment", async () => {
+    it('should correctly identify negative sentiment', async () => {
       const negativeFeedback =
-        "Terrible service! Poor quality! Awful experience! Many problems and issues!";
+        'Terrible service! Poor quality! Awful experience! Many problems and issues!';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         negativeFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.sentiment.score).toBeLessThan(-0.5);
       expect(analysis.escalationRequired).toBe(true);
     });
 
-    it("should extract specific issues from negative feedback", async () => {
+    it('should extract specific issues from negative feedback', async () => {
       const feedbackWithIssues =
-        "There were delays in the process and the agent was unprofessional. Also, there were hidden costs that were not disclosed.";
+        'There were delays in the process and the agent was unprofessional. Also, there were hidden costs that were not disclosed.';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         feedbackWithIssues,
-        "email"
+        'email'
       );
 
       expect(analysis.issues.length).toBeGreaterThan(0);
-      expect(analysis.issues.some((issue) => issue.includes("delays"))).toBe(
+      expect(analysis.issues.some((issue) => issue.includes('delays'))).toBe(
         true
       );
       expect(
-        analysis.issues.some((issue) => issue.includes("unprofessional"))
+        analysis.issues.some((issue) => issue.includes('unprofessional'))
       ).toBe(true);
     });
 
-    it("should extract positive aspects from positive feedback", async () => {
+    it('should extract positive aspects from positive feedback', async () => {
       const feedbackWithPositives =
-        "The agent was very professional and helpful. The service was excellent and efficient.";
+        'The agent was very professional and helpful. The service was excellent and efficient.';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         feedbackWithPositives,
-        "email"
+        'email'
       );
 
       expect(analysis.positiveAspects.length).toBeGreaterThan(0);
       expect(
         analysis.positiveAspects.some((aspect) =>
-          aspect.includes("professional")
+          aspect.includes('professional')
         )
       ).toBe(true);
       expect(
-        analysis.positiveAspects.some((aspect) => aspect.includes("excellent"))
+        analysis.positiveAspects.some((aspect) => aspect.includes('excellent'))
       ).toBe(true);
     });
   });
 
-  describe("Issue Escalation", () => {
+  describe('Issue Escalation', () => {
     let session: FeedbackSession;
 
     beforeEach(async () => {
@@ -347,14 +347,14 @@ describe("ReviewFeedbackCollectorAgent", () => {
       session = sessions[0];
     });
 
-    it("should create escalation for negative feedback", async () => {
+    it('should create escalation for negative feedback', async () => {
       const negativeFeedback =
-        "Terrible experience with many problems and issues.";
+        'Terrible experience with many problems and issues.';
 
       await agent.handleFeedbackResponse(
         mockLead.id,
         negativeFeedback,
-        "email"
+        'email'
       );
 
       const escalations = agent.getEscalations();
@@ -363,37 +363,37 @@ describe("ReviewFeedbackCollectorAgent", () => {
       const escalation = escalations[0];
       expect(escalation.leadId).toBe(mockLead.id);
       expect(escalation.sessionId).toBe(session.id);
-      expect(escalation.status).toBe("open");
+      expect(escalation.status).toBe('open');
       expect(escalation.issues.length).toBeGreaterThan(0);
       expect(escalation.feedbackContent).toBe(negativeFeedback);
     });
 
-    it("should determine appropriate severity levels", async () => {
+    it('should determine appropriate severity levels', async () => {
       // High severity feedback
       const highSeverityFeedback =
-        "Absolutely terrible! Worst experience ever! Multiple major problems and awful service!";
+        'Absolutely terrible! Worst experience ever! Multiple major problems and awful service!';
 
       await agent.handleFeedbackResponse(
         mockLead.id,
         highSeverityFeedback,
-        "email"
+        'email'
       );
 
       const escalations = agent.getEscalations();
-      expect(escalations[0].severity).toBe("high");
+      expect(escalations[0].severity).toBe('high');
     });
 
-    it("should update escalation status", () => {
+    it('should update escalation status', () => {
       // First create an escalation
       const escalation: IssueEscalation = {
-        id: "escalation-123",
+        id: 'escalation-123',
         sessionId: session.id,
         leadId: mockLead.id,
-        severity: "medium",
-        issues: ["Test issue"],
-        feedbackContent: "Test feedback",
+        severity: 'medium',
+        issues: ['Test issue'],
+        feedbackContent: 'Test feedback',
         escalatedAt: new Date(),
-        status: "open",
+        status: 'open',
       };
 
       // Manually add escalation for testing
@@ -401,31 +401,31 @@ describe("ReviewFeedbackCollectorAgent", () => {
 
       // Update status
       const success = agent.updateEscalationStatus(
-        "escalation-123",
-        "resolved",
-        "Issue resolved by management"
+        'escalation-123',
+        'resolved',
+        'Issue resolved by management'
       );
 
       expect(success).toBe(true);
 
-      const updatedEscalation = agent.getEscalation("escalation-123");
-      expect(updatedEscalation?.status).toBe("resolved");
+      const updatedEscalation = agent.getEscalation('escalation-123');
+      expect(updatedEscalation?.status).toBe('resolved');
       expect(updatedEscalation?.resolution).toBe(
-        "Issue resolved by management"
+        'Issue resolved by management'
       );
     });
 
-    it("should handle non-existent escalation updates", () => {
+    it('should handle non-existent escalation updates', () => {
       const success = agent.updateEscalationStatus(
-        "nonexistent-escalation",
-        "resolved"
+        'nonexistent-escalation',
+        'resolved'
       );
 
       expect(success).toBe(false);
     });
   });
 
-  describe("Review Platform Integration", () => {
+  describe('Review Platform Integration', () => {
     let session: FeedbackSession;
 
     beforeEach(async () => {
@@ -435,30 +435,30 @@ describe("ReviewFeedbackCollectorAgent", () => {
       session = sessions[0];
     });
 
-    it("should request public review for positive feedback", async () => {
+    it('should request public review for positive feedback', async () => {
       const positiveFeedback =
-        "Excellent service! Very professional and helpful!";
+        'Excellent service! Very professional and helpful!';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         positiveFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.reviewWorthy).toBe(true);
 
       const updatedSession = agent.getSession(session.id);
       expect(updatedSession?.reviewRequested).toBe(true);
-      expect(updatedSession?.outcome).toBe("positive_review");
+      expect(updatedSession?.outcome).toBe('positive_review');
     });
 
-    it("should not request review for neutral or negative feedback", async () => {
-      const neutralFeedback = "The service was okay.";
+    it('should not request review for neutral or negative feedback', async () => {
+      const neutralFeedback = 'The service was okay.';
 
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         neutralFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.reviewWorthy).toBe(false);
@@ -468,8 +468,8 @@ describe("ReviewFeedbackCollectorAgent", () => {
     });
   });
 
-  describe("Follow-up Management", () => {
-    it("should track follow-up attempts", async () => {
+  describe('Follow-up Management', () => {
+    it('should track follow-up attempts', async () => {
       // This test would require mocking the follow-up timing mechanism
       // For now, we'll test the basic structure
       const leads = [mockLead];
@@ -483,13 +483,13 @@ describe("ReviewFeedbackCollectorAgent", () => {
     });
   });
 
-  describe("Configuration Management", () => {
-    it("should use custom triggers", () => {
+  describe('Configuration Management', () => {
+    it('should use custom triggers', () => {
       const customTrigger: ProjectCompletionTrigger = {
-        id: "custom_trigger",
-        name: "Custom Completion Trigger",
-        condition: (lead) => lead.status === "converted",
-        priority: "high",
+        id: 'custom_trigger',
+        name: 'Custom Completion Trigger',
+        condition: (lead) => lead.status === 'converted',
+        priority: 'high',
         enabled: true,
         delayHours: 12,
       };
@@ -501,14 +501,14 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(agent).toBeDefined();
     });
 
-    it("should use custom feedback templates", () => {
+    it('should use custom feedback templates', () => {
       const customTemplate: FeedbackTemplate = {
-        id: "custom_template",
-        name: "Custom Feedback Template",
-        channel: "sms",
-        content: "Custom feedback request: {{name}}",
-        variables: ["name"],
-        feedbackType: "initial",
+        id: 'custom_template',
+        name: 'Custom Feedback Template',
+        channel: 'sms',
+        content: 'Custom feedback request: {{name}}',
+        variables: ['name'],
+        feedbackType: 'initial',
         enabled: true,
       };
 
@@ -519,12 +519,12 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(agent).toBeDefined();
     });
 
-    it("should use custom review platforms", () => {
+    it('should use custom review platforms', () => {
       const customPlatform: ReviewPlatform = {
-        id: "custom_platform",
-        name: "Custom Review Platform",
-        url: "https://custom-reviews.com",
-        instructions: "Leave a review on our custom platform",
+        id: 'custom_platform',
+        name: 'Custom Review Platform',
+        url: 'https://custom-reviews.com',
+        instructions: 'Leave a review on our custom platform',
         enabled: true,
       };
 
@@ -536,14 +536,14 @@ describe("ReviewFeedbackCollectorAgent", () => {
     });
   });
 
-  describe("Error Handling", () => {
-    it("should handle missing lead data gracefully", async () => {
+  describe('Error Handling', () => {
+    it('should handle missing lead data gracefully', async () => {
       // Test with empty leads array
       const sessions = await agent.detectCompletedProjects([], new Map());
       expect(sessions).toHaveLength(0);
     });
 
-    it("should handle missing interaction data gracefully", async () => {
+    it('should handle missing interaction data gracefully', async () => {
       const leads = [mockLead];
       const sessions = await agent.detectCompletedProjects(leads, new Map());
 
@@ -551,7 +551,7 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(sessions).toHaveLength(1);
     });
 
-    it("should handle invalid feedback gracefully", async () => {
+    it('should handle invalid feedback gracefully', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
       const sessions = await agent.detectCompletedProjects(leads, interactions);
@@ -559,8 +559,8 @@ describe("ReviewFeedbackCollectorAgent", () => {
       // Try to handle feedback with minimal content
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
-        "ok",
-        "email"
+        'ok',
+        'email'
       );
 
       expect(analysis).toBeDefined();
@@ -568,8 +568,8 @@ describe("ReviewFeedbackCollectorAgent", () => {
     });
   });
 
-  describe("Session Management", () => {
-    it("should retrieve active sessions", async () => {
+  describe('Session Management', () => {
+    it('should retrieve active sessions', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
 
@@ -580,7 +580,7 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(activeSessions[0].leadId).toBe(mockLead.id);
     });
 
-    it("should retrieve session by ID", async () => {
+    it('should retrieve session by ID', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
 
@@ -592,14 +592,14 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(retrievedSession?.id).toBe(sessionId);
     });
 
-    it("should return undefined for non-existent session", () => {
-      const session = agent.getSession("nonexistent-session");
+    it('should return undefined for non-existent session', () => {
+      const session = agent.getSession('nonexistent-session');
       expect(session).toBeUndefined();
     });
   });
 
-  describe("Integration Requirements", () => {
-    it("should satisfy requirement 5.1: Send congratulatory messages within 24 hours", async () => {
+  describe('Integration Requirements', () => {
+    it('should satisfy requirement 5.1: Send congratulatory messages within 24 hours', async () => {
       // Test that completed projects trigger feedback collection
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
@@ -607,20 +607,20 @@ describe("ReviewFeedbackCollectorAgent", () => {
       const sessions = await agent.detectCompletedProjects(leads, interactions);
 
       expect(sessions).toHaveLength(1);
-      expect(sessions[0].status).toBe("active");
+      expect(sessions[0].status).toBe('active');
       // In real implementation, would verify 24-hour delay is respected
     });
 
-    it("should satisfy requirement 5.2: Request online reviews and gather testimonials", async () => {
+    it('should satisfy requirement 5.2: Request online reviews and gather testimonials', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
       const sessions = await agent.detectCompletedProjects(leads, interactions);
 
-      const positiveFeedback = "Excellent service! Highly recommend!";
+      const positiveFeedback = 'Excellent service! Highly recommend!';
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         positiveFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.reviewWorthy).toBe(true);
@@ -628,51 +628,51 @@ describe("ReviewFeedbackCollectorAgent", () => {
       expect(session?.reviewRequested).toBe(true);
     });
 
-    it("should satisfy requirement 5.3: Flag urgent issues to human management", async () => {
+    it('should satisfy requirement 5.3: Flag urgent issues to human management', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
       await agent.detectCompletedProjects(leads, interactions);
 
-      const negativeFeedback = "Terrible service with major problems!";
+      const negativeFeedback = 'Terrible service with major problems!';
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         negativeFeedback,
-        "email"
+        'email'
       );
 
       expect(analysis.escalationRequired).toBe(true);
       const escalations = agent.getEscalations();
       expect(escalations).toHaveLength(1);
-      expect(escalations[0].status).toBe("open");
+      expect(escalations[0].status).toBe('open');
     });
 
-    it("should satisfy requirement 5.4: Guide customers to leave public reviews", async () => {
+    it('should satisfy requirement 5.4: Guide customers to leave public reviews', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
       await agent.detectCompletedProjects(leads, interactions);
 
-      const positiveFeedback = "Amazing experience! Very professional!";
+      const positiveFeedback = 'Amazing experience! Very professional!';
       await agent.handleFeedbackResponse(
         mockLead.id,
         positiveFeedback,
-        "email"
+        'email'
       );
 
       const session = agent.getActiveSessions()[0];
       expect(session.reviewRequested).toBe(true);
-      expect(session.outcome).toBe("positive_review");
+      expect(session.outcome).toBe('positive_review');
     });
 
-    it("should satisfy requirement 5.5: Record all feedback and reviews in CRM", async () => {
+    it('should satisfy requirement 5.5: Record all feedback and reviews in CRM', async () => {
       const leads = [mockLead];
       const interactions = new Map([[mockLead.id, mockInteractions]]);
       await agent.detectCompletedProjects(leads, interactions);
 
-      const feedback = "Good service overall.";
+      const feedback = 'Good service overall.';
       const analysis = await agent.handleFeedbackResponse(
         mockLead.id,
         feedback,
-        "email"
+        'email'
       );
 
       // Verify that interaction records are created (logged to console in mock)

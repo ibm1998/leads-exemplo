@@ -1,5 +1,5 @@
-import "../styles/globals.css";
-import initAuth from "@/auth";
+import '../styles/globals.css';
+import initAuth from '@/auth';
 
 initAuth();
 

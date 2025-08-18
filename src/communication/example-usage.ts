@@ -1,9 +1,9 @@
-import { MultiChannelCommunicationManager } from "./multi-channel-manager";
+import { MultiChannelCommunicationManager } from './multi-channel-manager';
 import {
   CommunicationChannel,
   ChannelSelectionCriteria,
-} from "../types/communication";
-import { generateUUID } from "../types/validation";
+} from '../types/communication';
+import { generateUUID } from '../types/validation';
 
 /**
  * Example usage of the MultiChannelCommunicationManager
@@ -13,18 +13,18 @@ async function demonstrateMultiChannelCommunication() {
   const manager = new MultiChannelCommunicationManager();
   const leadId = generateUUID();
 
-  console.log("=== Multi-Channel Communication Manager Demo ===\n");
+  console.log('=== Multi-Channel Communication Manager Demo ===\n');
 
   // 1. Set up communication preferences for a lead
-  console.log("1. Setting up communication preferences...");
+  console.log('1. Setting up communication preferences...');
   await manager.setCommunicationPreferences({
     leadId,
-    preferredChannels: ["email", "sms", "whatsapp"],
+    preferredChannels: ['email', 'sms', 'whatsapp'],
     optedOutChannels: [],
     bestTimeToContact: {
       startHour: 9,
       endHour: 17,
-      timezone: "UTC",
+      timezone: 'UTC',
     },
     frequencyLimits: {
       maxDailyContacts: 3,
@@ -34,21 +34,21 @@ async function demonstrateMultiChannelCommunication() {
   });
 
   const preferences = await manager.getCommunicationPreferences(leadId);
-  console.log("✓ Preferences set:", {
+  console.log('✓ Preferences set:', {
     preferredChannels: preferences?.preferredChannels,
     frequencyLimits: preferences?.frequencyLimits,
   });
 
   // 2. Demonstrate channel selection based on criteria
-  console.log("\n2. Selecting optimal communication channels...");
+  console.log('\n2. Selecting optimal communication channels...');
 
   const urgentCriteria: ChannelSelectionCriteria = {
-    urgency: "high",
-    messageType: "urgent",
+    urgency: 'high',
+    messageType: 'urgent',
     leadProfile: {
-      leadType: "hot",
-      responseHistory: ["voice", "sms"],
-      preferredChannel: "voice",
+      leadType: 'hot',
+      responseHistory: ['voice', 'sms'],
+      preferredChannel: 'voice',
     },
     contextualFactors: {
       timeOfDay: 14, // 2 PM
@@ -61,15 +61,15 @@ async function demonstrateMultiChannelCommunication() {
     leadId,
     urgentCriteria
   );
-  console.log("✓ Urgent message channel:", urgentChannel);
+  console.log('✓ Urgent message channel:', urgentChannel);
 
   const promotionalCriteria: ChannelSelectionCriteria = {
-    urgency: "low",
-    messageType: "promotional",
+    urgency: 'low',
+    messageType: 'promotional',
     leadProfile: {
-      leadType: "warm",
-      responseHistory: ["email"],
-      preferredChannel: "email",
+      leadType: 'warm',
+      responseHistory: ['email'],
+      preferredChannel: 'email',
     },
     contextualFactors: {
       timeOfDay: 10,
@@ -82,89 +82,89 @@ async function demonstrateMultiChannelCommunication() {
     leadId,
     promotionalCriteria
   );
-  console.log("✓ Promotional message channel:", promotionalChannel);
+  console.log('✓ Promotional message channel:', promotionalChannel);
 
   // 3. Check communication frequency limits
-  console.log("\n3. Checking communication frequency limits...");
+  console.log('\n3. Checking communication frequency limits...');
 
-  let canCommunicate = await manager.canCommunicate(leadId, "email");
-  console.log("✓ Can send email:", canCommunicate.allowed);
+  let canCommunicate = await manager.canCommunicate(leadId, 'email');
+  console.log('✓ Can send email:', canCommunicate.allowed);
 
   // Record some communication attempts
   await manager.recordCommunicationAttempt(
     leadId,
-    "email",
+    'email',
     true,
     undefined,
     generateUUID()
   );
   await manager.recordCommunicationAttempt(
     leadId,
-    "sms",
+    'sms',
     true,
     undefined,
     generateUUID()
   );
 
-  canCommunicate = await manager.canCommunicate(leadId, "email");
+  canCommunicate = await manager.canCommunicate(leadId, 'email');
   console.log(
-    "✓ Can send another email (after cooldown):",
+    '✓ Can send another email (after cooldown):',
     canCommunicate.allowed
   );
   if (!canCommunicate.allowed) {
-    console.log("  Reason:", canCommunicate.reason);
-    console.log("  Next allowed time:", canCommunicate.nextAllowedTime);
+    console.log('  Reason:', canCommunicate.reason);
+    console.log('  Next allowed time:', canCommunicate.nextAllowedTime);
   }
 
   // 4. Demonstrate opt-out functionality
-  console.log("\n4. Demonstrating opt-out functionality...");
+  console.log('\n4. Demonstrating opt-out functionality...');
 
-  await manager.optOutFromChannel(leadId, "sms");
-  console.log("✓ Opted out from SMS");
+  await manager.optOutFromChannel(leadId, 'sms');
+  console.log('✓ Opted out from SMS');
 
-  const smsCheck = await manager.canCommunicate(leadId, "sms");
-  console.log("✓ Can send SMS after opt-out:", smsCheck.allowed);
-  console.log("  Reason:", smsCheck.reason);
+  const smsCheck = await manager.canCommunicate(leadId, 'sms');
+  console.log('✓ Can send SMS after opt-out:', smsCheck.allowed);
+  console.log('  Reason:', smsCheck.reason);
 
   // Opt back in
-  await manager.optInToChannel(leadId, "sms");
-  const smsCheckAfterOptIn = await manager.canCommunicate(leadId, "sms");
-  console.log("✓ Can send SMS after opt-in:", smsCheckAfterOptIn.allowed);
+  await manager.optInToChannel(leadId, 'sms');
+  const smsCheckAfterOptIn = await manager.canCommunicate(leadId, 'sms');
+  console.log('✓ Can send SMS after opt-in:', smsCheckAfterOptIn.allowed);
 
   // 5. Demonstrate conversation continuity
-  console.log("\n5. Demonstrating conversation continuity...");
+  console.log('\n5. Demonstrating conversation continuity...');
 
   const interactionId1 = generateUUID();
   const interactionId2 = generateUUID();
 
   await manager.updateConversationContext(
     leadId,
-    "property_inquiry",
-    "email",
+    'property_inquiry',
+    'email',
     {
-      propertyType: "apartment",
-      budget: "500k",
-      location: "downtown",
+      propertyType: 'apartment',
+      budget: '500k',
+      location: 'downtown',
     },
     interactionId1
   );
 
   await manager.updateConversationContext(
     leadId,
-    "property_inquiry",
-    "sms",
+    'property_inquiry',
+    'sms',
     {
-      preferredViewingTime: "weekend",
-      urgency: "high",
+      preferredViewingTime: 'weekend',
+      urgency: 'high',
     },
     interactionId2
   );
 
   const context = await manager.getConversationContext(
     leadId,
-    "property_inquiry"
+    'property_inquiry'
   );
-  console.log("✓ Conversation context:", {
+  console.log('✓ Conversation context:', {
     topic: context?.topic,
     lastChannel: context?.lastChannel,
     context: context?.context,
@@ -172,40 +172,40 @@ async function demonstrateMultiChannelCommunication() {
   });
 
   // 6. Get communication history
-  console.log("\n6. Communication history...");
+  console.log('\n6. Communication history...');
 
   const attempts = await manager.getCommunicationAttempts(leadId);
-  console.log("✓ Total communication attempts:", attempts.length);
+  console.log('✓ Total communication attempts:', attempts.length);
   console.log(
-    "✓ Successful attempts:",
+    '✓ Successful attempts:',
     attempts.filter((a) => a.successful).length
   );
   console.log(
-    "✓ Failed attempts:",
+    '✓ Failed attempts:',
     attempts.filter((a) => !a.successful).length
   );
 
   const failedChannels = await manager.getRecentFailedChannels(leadId, 24);
-  console.log("✓ Recently failed channels:", failedChannels);
+  console.log('✓ Recently failed channels:', failedChannels);
 
   // 7. Demonstrate channel selection with failures
-  console.log("\n7. Channel selection avoiding recent failures...");
+  console.log('\n7. Channel selection avoiding recent failures...');
 
   // Record a failed attempt
   await manager.recordCommunicationAttempt(
     leadId,
-    "whatsapp",
+    'whatsapp',
     false,
-    "Service unavailable"
+    'Service unavailable'
   );
 
   const criteriaWithFailures: ChannelSelectionCriteria = {
-    urgency: "medium",
-    messageType: "follow_up",
+    urgency: 'medium',
+    messageType: 'follow_up',
     leadProfile: {
-      leadType: "warm",
-      responseHistory: ["whatsapp", "email"],
-      preferredChannel: "whatsapp",
+      leadType: 'warm',
+      responseHistory: ['whatsapp', 'email'],
+      preferredChannel: 'whatsapp',
     },
     contextualFactors: {
       timeOfDay: 15,
@@ -219,11 +219,11 @@ async function demonstrateMultiChannelCommunication() {
     criteriaWithFailures
   );
   console.log(
-    "✓ Alternative channel (avoiding WhatsApp failure):",
+    '✓ Alternative channel (avoiding WhatsApp failure):',
     alternativeChannel
   );
 
-  console.log("\n=== Demo Complete ===");
+  console.log('\n=== Demo Complete ===');
 }
 
 // Run the demonstration

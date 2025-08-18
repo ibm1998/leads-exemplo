@@ -1,5 +1,5 @@
-import admin from "@/firebase-admin";
-import { docRef } from "@/FS-admin-refs";
+import admin from '@/firebase-admin';
+import { docRef } from '@/FS-admin-refs';
 
 const db = admin.firestore(); // mostly for transactions or batches
 

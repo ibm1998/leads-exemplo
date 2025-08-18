@@ -1,23 +1,23 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   ContinuousOptimizationLoop,
   OptimizationFeedback,
   OptimizationRecommendation,
-} from "../optimization-loop";
-import { AIHeadAgent } from "../ai-head-agent";
-import { AICustomerAnalyticsAgent } from "../ai-customer-analytics-agent";
-import { DatabaseManager } from "../../database/manager";
-import { DateRange, PerformanceMetrics } from "../../types/agent-performance";
+} from '../optimization-loop';
+import { AIHeadAgent } from '../ai-head-agent';
+import { AICustomerAnalyticsAgent } from '../ai-customer-analytics-agent';
+import { DatabaseManager } from '../../database/manager';
+import { DateRange, PerformanceMetrics } from '../../types/agent-performance';
 
 // Mock the database manager
-vi.mock("../../database/manager", () => ({
+vi.mock('../../database/manager', () => ({
   DatabaseManager: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     close: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
-describe("ContinuousOptimizationLoop Integration Tests", () => {
+describe('ContinuousOptimizationLoop Integration Tests', () => {
   let optimizationLoop: ContinuousOptimizationLoop;
   let aiHeadAgent: AIHeadAgent;
   let analyticsAgent: AICustomerAnalyticsAgent;
@@ -48,26 +48,26 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
     await dbManager.close();
   });
 
-  describe("Feedback Mechanism", () => {
-    it("should collect performance feedback from analytics agent", async () => {
+  describe('Feedback Mechanism', () => {
+    it('should collect performance feedback from analytics agent', async () => {
       // Mock analytics agent methods
       const mockInsights = [
         {
-          id: "insight_1",
-          type: "performance" as const,
-          title: "Conversion Rate Opportunity",
-          description: "Potential for improvement",
-          impact: "high" as const,
+          id: 'insight_1',
+          type: 'performance' as const,
+          title: 'Conversion Rate Opportunity',
+          description: 'Potential for improvement',
+          impact: 'high' as const,
           actionable: true,
-          recommendations: ["Improve qualification"],
+          recommendations: ['Improve qualification'],
           data: { currentRate: 0.6 },
           generatedAt: new Date(),
         },
       ];
 
       const mockPerformanceData = {
-        id: "perf_1",
-        agentId: "test-agent",
+        id: 'perf_1',
+        agentId: 'test-agent',
         period: {
           start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
           end: new Date(),
@@ -84,10 +84,10 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         createdAt: new Date(),
       };
 
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockResolvedValue(
         mockInsights
       );
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockResolvedValue(
         mockPerformanceData
       );
 
@@ -105,10 +105,10 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       );
     });
 
-    it("should handle analytics agent failures gracefully", async () => {
+    it('should handle analytics agent failures gracefully', async () => {
       // Mock analytics agent to throw error
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockRejectedValue(
-        new Error("Analytics service unavailable")
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockRejectedValue(
+        new Error('Analytics service unavailable')
       );
 
       // Should not throw error
@@ -118,11 +118,11 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
     });
   });
 
-  describe("Routing Rule Optimization", () => {
-    it("should generate routing optimization for poor conversion rates", async () => {
+  describe('Routing Rule Optimization', () => {
+    it('should generate routing optimization for poor conversion rates', async () => {
       const mockPerformanceData = {
-        id: "perf_1",
-        agentId: "test-agent",
+        id: 'perf_1',
+        agentId: 'test-agent',
         period: {
           start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
           end: new Date(),
@@ -139,10 +139,10 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         createdAt: new Date(),
       };
 
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockResolvedValue(
         []
       );
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockResolvedValue(
         mockPerformanceData
       );
 
@@ -153,16 +153,16 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       const activeOptimizations = optimizationLoop.getActiveOptimizations();
       const routingOptimizations = Array.from(
         activeOptimizations.values()
-      ).filter((opt) => opt.type === "routing_rule");
+      ).filter((opt) => opt.type === 'routing_rule');
 
       expect(routingOptimizations.length).toBeGreaterThan(0);
-      expect(routingOptimizations[0].description).toContain("conversion rate");
+      expect(routingOptimizations[0].description).toContain('conversion rate');
     });
 
-    it("should generate routing optimization for slow response times", async () => {
+    it('should generate routing optimization for slow response times', async () => {
       const mockPerformanceData = {
-        id: "perf_1",
-        agentId: "test-agent",
+        id: 'perf_1',
+        agentId: 'test-agent',
         period: {
           start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
           end: new Date(),
@@ -179,10 +179,10 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         createdAt: new Date(),
       };
 
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockResolvedValue(
         []
       );
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockResolvedValue(
         mockPerformanceData
       );
 
@@ -193,21 +193,21 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       const activeOptimizations = optimizationLoop.getActiveOptimizations();
       const responseTimeOptimizations = Array.from(
         activeOptimizations.values()
-      ).filter((opt) => opt.description.includes("response time"));
+      ).filter((opt) => opt.description.includes('response time'));
 
       expect(responseTimeOptimizations.length).toBeGreaterThan(0);
     });
   });
 
-  describe("Script Optimization", () => {
-    it("should generate script optimization recommendations", async () => {
+  describe('Script Optimization', () => {
+    it('should generate script optimization recommendations', async () => {
       const mockScriptOptimizations = [
         {
-          scriptId: "qualification-script",
-          scriptName: "Qualification Script",
+          scriptId: 'qualification-script',
+          scriptName: 'Qualification Script',
           currentPerformance: {
-            scriptId: "qualification-script",
-            scriptName: "Qualification Script",
+            scriptId: 'qualification-script',
+            scriptName: 'Qualification Script',
             usageCount: 100,
             successRate: 0.6,
             averageResponseTime: 45000,
@@ -215,10 +215,10 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
           },
           recommendations: [
             {
-              type: "content" as const,
-              description: "Improve opening questions",
+              type: 'content' as const,
+              description: 'Improve opening questions',
               expectedImpact: 15,
-              priority: "high" as const,
+              priority: 'high' as const,
             },
           ],
           estimatedImpact: {
@@ -229,12 +229,12 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         },
       ];
 
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockResolvedValue(
         []
       );
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockResolvedValue({
-        id: "perf_1",
-        agentId: "test-agent",
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockResolvedValue({
+        id: 'perf_1',
+        agentId: 'test-agent',
         period: {
           start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
           end: new Date(),
@@ -250,7 +250,7 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         optimizationSuggestions: [],
         createdAt: new Date(),
       });
-      vi.spyOn(analyticsAgent, "analyzeScriptPerformance").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'analyzeScriptPerformance').mockResolvedValue(
         mockScriptOptimizations
       );
 
@@ -261,32 +261,32 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       const activeOptimizations = optimizationLoop.getActiveOptimizations();
       const scriptOptimizations = Array.from(
         activeOptimizations.values()
-      ).filter((opt) => opt.type === "script_update");
+      ).filter((opt) => opt.type === 'script_update');
 
       expect(scriptOptimizations.length).toBeGreaterThan(0);
       expect(scriptOptimizations[0].description).toContain(
-        "Qualification Script"
+        'Qualification Script'
       );
     });
   });
 
-  describe("Performance Validation", () => {
-    it("should validate optimization improvements", async () => {
+  describe('Performance Validation', () => {
+    it('should validate optimization improvements', async () => {
       // Create a mock optimization that should be validated
       const mockRecommendation: OptimizationRecommendation = {
-        id: "test_optimization_1",
-        type: "routing_rule",
-        priority: "high",
-        description: "Test optimization",
+        id: 'test_optimization_1',
+        type: 'routing_rule',
+        priority: 'high',
+        description: 'Test optimization',
         expectedImpact: 15,
         implementation: {
-          action: "test_action",
+          action: 'test_action',
           parameters: {},
-          rollbackPlan: "Test rollback",
+          rollbackPlan: 'Test rollback',
           testingPeriod: 1, // 1 day for quick testing
         },
         validationCriteria: {
-          metrics: ["conversionRate"],
+          metrics: ['conversionRate'],
           minimumImprovement: 10,
           testPeriod: 1,
           significanceThreshold: 0.05,
@@ -316,7 +316,7 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       });
 
       // Mock current metrics showing improvement
-      vi.spyOn(optimizationLoop as any, "getCurrentMetrics").mockResolvedValue({
+      vi.spyOn(optimizationLoop as any, 'getCurrentMetrics').mockResolvedValue({
         totalInteractions: 120,
         conversionRate: 0.72, // 20% improvement
         averageResponseTime: 45000,
@@ -351,21 +351,21 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       expect(validationResult.improvement.conversionRate).toBeGreaterThan(10);
     });
 
-    it("should rollback failed optimizations", async () => {
+    it('should rollback failed optimizations', async () => {
       const mockRecommendation: OptimizationRecommendation = {
-        id: "test_optimization_2",
-        type: "routing_rule",
-        priority: "high",
-        description: "Test optimization that fails",
+        id: 'test_optimization_2',
+        type: 'routing_rule',
+        priority: 'high',
+        description: 'Test optimization that fails',
         expectedImpact: 15,
         implementation: {
-          action: "test_action",
+          action: 'test_action',
           parameters: {},
-          rollbackPlan: "Test rollback",
+          rollbackPlan: 'Test rollback',
           testingPeriod: 1,
         },
         validationCriteria: {
-          metrics: ["conversionRate"],
+          metrics: ['conversionRate'],
           minimumImprovement: 10,
           testPeriod: 1,
           significanceThreshold: 0.05,
@@ -395,7 +395,7 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       });
 
       // Mock current metrics showing degradation
-      vi.spyOn(optimizationLoop as any, "getCurrentMetrics").mockResolvedValue({
+      vi.spyOn(optimizationLoop as any, 'getCurrentMetrics').mockResolvedValue({
         totalInteractions: 80,
         conversionRate: 0.45, // 25% degradation
         averageResponseTime: 65000,
@@ -431,26 +431,26 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
     });
   });
 
-  describe("Complete Optimization Cycle", () => {
-    it("should run complete optimization cycle successfully", async () => {
+  describe('Complete Optimization Cycle', () => {
+    it('should run complete optimization cycle successfully', async () => {
       // Mock all required methods
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockResolvedValue([
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockResolvedValue([
         {
-          id: "insight_1",
-          type: "performance",
-          title: "Test Insight",
-          description: "Test description",
-          impact: "high",
+          id: 'insight_1',
+          type: 'performance',
+          title: 'Test Insight',
+          description: 'Test description',
+          impact: 'high',
           actionable: true,
-          recommendations: ["Test recommendation"],
+          recommendations: ['Test recommendation'],
           data: {},
           generatedAt: new Date(),
         },
       ]);
 
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockResolvedValue({
-        id: "perf_1",
-        agentId: "test-agent",
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockResolvedValue({
+        id: 'perf_1',
+        agentId: 'test-agent',
         period: {
           start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
           end: new Date(),
@@ -467,10 +467,10 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         createdAt: new Date(),
       });
 
-      vi.spyOn(analyticsAgent, "analyzeScriptPerformance").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'analyzeScriptPerformance').mockResolvedValue(
         []
       );
-      vi.spyOn(analyticsAgent, "analyzePerformanceTrends").mockResolvedValue(
+      vi.spyOn(analyticsAgent, 'analyzePerformanceTrends').mockResolvedValue(
         []
       );
 
@@ -482,13 +482,13 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
       expect(stats.totalOptimizations).toBeGreaterThanOrEqual(0);
     });
 
-    it("should handle errors gracefully during optimization cycle", async () => {
+    it('should handle errors gracefully during optimization cycle', async () => {
       // Mock analytics agent to throw errors
-      vi.spyOn(analyticsAgent, "generateIntelligenceReport").mockRejectedValue(
-        new Error("Service unavailable")
+      vi.spyOn(analyticsAgent, 'generateIntelligenceReport').mockRejectedValue(
+        new Error('Service unavailable')
       );
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockRejectedValue(
-        new Error("Database error")
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockRejectedValue(
+        new Error('Database error')
       );
 
       // Should not throw error
@@ -498,11 +498,11 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
     });
   });
 
-  describe("Optimization Statistics", () => {
-    it("should provide accurate optimization statistics", async () => {
+  describe('Optimization Statistics', () => {
+    it('should provide accurate optimization statistics', async () => {
       // Add some mock optimization history using the new method
-      optimizationLoop.addOptimizationResult("opt_1", {
-        recommendationId: "opt_1",
+      optimizationLoop.addOptimizationResult('opt_1', {
+        recommendationId: 'opt_1',
         implemented: true,
         implementedAt: new Date(),
         baselineMetrics: {
@@ -530,8 +530,8 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
         rollbackRequired: false,
       });
 
-      optimizationLoop.addOptimizationResult("opt_2", {
-        recommendationId: "opt_2",
+      optimizationLoop.addOptimizationResult('opt_2', {
+        recommendationId: 'opt_2',
         implemented: true,
         implementedAt: new Date(),
         baselineMetrics: {
@@ -568,33 +568,33 @@ describe("ContinuousOptimizationLoop Integration Tests", () => {
     });
   });
 
-  describe("Continuous Operation", () => {
-    it("should start and stop optimization loop", async () => {
-      expect(optimizationLoop["isRunning"]).toBe(false);
+  describe('Continuous Operation', () => {
+    it('should start and stop optimization loop', async () => {
+      expect(optimizationLoop['isRunning']).toBe(false);
 
       // Mock the runOptimizationCycle to avoid actual execution
-      vi.spyOn(optimizationLoop, "runOptimizationCycle").mockResolvedValue();
+      vi.spyOn(optimizationLoop, 'runOptimizationCycle').mockResolvedValue();
 
       // Start the loop
       await optimizationLoop.start();
-      expect(optimizationLoop["isRunning"]).toBe(true);
+      expect(optimizationLoop['isRunning']).toBe(true);
 
       // Stop the loop
       optimizationLoop.stop();
-      expect(optimizationLoop["isRunning"]).toBe(false);
+      expect(optimizationLoop['isRunning']).toBe(false);
     });
 
-    it("should not start multiple instances", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    it('should not start multiple instances', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       // Mock the runOptimizationCycle to avoid actual execution
-      vi.spyOn(optimizationLoop, "runOptimizationCycle").mockResolvedValue();
+      vi.spyOn(optimizationLoop, 'runOptimizationCycle').mockResolvedValue();
 
       await optimizationLoop.start();
       await optimizationLoop.start(); // Try to start again
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        "Optimization loop is already running"
+        'Optimization loop is already running'
       );
 
       optimizationLoop.stop();

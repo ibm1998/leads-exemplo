@@ -1,11 +1,11 @@
-import { Lead, LeadModel, LeadStatus } from "../types/lead";
+import { Lead, LeadModel, LeadStatus } from '../types/lead';
 import {
   Interaction,
   InteractionModel,
   CreateInteraction,
   InteractionType,
   SentimentScore,
-} from "../types/interaction";
+} from '../types/interaction';
 
 /**
  * Project completion trigger configuration
@@ -14,7 +14,7 @@ export interface ProjectCompletionTrigger {
   id: string;
   name: string;
   condition: (lead: Lead, interactions: Interaction[]) => boolean;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
   enabled: boolean;
   delayHours: number; // Hours to wait after completion before triggering
 }
@@ -29,7 +29,7 @@ export interface FeedbackTemplate {
   subject?: string; // For email
   content: string;
   variables: string[]; // Variables that can be replaced in content
-  feedbackType: "initial" | "follow_up" | "review_request";
+  feedbackType: 'initial' | 'follow_up' | 'review_request';
   enabled: boolean;
 }
 
@@ -52,7 +52,7 @@ export interface FeedbackSession {
   leadId: string;
   triggerId: string;
   startedAt: Date;
-  status: "active" | "completed" | "escalated" | "failed";
+  status: 'active' | 'completed' | 'escalated' | 'failed';
   feedbackReceived: boolean;
   sentimentScore?: SentimentScore;
   feedbackContent?: string;
@@ -60,10 +60,10 @@ export interface FeedbackSession {
   escalationRequired: boolean;
   completedAt?: Date;
   outcome?:
-    | "positive_review"
-    | "negative_escalated"
-    | "no_response"
-    | "neutral";
+    | 'positive_review'
+    | 'negative_escalated'
+    | 'no_response'
+    | 'neutral';
 }
 
 /**
@@ -86,12 +86,12 @@ export interface IssueEscalation {
   id: string;
   sessionId: string;
   leadId: string;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   issues: string[];
   feedbackContent: string;
   escalatedAt: Date;
   assignedTo?: string;
-  status: "open" | "in_progress" | "resolved" | "closed";
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
   resolution?: string;
 }
 
@@ -128,63 +128,63 @@ const DEFAULT_CONFIG: ReviewFeedbackConfig = {
     positiveThreshold: 0.3,
     negativeThreshold: -0.3,
     issueKeywords: [
-      "problem",
-      "issue",
-      "complaint",
-      "disappointed",
-      "unhappy",
-      "poor",
-      "bad",
-      "terrible",
-      "awful",
-      "worst",
-      "delay",
-      "late",
-      "unprofessional",
-      "rude",
-      "mistake",
-      "error",
-      "wrong",
-      "damaged",
-      "broken",
-      "defect",
-      "quality",
-      "overpriced",
-      "expensive",
-      "hidden costs",
-      "surprise fees",
+      'problem',
+      'issue',
+      'complaint',
+      'disappointed',
+      'unhappy',
+      'poor',
+      'bad',
+      'terrible',
+      'awful',
+      'worst',
+      'delay',
+      'late',
+      'unprofessional',
+      'rude',
+      'mistake',
+      'error',
+      'wrong',
+      'damaged',
+      'broken',
+      'defect',
+      'quality',
+      'overpriced',
+      'expensive',
+      'hidden costs',
+      'surprise fees',
     ],
     positiveKeywords: [
-      "excellent",
-      "great",
-      "amazing",
-      "wonderful",
-      "fantastic",
-      "outstanding",
-      "professional",
-      "helpful",
-      "friendly",
-      "knowledgeable",
-      "responsive",
-      "quick",
-      "efficient",
-      "smooth",
-      "easy",
-      "recommend",
-      "satisfied",
-      "happy",
-      "pleased",
-      "impressed",
-      "exceeded expectations",
-      "quality",
-      "value",
-      "fair price",
+      'excellent',
+      'great',
+      'amazing',
+      'wonderful',
+      'fantastic',
+      'outstanding',
+      'professional',
+      'helpful',
+      'friendly',
+      'knowledgeable',
+      'responsive',
+      'quick',
+      'efficient',
+      'smooth',
+      'easy',
+      'recommend',
+      'satisfied',
+      'happy',
+      'pleased',
+      'impressed',
+      'exceeded expectations',
+      'quality',
+      'value',
+      'fair price',
     ],
   },
   escalation: {
     enabled: true,
     autoAssign: false,
-    notificationChannels: ["email", "slack"],
+    notificationChannels: ['email', 'slack'],
   },
   followUpDelayHours: 72, // 3 days
   maxFollowUpAttempts: 2,
@@ -232,38 +232,38 @@ export class ReviewFeedbackCollectorAgent {
   private initializeDefaultTriggers(): void {
     const defaultTriggers: ProjectCompletionTrigger[] = [
       {
-        id: "project_completed",
-        name: "Project Marked as Completed",
+        id: 'project_completed',
+        name: 'Project Marked as Completed',
         condition: (lead, interactions) => {
-          return lead.status === "converted";
+          return lead.status === 'converted';
         },
-        priority: "high",
+        priority: 'high',
         enabled: true,
         delayHours: 24, // Wait 24 hours after completion
       },
       {
-        id: "successful_transaction",
-        name: "Successful Transaction Completed",
+        id: 'successful_transaction',
+        name: 'Successful Transaction Completed',
         condition: (lead, interactions) => {
           const recentInteractions = interactions.filter(
             (i) => Date.now() - i.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000 // Last 7 days
           );
           return (
-            lead.status === "converted" &&
+            lead.status === 'converted' &&
             recentInteractions.some(
               (i) =>
-                i.outcome.status === "successful" &&
-                i.content.toLowerCase().includes("closing")
+                i.outcome.status === 'successful' &&
+                i.content.toLowerCase().includes('closing')
             )
           );
         },
-        priority: "high",
+        priority: 'high',
         enabled: true,
         delayHours: 48, // Wait 48 hours after transaction
       },
       {
-        id: "appointment_completed",
-        name: "Appointment Successfully Completed",
+        id: 'appointment_completed',
+        name: 'Appointment Successfully Completed',
         condition: (lead, interactions) => {
           const recentInteractions = interactions.filter(
             (i) => Date.now() - i.timestamp.getTime() < 3 * 24 * 60 * 60 * 1000 // Last 3 days
@@ -271,11 +271,11 @@ export class ReviewFeedbackCollectorAgent {
           return recentInteractions.some(
             (i) =>
               i.outcome.appointmentBooked &&
-              i.outcome.status === "successful" &&
+              i.outcome.status === 'successful' &&
               !i.outcome.escalationRequired
           );
         },
-        priority: "medium",
+        priority: 'medium',
         enabled: true,
         delayHours: 24,
       },
@@ -290,10 +290,10 @@ export class ReviewFeedbackCollectorAgent {
   private initializeDefaultTemplates(): void {
     const defaultTemplates: FeedbackTemplate[] = [
       {
-        id: "congratulatory_email",
-        name: "Congratulatory Email with Feedback Request",
-        channel: "email",
-        subject: "Congratulations on Your New Home, {{name}}! 🏠",
+        id: 'congratulatory_email',
+        name: 'Congratulatory Email with Feedback Request',
+        channel: 'email',
+        subject: 'Congratulations on Your New Home, {{name}}! 🏠',
         content: `Dear {{name}},
 
 Congratulations on the successful completion of your real estate transaction! 🎉
@@ -317,25 +317,25 @@ Warm regards,
 {{companyName}}
 
 P.S. If you had a great experience, we'd be incredibly grateful if you could share a review on Google or Zillow. It really helps other families find us when they need real estate services.`,
-        variables: ["name", "propertyType", "agentName", "companyName"],
-        feedbackType: "initial",
+        variables: ['name', 'propertyType', 'agentName', 'companyName'],
+        feedbackType: 'initial',
         enabled: true,
       },
       {
-        id: "sms_feedback_request",
-        name: "SMS Feedback Request",
-        channel: "sms",
+        id: 'sms_feedback_request',
+        name: 'SMS Feedback Request',
+        channel: 'sms',
         content:
           "Hi {{name}}! Congrats on your new home! 🏠 We'd love to hear about your experience with us. Could you share a quick review? It would mean the world to us! Reply with your thoughts or call {{phone}}. Thanks! - {{agentName}}",
-        variables: ["name", "phone", "agentName"],
-        feedbackType: "initial",
+        variables: ['name', 'phone', 'agentName'],
+        feedbackType: 'initial',
         enabled: true,
       },
       {
-        id: "follow_up_email",
-        name: "Follow-up Feedback Request",
-        channel: "email",
-        subject: "Quick Follow-up: How Was Your Experience?",
+        id: 'follow_up_email',
+        name: 'Follow-up Feedback Request',
+        channel: 'email',
+        subject: 'Quick Follow-up: How Was Your Experience?',
         content: `Hi {{name}},
 
 I hope you're enjoying your new {{propertyType}}! 
@@ -355,15 +355,15 @@ Thank you so much!
 
 Best,
 {{agentName}}`,
-        variables: ["name", "propertyType", "phone", "agentName"],
-        feedbackType: "follow_up",
+        variables: ['name', 'propertyType', 'phone', 'agentName'],
+        feedbackType: 'follow_up',
         enabled: true,
       },
       {
-        id: "review_request_email",
-        name: "Review Request for Satisfied Customers",
-        channel: "email",
-        subject: "Would You Mind Sharing Your Experience Online?",
+        id: 'review_request_email',
+        name: 'Review Request for Satisfied Customers',
+        channel: 'email',
+        subject: 'Would You Mind Sharing Your Experience Online?',
         content: `Hi {{name}},
 
 Thank you so much for the wonderful feedback about your experience with our team! It truly means the world to us to know that we exceeded your expectations.
@@ -384,14 +384,14 @@ Gratefully,
 {{agentName}}
 {{companyName}}`,
         variables: [
-          "name",
-          "googleReviewLink",
-          "zillowReviewLink",
-          "yelpReviewLink",
-          "agentName",
-          "companyName",
+          'name',
+          'googleReviewLink',
+          'zillowReviewLink',
+          'yelpReviewLink',
+          'agentName',
+          'companyName',
         ],
-        feedbackType: "review_request",
+        feedbackType: 'review_request',
         enabled: true,
       },
     ];
@@ -405,35 +405,35 @@ Gratefully,
   private initializeDefaultPlatforms(): void {
     const defaultPlatforms: ReviewPlatform[] = [
       {
-        id: "google",
-        name: "Google Reviews",
-        url: "https://g.page/r/YOUR_BUSINESS_ID/review",
+        id: 'google',
+        name: 'Google Reviews',
+        url: 'https://g.page/r/YOUR_BUSINESS_ID/review',
         instructions:
-          "Click the link above and select the number of stars that represents your experience, then write a brief review about our service.",
+          'Click the link above and select the number of stars that represents your experience, then write a brief review about our service.',
         enabled: true,
       },
       {
-        id: "zillow",
-        name: "Zillow",
-        url: "https://www.zillow.com/profile/YOUR_AGENT_PROFILE",
+        id: 'zillow',
+        name: 'Zillow',
+        url: 'https://www.zillow.com/profile/YOUR_AGENT_PROFILE',
         instructions:
           "Visit our Zillow profile and click 'Write a Review' to share your experience with future clients.",
         enabled: true,
       },
       {
-        id: "yelp",
-        name: "Yelp",
-        url: "https://www.yelp.com/biz/YOUR_BUSINESS_ID",
+        id: 'yelp',
+        name: 'Yelp',
+        url: 'https://www.yelp.com/biz/YOUR_BUSINESS_ID',
         instructions:
           "Find our business on Yelp and click 'Write a Review' to help other families find our services.",
         enabled: true,
       },
       {
-        id: "facebook",
-        name: "Facebook",
-        url: "https://www.facebook.com/YOUR_BUSINESS_PAGE/reviews",
+        id: 'facebook',
+        name: 'Facebook',
+        url: 'https://www.facebook.com/YOUR_BUSINESS_PAGE/reviews',
         instructions:
-          "Visit our Facebook page and leave a review to help us reach more families in our community.",
+          'Visit our Facebook page and leave a review to help us reach more families in our community.',
         enabled: true,
       },
     ];
@@ -488,7 +488,7 @@ Gratefully,
       leadId: lead.id,
       triggerId: trigger.id,
       startedAt: new Date(),
-      status: "active",
+      status: 'active',
       feedbackReceived: false,
       reviewRequested: false,
       escalationRequired: false,
@@ -507,7 +507,7 @@ Gratefully,
    */
   async sendInitialFeedbackRequest(sessionId: string): Promise<boolean> {
     const session = this.activeSessions.get(sessionId);
-    if (!session || session.status !== "active") {
+    if (!session || session.status !== 'active') {
       return false;
     }
 
@@ -519,7 +519,7 @@ Gratefully,
     let template = this.config.feedbackTemplates.find(
       (t) =>
         t.channel === preferredChannel &&
-        t.feedbackType === "initial" &&
+        t.feedbackType === 'initial' &&
         t.enabled
     );
 
@@ -527,12 +527,12 @@ Gratefully,
     if (!template) {
       template = this.config.feedbackTemplates.find(
         (t) =>
-          t.channel === "email" && t.feedbackType === "initial" && t.enabled
+          t.channel === 'email' && t.feedbackType === 'initial' && t.enabled
       );
     }
 
     if (!template) {
-      console.error("No initial feedback template available");
+      console.error('No initial feedback template available');
       return false;
     }
 
@@ -551,12 +551,12 @@ Gratefully,
       // Create interaction record
       const interaction = InteractionModel.create({
         leadId: session.leadId,
-        agentId: "review-feedback-collector",
+        agentId: 'review-feedback-collector',
         type: template.channel,
-        direction: "outbound",
+        direction: 'outbound',
         content: personalizedMessage.content,
         outcome: {
-          status: "pending",
+          status: 'pending',
           appointmentBooked: false,
           qualificationUpdated: false,
           escalationRequired: false,
@@ -585,11 +585,11 @@ Gratefully,
   ): Promise<FeedbackAnalysis> {
     // Find active session for this lead
     const session = Array.from(this.activeSessions.values()).find(
-      (s) => s.leadId === leadId && s.status === "active"
+      (s) => s.leadId === leadId && s.status === 'active'
     );
 
     if (!session) {
-      throw new Error("No active feedback session found for lead");
+      throw new Error('No active feedback session found for lead');
     }
 
     // Analyze the feedback
@@ -604,12 +604,12 @@ Gratefully,
     // Create interaction record
     const interaction = InteractionModel.create({
       leadId,
-      agentId: "review-feedback-collector",
+      agentId: 'review-feedback-collector',
       type: channel,
-      direction: "inbound",
+      direction: 'inbound',
       content: feedbackContent,
       outcome: {
-        status: "successful",
+        status: 'successful',
         appointmentBooked: false,
         qualificationUpdated: false,
         escalationRequired: analysis.escalationRequired,
@@ -626,8 +626,8 @@ Gratefully,
       await this.requestPublicReview(session, analysis);
     } else {
       // Neutral feedback - complete session
-      session.status = "completed";
-      session.outcome = "neutral";
+      session.status = 'completed';
+      session.outcome = 'neutral';
       session.completedAt = new Date();
       this.activeSessions.set(session.id, session);
     }
@@ -661,16 +661,16 @@ Gratefully,
 
     // Generate suggested actions based on analysis
     if (analysis.escalationRequired) {
-      analysis.suggestedActions.push("Escalate to human management");
+      analysis.suggestedActions.push('Escalate to human management');
       analysis.suggestedActions.push(
-        "Schedule follow-up call to address issues"
+        'Schedule follow-up call to address issues'
       );
     } else if (analysis.reviewWorthy) {
-      analysis.suggestedActions.push("Request public review");
-      analysis.suggestedActions.push("Thank customer for positive feedback");
+      analysis.suggestedActions.push('Request public review');
+      analysis.suggestedActions.push('Thank customer for positive feedback');
     } else {
-      analysis.suggestedActions.push("Send thank you message");
-      analysis.suggestedActions.push("Complete feedback collection");
+      analysis.suggestedActions.push('Send thank you message');
+      analysis.suggestedActions.push('Complete feedback collection');
     }
 
     return analysis;
@@ -770,33 +770,33 @@ Gratefully,
     analysis: FeedbackAnalysis
   ): Promise<void> {
     if (!this.config.escalation.enabled) {
-      console.log("Escalation disabled, marking session as completed");
-      session.status = "completed";
-      session.outcome = "negative_escalated";
+      console.log('Escalation disabled, marking session as completed');
+      session.status = 'completed';
+      session.outcome = 'negative_escalated';
       session.completedAt = new Date();
       this.activeSessions.set(session.id, session);
       return;
     }
 
     // Determine severity based on sentiment score and issues
-    let severity: IssueEscalation["severity"] = "medium";
+    let severity: IssueEscalation['severity'] = 'medium';
     if (analysis.sentiment.score <= -0.7 || analysis.issues.length >= 3) {
-      severity = "high";
+      severity = 'high';
     } else if (
       analysis.sentiment.score <= -0.9 ||
       analysis.issues.some(
         (issue) =>
-          issue.toLowerCase().includes("legal") ||
-          issue.toLowerCase().includes("lawsuit") ||
-          issue.toLowerCase().includes("fraud")
+          issue.toLowerCase().includes('legal') ||
+          issue.toLowerCase().includes('lawsuit') ||
+          issue.toLowerCase().includes('fraud')
       )
     ) {
-      severity = "critical";
+      severity = 'critical';
     } else if (
       analysis.sentiment.score > -0.5 &&
       analysis.issues.length === 1
     ) {
-      severity = "low";
+      severity = 'low';
     }
 
     const escalation: IssueEscalation = {
@@ -805,16 +805,16 @@ Gratefully,
       leadId: session.leadId,
       severity,
       issues: analysis.issues,
-      feedbackContent: session.feedbackContent || "",
+      feedbackContent: session.feedbackContent || '',
       escalatedAt: new Date(),
-      status: "open",
+      status: 'open',
     };
 
     this.escalations.set(escalation.id, escalation);
 
     // Update session
     session.escalationRequired = true;
-    session.status = "escalated";
+    session.status = 'escalated';
     this.activeSessions.set(session.id, session);
 
     // Send escalation notifications
@@ -836,11 +836,11 @@ Gratefully,
 
     // Find review request template
     const template = this.config.feedbackTemplates.find(
-      (t) => t.feedbackType === "review_request" && t.enabled
+      (t) => t.feedbackType === 'review_request' && t.enabled
     );
 
     if (!template) {
-      console.error("No review request template available");
+      console.error('No review request template available');
       return;
     }
 
@@ -859,20 +859,20 @@ Gratefully,
 
     if (success) {
       session.reviewRequested = true;
-      session.status = "completed";
-      session.outcome = "positive_review";
+      session.status = 'completed';
+      session.outcome = 'positive_review';
       session.completedAt = new Date();
       this.activeSessions.set(session.id, session);
 
       // Create interaction record
       const interaction = InteractionModel.create({
         leadId: session.leadId,
-        agentId: "review-feedback-collector",
+        agentId: 'review-feedback-collector',
         type: template.channel,
-        direction: "outbound",
+        direction: 'outbound',
         content: personalizedMessage.content,
         outcome: {
-          status: "successful",
+          status: 'successful',
           appointmentBooked: false,
           qualificationUpdated: false,
           escalationRequired: false,
@@ -888,7 +888,7 @@ Gratefully,
    */
   async checkForFollowUp(sessionId: string): Promise<void> {
     const session = this.activeSessions.get(sessionId);
-    if (!session || session.status !== "active" || session.feedbackReceived) {
+    if (!session || session.status !== 'active' || session.feedbackReceived) {
       return;
     }
 
@@ -896,8 +896,8 @@ Gratefully,
     const followUpAttempts = await this.getFollowUpAttempts(session.leadId);
     if (followUpAttempts >= this.config.maxFollowUpAttempts) {
       // Max attempts reached, complete session
-      session.status = "completed";
-      session.outcome = "no_response";
+      session.status = 'completed';
+      session.outcome = 'no_response';
       session.completedAt = new Date();
       this.activeSessions.set(session.id, session);
       return;
@@ -918,11 +918,11 @@ Gratefully,
 
     // Find follow-up template
     const template = this.config.feedbackTemplates.find(
-      (t) => t.feedbackType === "follow_up" && t.enabled
+      (t) => t.feedbackType === 'follow_up' && t.enabled
     );
 
     if (!template) {
-      console.error("No follow-up template available");
+      console.error('No follow-up template available');
       return false;
     }
 
@@ -940,12 +940,12 @@ Gratefully,
       // Create interaction record
       const interaction = InteractionModel.create({
         leadId: session.leadId,
-        agentId: "review-feedback-collector",
+        agentId: 'review-feedback-collector',
         type: template.channel,
-        direction: "outbound",
+        direction: 'outbound',
         content: personalizedMessage.content,
         outcome: {
-          status: "pending",
+          status: 'pending',
           appointmentBooked: false,
           qualificationUpdated: false,
           escalationRequired: false,
@@ -976,23 +976,23 @@ Gratefully,
 
     // Basic replacements
     const replacements: Record<string, string> = {
-      name: leadData.contactInfo.name.split(" ")[0], // First name
-      propertyType: leadData.qualificationData.propertyType || "property",
-      agentName: "Sarah Johnson",
-      companyName: "Premier Real Estate",
-      phone: "(555) 123-4567",
+      name: leadData.contactInfo.name.split(' ')[0], // First name
+      propertyType: leadData.qualificationData.propertyType || 'property',
+      agentName: 'Sarah Johnson',
+      companyName: 'Premier Real Estate',
+      phone: '(555) 123-4567',
     };
 
     // Replace variables in content
     for (const [variable, value] of Object.entries(replacements)) {
-      const regex = new RegExp(`{{${variable}}}`, "g");
+      const regex = new RegExp(`{{${variable}}}`, 'g');
       content = content.replace(regex, value);
     }
 
     // Replace variables in subject if it exists
     if (subject) {
       for (const [variable, value] of Object.entries(replacements)) {
-        const regex = new RegExp(`{{${variable}}}`, "g");
+        const regex = new RegExp(`{{${variable}}}`, 'g');
         subject = subject.replace(regex, value);
       }
     }
@@ -1019,7 +1019,7 @@ Gratefully,
 
     let content = baseMessage.content;
     for (const [variable, value] of Object.entries(platformLinks)) {
-      const regex = new RegExp(`{{${variable}}}`, "g");
+      const regex = new RegExp(`{{${variable}}}`, 'g');
       content = content.replace(regex, value);
     }
 
@@ -1036,19 +1036,19 @@ Gratefully,
   ): Promise<boolean> {
     try {
       switch (channel) {
-        case "sms":
+        case 'sms':
           if (!contactInfo.phone) return false;
           return await this.sendSMS(contactInfo.phone, message.content);
 
-        case "email":
+        case 'email':
           if (!contactInfo.email) return false;
           return await this.sendEmail(
             contactInfo.email,
-            message.subject || "Feedback Request",
+            message.subject || 'Feedback Request',
             message.content
           );
 
-        case "whatsapp":
+        case 'whatsapp':
           if (!contactInfo.phone) return false;
           return await this.sendWhatsApp(contactInfo.phone, message.content);
 
@@ -1111,21 +1111,21 @@ Gratefully,
       
 Lead ID: ${escalation.leadId}
 Severity: ${escalation.severity.toUpperCase()}
-Issues: ${escalation.issues.join(", ")}
+Issues: ${escalation.issues.join(', ')}
 
 Feedback: "${escalation.feedbackContent}"
 
 Please review and respond promptly.`;
 
       switch (channel) {
-        case "email":
+        case 'email':
           await this.sendEmail(
-            "management@company.com",
+            'management@company.com',
             `URGENT: Customer Issue Escalation - ${escalation.severity.toUpperCase()}`,
             message
           );
           break;
-        case "slack":
+        case 'slack':
           console.log(`Slack notification: ${message}`);
           break;
       }
@@ -1145,7 +1145,7 @@ Please review and respond promptly.`;
 
   private hasActiveFeedbackSession(leadId: string): boolean {
     return Array.from(this.activeSessions.values()).some(
-      (session) => session.leadId === leadId && session.status === "active"
+      (session) => session.leadId === leadId && session.status === 'active'
     );
   }
 
@@ -1163,13 +1163,13 @@ Please review and respond promptly.`;
     return {
       id: leadId,
       contactInfo: {
-        name: "John Smith",
-        email: "john.smith@example.com",
-        phone: "+1234567890",
-        preferredChannel: "email",
+        name: 'John Smith',
+        email: 'john.smith@example.com',
+        phone: '+1234567890',
+        preferredChannel: 'email',
       },
       qualificationData: {
-        propertyType: "home",
+        propertyType: 'home',
       },
     };
   }
@@ -1212,7 +1212,7 @@ Please review and respond promptly.`;
    */
   updateEscalationStatus(
     escalationId: string,
-    status: IssueEscalation["status"],
+    status: IssueEscalation['status'],
     resolution?: string
   ): boolean {
     const escalation = this.escalations.get(escalationId);

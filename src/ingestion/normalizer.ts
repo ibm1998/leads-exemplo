@@ -1,6 +1,6 @@
-import { logger } from "../utils/logger";
-import { RawLeadData, NormalizedLeadData } from "./types";
-import { LeadSource } from "../types/lead";
+import { logger } from '../utils/logger';
+import { RawLeadData, NormalizedLeadData } from './types';
+import { LeadSource } from '../types/lead';
 
 /**
  * Lead normalizer that converts raw lead data from different sources
@@ -15,23 +15,23 @@ export class LeadNormalizer {
       logger.info(`Normalizing lead data from source: ${rawData.source}`);
 
       switch (rawData.source.toLowerCase()) {
-        case "gmail":
+        case 'gmail':
           return this.normalizeGmailLead(rawData);
-        case "meta_ads":
-        case "facebook":
-        case "instagram":
+        case 'meta_ads':
+        case 'facebook':
+        case 'instagram':
           return this.normalizeMetaLead(rawData);
-        case "website":
-        case "web_form":
+        case 'website':
+        case 'web_form':
           return this.normalizeWebsiteLead(rawData);
-        case "slack":
+        case 'slack':
           return this.normalizeSlackLead(rawData);
-        case "third_party":
+        case 'third_party':
         default:
           return this.normalizeGenericLead(rawData);
       }
     } catch (error) {
-      logger.error("Lead normalization failed:", error);
+      logger.error('Lead normalization failed:', error);
       throw new Error(
         `Failed to normalize lead from ${rawData.source}: ${error}`
       );
@@ -48,15 +48,15 @@ export class LeadNormalizer {
     const name = this.extractName(
       data.from?.name ||
         data.sender?.name ||
-        data.from?.email?.split("@")[0] ||
-        "Unknown"
+        data.from?.email?.split('@')[0] ||
+        'Unknown'
     );
 
     // Extract email
     const email = data.from?.email || data.sender?.email || data.replyTo;
 
     // Extract phone from email content if available
-    const phone = this.extractPhoneFromText(data.body || data.snippet || "");
+    const phone = this.extractPhoneFromText(data.body || data.snippet || '');
 
     // Analyze urgency from subject and content
     const urgencyLevel = this.analyzeUrgency(data.subject, data.body);
@@ -66,19 +66,19 @@ export class LeadNormalizer {
 
     // Extract qualification data from email content
     const qualificationData = this.extractQualificationFromText(
-      data.body || data.snippet || ""
+      data.body || data.snippet || ''
     );
 
     return {
-      source: "gmail" as LeadSource,
+      source: 'gmail' as LeadSource,
       contactInfo: {
         name,
         email,
         phone,
-        preferredChannel: "email",
-        timezone: this.extractTimezone(data) || "UTC",
+        preferredChannel: 'email',
+        timezone: this.extractTimezone(data) || 'UTC',
       },
-      leadType: urgencyLevel >= 7 ? "hot" : urgencyLevel >= 4 ? "warm" : "cold",
+      leadType: urgencyLevel >= 7 ? 'hot' : urgencyLevel >= 4 ? 'warm' : 'cold',
       urgencyLevel,
       intentSignals,
       qualificationData,
@@ -100,13 +100,13 @@ export class LeadNormalizer {
     const name =
       data.full_name ||
       data.name ||
-      `${data.first_name || ""} ${data.last_name || ""}`.trim() ||
-      "Unknown";
+      `${data.first_name || ''} ${data.last_name || ''}`.trim() ||
+      'Unknown';
     const email = data.email;
     const phone = data.phone_number || data.phone;
 
     // Meta leads are typically warm since they came from ads
-    const leadType = "warm";
+    const leadType = 'warm';
     const urgencyLevel = 5; // Default for ad leads
 
     // Extract intent signals from form responses
@@ -116,13 +116,13 @@ export class LeadNormalizer {
     const qualificationData = this.extractMetaQualificationData(data);
 
     return {
-      source: "meta_ads" as LeadSource,
+      source: 'meta_ads' as LeadSource,
       contactInfo: {
         name,
         email,
         phone,
-        preferredChannel: phone ? "sms" : "email",
-        timezone: "UTC", // Meta doesn't provide timezone info
+        preferredChannel: phone ? 'sms' : 'email',
+        timezone: 'UTC', // Meta doesn't provide timezone info
       },
       leadType,
       urgencyLevel,
@@ -132,7 +132,7 @@ export class LeadNormalizer {
         adId: data.ad_id,
         campaignId: data.campaign_id,
         formId: data.form_id,
-        platform: data.platform || "facebook",
+        platform: data.platform || 'facebook',
         createdTime: data.created_time,
       },
     };
@@ -150,12 +150,12 @@ export class LeadNormalizer {
       (data.firstName && data.lastName
         ? `${data.firstName} ${data.lastName}`
         : null) ||
-      "Unknown";
+      'Unknown';
     const email = data.email;
     const phone = data.phone || data.phoneNumber;
 
     // Website forms are typically hot leads
-    const leadType = "hot";
+    const leadType = 'hot';
     const urgencyLevel = this.analyzeWebsiteUrgency(data);
 
     // Extract intent signals from form data
@@ -165,13 +165,13 @@ export class LeadNormalizer {
     const qualificationData = this.extractWebsiteQualificationData(data);
 
     return {
-      source: "website" as LeadSource,
+      source: 'website' as LeadSource,
       contactInfo: {
         name,
         email,
         phone,
-        preferredChannel: phone ? "sms" : "email",
-        timezone: data.timezone || "UTC",
+        preferredChannel: phone ? 'sms' : 'email',
+        timezone: data.timezone || 'UTC',
       },
       leadType,
       urgencyLevel,
@@ -197,30 +197,30 @@ export class LeadNormalizer {
       data.user?.real_name ||
       data.user?.display_name ||
       data.user?.name ||
-      "Unknown";
+      'Unknown';
     const email = data.user?.profile?.email;
 
     // Slack leads are typically referrals, so warm
-    const leadType = "warm";
+    const leadType = 'warm';
     const urgencyLevel = 4;
 
     // Extract intent signals from message content
     const intentSignals = this.extractIntentSignals(
-      "",
+      '',
       data.text || data.message
     );
 
     const qualificationData = this.extractQualificationFromText(
-      data.text || data.message || ""
+      data.text || data.message || ''
     );
 
     return {
-      source: "slack" as LeadSource,
+      source: 'slack' as LeadSource,
       contactInfo: {
         name,
         email,
-        preferredChannel: "email",
-        timezone: data.user?.tz || "UTC",
+        preferredChannel: 'email',
+        timezone: data.user?.tz || 'UTC',
       },
       leadType,
       urgencyLevel,
@@ -241,12 +241,12 @@ export class LeadNormalizer {
   private normalizeGenericLead(rawData: RawLeadData): NormalizedLeadData {
     const data = rawData.rawData;
 
-    const name = data.name || data.full_name || data.contact_name || "Unknown";
+    const name = data.name || data.full_name || data.contact_name || 'Unknown';
     const email = data.email || data.email_address;
     const phone = data.phone || data.phone_number || data.mobile;
 
     // Default to cold for unknown sources
-    const leadType = "cold";
+    const leadType = 'cold';
     const urgencyLevel = 2;
 
     const intentSignals = data.intent_signals || [];
@@ -262,13 +262,13 @@ export class LeadNormalizer {
     };
 
     return {
-      source: "third_party" as LeadSource,
+      source: 'third_party' as LeadSource,
       contactInfo: {
         name,
         email,
         phone,
-        preferredChannel: phone ? "sms" : "email",
-        timezone: data.timezone || "UTC",
+        preferredChannel: phone ? 'sms' : 'email',
+        timezone: data.timezone || 'UTC',
       },
       leadType,
       urgencyLevel,
@@ -282,23 +282,23 @@ export class LeadNormalizer {
    * Extract name from various text formats
    */
   private extractName(text: string): string {
-    if (!text) return "Unknown";
+    if (!text) return 'Unknown';
 
     // Clean up common email prefixes and suffixes
-    let name = text.replace(/^(re:|fwd:|fw:)/i, "").trim();
+    let name = text.replace(/^(re:|fwd:|fw:)/i, '').trim();
 
     // If it looks like an email, extract the part before @
-    if (name.includes("@")) {
-      name = name.split("@")[0];
+    if (name.includes('@')) {
+      name = name.split('@')[0];
     }
 
     // Convert underscores and dots to spaces
-    name = name.replace(/[._]/g, " ");
+    name = name.replace(/[._]/g, ' ');
 
     // Capitalize first letter of each word
     name = name.replace(/\b\w/g, (l) => l.toUpperCase());
 
-    return name || "Unknown";
+    return name || 'Unknown';
   }
 
   /**
@@ -308,14 +308,14 @@ export class LeadNormalizer {
     const phoneRegex =
       /(\+?1?[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})/;
     const match = text.match(phoneRegex);
-    return match ? match[0].replace(/\D/g, "") : undefined;
+    return match ? match[0].replace(/\D/g, '') : undefined;
   }
 
   /**
    * Analyze urgency level from text content
    */
   private analyzeUrgency(subject?: string, body?: string): number {
-    const text = `${subject || ""} ${body || ""}`.toLowerCase();
+    const text = `${subject || ''} ${body || ''}`.toLowerCase();
 
     // High urgency keywords
     if (text.match(/urgent|asap|immediately|emergency|today|now|quick/)) {
@@ -340,20 +340,20 @@ export class LeadNormalizer {
    * Extract intent signals from text
    */
   private extractIntentSignals(subject?: string, body?: string): string[] {
-    const text = `${subject || ""} ${body || ""}`.toLowerCase();
+    const text = `${subject || ''} ${body || ''}`.toLowerCase();
     const signals: string[] = [];
 
     // Real estate specific intent signals
     if (text.match(/buy|purchase|looking to buy/))
-      signals.push("buying_intent");
-    if (text.match(/sell|selling|list my/)) signals.push("selling_intent");
-    if (text.match(/rent|rental|lease/)) signals.push("rental_intent");
-    if (text.match(/invest|investment|roi/)) signals.push("investment_intent");
-    if (text.match(/mortgage|financing|loan/)) signals.push("financing_need");
-    if (text.match(/agent|realtor|help/)) signals.push("agent_request");
+      signals.push('buying_intent');
+    if (text.match(/sell|selling|list my/)) signals.push('selling_intent');
+    if (text.match(/rent|rental|lease/)) signals.push('rental_intent');
+    if (text.match(/invest|investment|roi/)) signals.push('investment_intent');
+    if (text.match(/mortgage|financing|loan/)) signals.push('financing_need');
+    if (text.match(/agent|realtor|help/)) signals.push('agent_request');
     if (text.match(/valuation|appraisal|worth/))
-      signals.push("valuation_request");
-    if (text.match(/market|price|cost/)) signals.push("market_research");
+      signals.push('valuation_request');
+    if (text.match(/market|price|cost/)) signals.push('market_research');
 
     return signals;
   }
@@ -368,9 +368,9 @@ export class LeadNormalizer {
     const budgetMatch = text.match(/\$?([\d,]+)(?:\s*[-–—]\s*\$?([\d,]+))?/);
     let budget;
     if (budgetMatch) {
-      const min = parseInt(budgetMatch[1].replace(/,/g, ""));
+      const min = parseInt(budgetMatch[1].replace(/,/g, ''));
       const max = budgetMatch[2]
-        ? parseInt(budgetMatch[2].replace(/,/g, ""))
+        ? parseInt(budgetMatch[2].replace(/,/g, ''))
         : undefined;
       budget = { min, max };
     }
@@ -381,20 +381,20 @@ export class LeadNormalizer {
 
     // Extract property type
     let propertyType;
-    if (lowerText.includes("house") || lowerText.includes("home"))
-      propertyType = "house";
-    else if (lowerText.includes("condo") || lowerText.includes("condominium"))
-      propertyType = "condo";
-    else if (lowerText.includes("apartment")) propertyType = "apartment";
-    else if (lowerText.includes("commercial")) propertyType = "commercial";
+    if (lowerText.includes('house') || lowerText.includes('home'))
+      propertyType = 'house';
+    else if (lowerText.includes('condo') || lowerText.includes('condominium'))
+      propertyType = 'condo';
+    else if (lowerText.includes('apartment')) propertyType = 'apartment';
+    else if (lowerText.includes('commercial')) propertyType = 'commercial';
 
     // Extract timeline
     let timeline;
-    if (lowerText.match(/this month|30 days/)) timeline = "immediate";
-    else if (lowerText.match(/next month|60 days/)) timeline = "1-2 months";
-    else if (lowerText.match(/3 months|quarter/)) timeline = "3 months";
-    else if (lowerText.match(/6 months|half year/)) timeline = "6 months";
-    else if (lowerText.match(/year|12 months/)) timeline = "1 year";
+    if (lowerText.match(/this month|30 days/)) timeline = 'immediate';
+    else if (lowerText.match(/next month|60 days/)) timeline = '1-2 months';
+    else if (lowerText.match(/3 months|quarter/)) timeline = '3 months';
+    else if (lowerText.match(/6 months|half year/)) timeline = '6 months';
+    else if (lowerText.match(/year|12 months/)) timeline = '1 year';
 
     return {
       budget,
@@ -414,7 +414,7 @@ export class LeadNormalizer {
       const dateMatch = data.headers.date.match(/([+-]\d{4})/);
       if (dateMatch) {
         // Convert offset to timezone (simplified)
-        return "UTC"; // For now, default to UTC
+        return 'UTC'; // For now, default to UTC
       }
     }
     return undefined;
@@ -427,11 +427,11 @@ export class LeadNormalizer {
     const signals: string[] = [];
 
     // Check form fields for intent
-    if (data.looking_to_buy) signals.push("buying_intent");
-    if (data.looking_to_sell) signals.push("selling_intent");
-    if (data.interested_in_renting) signals.push("rental_intent");
-    if (data.investment_property) signals.push("investment_intent");
-    if (data.need_financing) signals.push("financing_need");
+    if (data.looking_to_buy) signals.push('buying_intent');
+    if (data.looking_to_sell) signals.push('selling_intent');
+    if (data.interested_in_renting) signals.push('rental_intent');
+    if (data.investment_property) signals.push('investment_intent');
+    if (data.need_financing) signals.push('financing_need');
 
     return signals;
   }
@@ -464,10 +464,10 @@ export class LeadNormalizer {
    */
   private analyzeWebsiteUrgency(data: any): number {
     // Contact form submissions are typically high urgency
-    if (data.formName?.toLowerCase().includes("contact")) return 8;
+    if (data.formName?.toLowerCase().includes('contact')) return 8;
 
     // Quote requests are very high urgency
-    if (data.formName?.toLowerCase().includes("quote")) return 9;
+    if (data.formName?.toLowerCase().includes('quote')) return 9;
 
     // General inquiries are medium urgency
     return 6;
@@ -479,11 +479,11 @@ export class LeadNormalizer {
   private extractWebsiteIntentSignals(data: any): string[] {
     const signals: string[] = [];
 
-    if (data.service?.includes("buy")) signals.push("buying_intent");
-    if (data.service?.includes("sell")) signals.push("selling_intent");
-    if (data.service?.includes("rent")) signals.push("rental_intent");
-    if (data.inquiry_type === "valuation") signals.push("valuation_request");
-    if (data.need_agent) signals.push("agent_request");
+    if (data.service?.includes('buy')) signals.push('buying_intent');
+    if (data.service?.includes('sell')) signals.push('selling_intent');
+    if (data.service?.includes('rent')) signals.push('rental_intent');
+    if (data.inquiry_type === 'valuation') signals.push('valuation_request');
+    if (data.need_agent) signals.push('agent_request');
 
     return signals;
   }

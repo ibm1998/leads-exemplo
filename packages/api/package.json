@@ -6,14 +6,9 @@
   "scripts": {
     "build": "tsc",
 
-    // roda só a API em modo watch
-    "dev:api": "tsx watch src/index.ts",
-
-    // roda só o n8n (assumindo que você tem o binário 'n8n' disponível)
-    "dev:n8n": "n8n start",
-
-    // roda API + n8n em paralelo
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:n8n\"",
+  "dev:api": "tsx watch src/index.ts",
+  "dev:n8n": "n8n start",
+  "dev": "concurrently \"npm run dev:api\" \"npm run dev:n8n\"",
 
     "start": "node dist/index.js",
     "test": "vitest --run",
@@ -29,7 +24,7 @@
     "express": "^5.1.0",
     "pg": "^8.11.3",
     "winston": "^3.11.0",
-    "firebase": "^11.10.0",           // <12 para satisfazer next-firebase-auth
+  "firebase": "^11.10.0",
     "next-firebase-auth": "^1.4.0",
     "zod": "^3.22.4"
   },

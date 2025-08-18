@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import * as admin from 'firebase-admin';
 // https://firebase.google.com/docs/admin/setup#initialize-sdk
 
 if (!admin.apps.length) {
@@ -24,7 +24,7 @@ if (!admin.apps.length) {
       databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     });
   } catch (e) {
-    console.log("Failed to initialize App: " + e);
+    console.log('Failed to initialize App: ' + e);
   }
 }
 

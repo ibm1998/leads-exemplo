@@ -1,10 +1,10 @@
-import { Lead, LeadModel, LeadStatus } from "../types/lead";
+import { Lead, LeadModel, LeadStatus } from '../types/lead';
 import {
   Interaction,
   InteractionModel,
   CreateInteraction,
   InteractionType,
-} from "../types/interaction";
+} from '../types/interaction';
 
 /**
  * Re-engagement trigger configuration
@@ -13,7 +13,7 @@ export interface ReengagementTrigger {
   id: string;
   name: string;
   condition: (lead: Lead, interactions: Interaction[]) => boolean;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
   enabled: boolean;
   cooldownDays: number; // Days to wait before re-triggering
 }
@@ -63,13 +63,13 @@ export interface ReengagementSession {
   campaignId: string;
   triggerId: string;
   startedAt: Date;
-  status: "active" | "completed" | "paused" | "failed";
+  status: 'active' | 'completed' | 'paused' | 'failed';
   currentStep: number;
   messagesAttempted: number;
   lastContactAt?: Date;
   responseReceived: boolean;
   completedAt?: Date;
-  outcome?: "re_engaged" | "no_response" | "opted_out" | "converted";
+  outcome?: 're_engaged' | 'no_response' | 'opted_out' | 'converted';
 }
 
 /**
@@ -83,7 +83,7 @@ export interface EngagementAnalysis {
   bestContactTime: string;
   engagementScore: number; // 0-1 scale
   personalizedFactors: string[];
-  riskLevel: "low" | "medium" | "high";
+  riskLevel: 'low' | 'medium' | 'high';
 }
 
 /**
@@ -91,13 +91,13 @@ export interface EngagementAnalysis {
  */
 export interface ResponseHandlingResult {
   sessionId: string;
-  responseType: "positive" | "negative" | "neutral" | "opt_out";
+  responseType: 'positive' | 'negative' | 'neutral' | 'opt_out';
   nextAction:
-    | "continue_campaign"
-    | "escalate"
-    | "mark_converted"
-    | "pause"
-    | "end";
+    | 'continue_campaign'
+    | 'escalate'
+    | 'mark_converted'
+    | 'pause'
+    | 'end';
   reasoning: string[];
   scheduledFollowUp?: Date;
 }
@@ -132,47 +132,47 @@ const DEFAULT_CONFIG: CustomerRetentionConfig = {
   messageTemplates: [],
   campaigns: [],
   channels: {
-    sms: { enabled: true, provider: "twilio" },
-    email: { enabled: true, provider: "sendgrid" },
-    whatsapp: { enabled: true, provider: "twilio" },
+    sms: { enabled: true, provider: 'twilio' },
+    email: { enabled: true, provider: 'sendgrid' },
+    whatsapp: { enabled: true, provider: 'twilio' },
   },
   responseAnalysis: {
     positiveKeywords: [
-      "yes",
-      "interested",
-      "sure",
-      "okay",
-      "sounds good",
-      "tell me more",
-      "when",
-      "how",
-      "what",
-      "where",
-      "schedule",
-      "meeting",
-      "call",
+      'yes',
+      'interested',
+      'sure',
+      'okay',
+      'sounds good',
+      'tell me more',
+      'when',
+      'how',
+      'what',
+      'where',
+      'schedule',
+      'meeting',
+      'call',
     ],
     negativeKeywords: [
-      "no",
-      "not interested",
-      "busy",
-      "later",
-      "maybe",
-      "not now",
+      'no',
+      'not interested',
+      'busy',
+      'later',
+      'maybe',
+      'not now',
       "don't",
       "can't",
       "won't",
-      "not ready",
+      'not ready',
     ],
     optOutKeywords: [
-      "stop",
-      "unsubscribe",
-      "remove",
-      "opt out",
-      "no more",
-      "leave me alone",
+      'stop',
+      'unsubscribe',
+      'remove',
+      'opt out',
+      'no more',
+      'leave me alone',
       "don't contact",
-      "take me off",
+      'take me off',
     ],
   },
   maxConcurrentCampaigns: 50,
@@ -219,49 +219,49 @@ export class CustomerRetentionAgent {
   private initializeDefaultTriggers(): void {
     const defaultTriggers: ReengagementTrigger[] = [
       {
-        id: "inactive_60_days",
-        name: "60 Days Inactive",
+        id: 'inactive_60_days',
+        name: '60 Days Inactive',
         condition: (lead, interactions) => {
           const daysSinceLastInteraction =
             this.getDaysSinceLastInteraction(interactions);
-          return daysSinceLastInteraction >= 60 && lead.status !== "dormant";
+          return daysSinceLastInteraction >= 60 && lead.status !== 'dormant';
         },
-        priority: "medium",
+        priority: 'medium',
         enabled: true,
         cooldownDays: 30,
       },
       {
-        id: "inactive_90_days",
-        name: "90 Days Inactive - High Priority",
+        id: 'inactive_90_days',
+        name: '90 Days Inactive - High Priority',
         condition: (lead, interactions) => {
           const daysSinceLastInteraction =
             this.getDaysSinceLastInteraction(interactions);
-          return daysSinceLastInteraction >= 90 && lead.status !== "dormant";
+          return daysSinceLastInteraction >= 90 && lead.status !== 'dormant';
         },
-        priority: "high",
+        priority: 'high',
         enabled: true,
         cooldownDays: 45,
       },
       {
-        id: "qualified_but_inactive",
-        name: "Qualified Lead Gone Inactive",
+        id: 'qualified_but_inactive',
+        name: 'Qualified Lead Gone Inactive',
         condition: (lead, interactions) => {
           const daysSinceLastInteraction =
             this.getDaysSinceLastInteraction(interactions);
           return (
             daysSinceLastInteraction >= 30 &&
             lead.qualificationData.qualificationScore > 0.6 &&
-            lead.status !== "converted" &&
-            lead.status !== "lost"
+            lead.status !== 'converted' &&
+            lead.status !== 'lost'
           );
         },
-        priority: "high",
+        priority: 'high',
         enabled: true,
         cooldownDays: 14,
       },
       {
-        id: "appointment_no_show",
-        name: "Appointment No-Show Follow-up",
+        id: 'appointment_no_show',
+        name: 'Appointment No-Show Follow-up',
         condition: (lead, interactions) => {
           const recentInteractions = interactions.filter(
             (i) => Date.now() - i.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000 // Last 7 days
@@ -270,7 +270,7 @@ export class CustomerRetentionAgent {
             (i) => i.outcome.appointmentBooked && !i.outcome.escalationRequired
           );
         },
-        priority: "high",
+        priority: 'high',
         enabled: true,
         cooldownDays: 7,
       },
@@ -285,19 +285,19 @@ export class CustomerRetentionAgent {
   private initializeDefaultTemplates(): void {
     const defaultTemplates: MessageTemplate[] = [
       {
-        id: "sms_gentle_reengagement",
-        name: "SMS Gentle Re-engagement",
-        channel: "sms",
+        id: 'sms_gentle_reengagement',
+        name: 'SMS Gentle Re-engagement',
+        channel: 'sms',
         content:
           "Hi {{name}}! It's been a while since we last spoke about your real estate needs. We have some exciting new properties that might interest you. Would you like to hear about them? Reply YES to continue or STOP to opt out.",
-        variables: ["name"],
+        variables: ['name'],
         enabled: true,
       },
       {
-        id: "email_personalized_update",
-        name: "Email Personalized Market Update",
-        channel: "email",
-        subject: "{{name}}, New Properties in {{location}} - Perfect for You!",
+        id: 'email_personalized_update',
+        name: 'Email Personalized Market Update',
+        channel: 'email',
+        subject: '{{name}}, New Properties in {{location}} - Perfect for You!',
         content: `Hi {{name}},
 
 I hope this email finds you well! It's been {{daysSinceContact}} days since we last connected about your search for a {{propertyType}} in {{location}}.
@@ -316,30 +316,30 @@ Best regards,
 {{agentName}}
 Premier Real Estate`,
         variables: [
-          "name",
-          "daysSinceContact",
-          "propertyType",
-          "location",
-          "budget",
-          "agentPhone",
-          "agentName",
+          'name',
+          'daysSinceContact',
+          'propertyType',
+          'location',
+          'budget',
+          'agentPhone',
+          'agentName',
         ],
         enabled: true,
       },
       {
-        id: "whatsapp_special_offer",
-        name: "WhatsApp Special Offer",
-        channel: "whatsapp",
+        id: 'whatsapp_special_offer',
+        name: 'WhatsApp Special Offer',
+        channel: 'whatsapp',
         content:
-          "🏠 Hi {{name}}! We have a special opportunity that might interest you. New properties just listed in {{location}} with exclusive early access for our valued clients. Interested in a private showing? Let me know! 📱",
-        variables: ["name", "location"],
+          '🏠 Hi {{name}}! We have a special opportunity that might interest you. New properties just listed in {{location}} with exclusive early access for our valued clients. Interested in a private showing? Let me know! 📱',
+        variables: ['name', 'location'],
         enabled: true,
       },
       {
-        id: "email_market_report",
-        name: "Email Market Report",
-        channel: "email",
-        subject: "{{location}} Market Update - What You Need to Know",
+        id: 'email_market_report',
+        name: 'Email Market Report',
+        channel: 'email',
+        subject: '{{location}} Market Update - What You Need to Know',
         content: `Hi {{name}},
 
 I thought you'd be interested in the latest market trends for {{location}}, especially given your previous interest in the area.
@@ -356,12 +356,12 @@ Would you like to schedule a brief consultation to discuss how these trends migh
 Best,
 {{agentName}}`,
         variables: [
-          "name",
-          "location",
-          "marketData",
-          "newListings",
-          "trend",
-          "agentName",
+          'name',
+          'location',
+          'marketData',
+          'newListings',
+          'trend',
+          'agentName',
         ],
         enabled: true,
       },
@@ -376,83 +376,83 @@ Best,
   private initializeDefaultCampaigns(): void {
     const defaultCampaigns: ReengagementCampaign[] = [
       {
-        id: "gentle_reengagement",
-        name: "Gentle Re-engagement Campaign",
-        triggers: ["inactive_60_days"],
+        id: 'gentle_reengagement',
+        name: 'Gentle Re-engagement Campaign',
+        triggers: ['inactive_60_days'],
         messageSequence: [
           {
-            templateId: "sms_gentle_reengagement",
-            channel: "sms",
+            templateId: 'sms_gentle_reengagement',
+            channel: 'sms',
             delayDays: 0,
           },
           {
-            templateId: "email_personalized_update",
-            channel: "email",
+            templateId: 'email_personalized_update',
+            channel: 'email',
             delayDays: 3,
-            conditions: ["no_sms_response"],
+            conditions: ['no_sms_response'],
           },
           {
-            templateId: "whatsapp_special_offer",
-            channel: "whatsapp",
+            templateId: 'whatsapp_special_offer',
+            channel: 'whatsapp',
             delayDays: 7,
-            conditions: ["no_email_response"],
+            conditions: ['no_email_response'],
           },
         ],
         enabled: true,
         maxAttempts: 3,
-        successCriteria: ["response_received", "appointment_booked"],
+        successCriteria: ['response_received', 'appointment_booked'],
       },
       {
-        id: "high_value_reengagement",
-        name: "High-Value Lead Re-engagement",
-        triggers: ["qualified_but_inactive", "inactive_90_days"],
+        id: 'high_value_reengagement',
+        name: 'High-Value Lead Re-engagement',
+        triggers: ['qualified_but_inactive', 'inactive_90_days'],
         messageSequence: [
           {
-            templateId: "email_personalized_update",
-            channel: "email",
+            templateId: 'email_personalized_update',
+            channel: 'email',
             delayDays: 0,
           },
           {
-            templateId: "sms_gentle_reengagement",
-            channel: "sms",
+            templateId: 'sms_gentle_reengagement',
+            channel: 'sms',
             delayDays: 2,
-            conditions: ["no_email_response"],
+            conditions: ['no_email_response'],
           },
           {
-            templateId: "email_market_report",
-            channel: "email",
+            templateId: 'email_market_report',
+            channel: 'email',
             delayDays: 7,
-            conditions: ["no_sms_response"],
+            conditions: ['no_sms_response'],
           },
         ],
         enabled: true,
         maxAttempts: 3,
         successCriteria: [
-          "response_received",
-          "appointment_booked",
-          "qualification_updated",
+          'response_received',
+          'appointment_booked',
+          'qualification_updated',
         ],
       },
       {
-        id: "appointment_recovery",
-        name: "Appointment No-Show Recovery",
-        triggers: ["appointment_no_show"],
+        id: 'appointment_recovery',
+        name: 'Appointment No-Show Recovery',
+        triggers: ['appointment_no_show'],
         messageSequence: [
           {
-            templateId: "sms_gentle_reengagement",
-            channel: "sms",
+            templateId: 'sms_gentle_reengagement',
+            channel: 'sms',
             delayDays: 1,
           },
           {
-            templateId: "email_personalized_update",
-            channel: "email",
+            templateId: 'email_personalized_update',
+            channel: 'email',
             delayDays: 3,
-            conditions: ["no_sms_response"],
+            conditions: ['no_sms_response'],
           },
         ],
         enabled: true,
         maxAttempts: 2,
-        successCriteria: ["response_received", "appointment_rescheduled"],
+        successCriteria: ['response_received', 'appointment_rescheduled'],
       },
     ];
 
@@ -520,7 +520,7 @@ Best,
       campaignId: campaign.id,
       triggerId: trigger.id,
       startedAt: new Date(),
-      status: "active",
+      status: 'active',
       currentStep: 0,
       messagesAttempted: 0,
       responseReceived: false,
@@ -543,7 +543,7 @@ Best,
    */
   async executeNextCampaignStep(sessionId: string): Promise<boolean> {
     const session = this.activeSessions.get(sessionId);
-    if (!session || session.status !== "active") {
+    if (!session || session.status !== 'active') {
       return false;
     }
 
@@ -556,8 +556,8 @@ Best,
 
     // Check if we've reached max attempts
     if (session.messagesAttempted >= campaign.maxAttempts) {
-      session.status = "completed";
-      session.outcome = "no_response";
+      session.status = 'completed';
+      session.outcome = 'no_response';
       session.completedAt = new Date();
       this.activeSessions.set(sessionId, session);
       return false;
@@ -566,8 +566,8 @@ Best,
     // Get next message in sequence
     const nextMessage = campaign.messageSequence[session.currentStep];
     if (!nextMessage) {
-      session.status = "completed";
-      session.outcome = "no_response";
+      session.status = 'completed';
+      session.outcome = 'no_response';
       session.completedAt = new Date();
       this.activeSessions.set(sessionId, session);
       return false;
@@ -633,12 +633,12 @@ Best,
       // Create interaction record
       const interaction = InteractionModel.create({
         leadId: session.leadId,
-        agentId: "customer-retention-agent",
+        agentId: 'customer-retention-agent',
         type: campaignMessage.channel,
-        direction: "outbound",
+        direction: 'outbound',
         content: personalizedMessage.content,
         outcome: {
-          status: "pending",
+          status: 'pending',
           appointmentBooked: false,
           qualificationUpdated: false,
           escalationRequired: false,
@@ -665,28 +665,28 @@ Best,
 
     // Replace variables with actual data
     const replacements: Record<string, string> = {
-      name: leadData.contactInfo.name.split(" ")[0], // First name
-      location: leadData.qualificationData.location || "your preferred area",
-      propertyType: leadData.qualificationData.propertyType || "property",
+      name: leadData.contactInfo.name.split(' ')[0], // First name
+      location: leadData.qualificationData.location || 'your preferred area',
+      propertyType: leadData.qualificationData.propertyType || 'property',
       budget: this.formatBudget(leadData.qualificationData.budget),
-      daysSinceContact: analysis?.daysSinceLastInteraction.toString() || "60",
-      agentName: "Sarah Johnson",
-      agentPhone: "(555) 123-4567",
-      marketData: "$450K - $650K",
-      newListings: "12",
-      trend: "Favorable for buyers",
+      daysSinceContact: analysis?.daysSinceLastInteraction.toString() || '60',
+      agentName: 'Sarah Johnson',
+      agentPhone: '(555) 123-4567',
+      marketData: '$450K - $650K',
+      newListings: '12',
+      trend: 'Favorable for buyers',
     };
 
     // Replace variables in content
     for (const [variable, value] of Object.entries(replacements)) {
-      const regex = new RegExp(`{{${variable}}}`, "g");
+      const regex = new RegExp(`{{${variable}}}`, 'g');
       content = content.replace(regex, value);
     }
 
     // Replace variables in subject if it exists
     if (subject) {
       for (const [variable, value] of Object.entries(replacements)) {
-        const regex = new RegExp(`{{${variable}}}`, "g");
+        const regex = new RegExp(`{{${variable}}}`, 'g');
         subject = subject.replace(regex, value);
       }
     }
@@ -704,23 +704,23 @@ Best,
   ): Promise<boolean> {
     try {
       switch (channel) {
-        case "sms":
+        case 'sms':
           if (!this.config.channels.sms.enabled || !contactInfo.phone) {
             return false;
           }
           return await this.sendSMS(contactInfo.phone, message.content);
 
-        case "email":
+        case 'email':
           if (!this.config.channels.email.enabled || !contactInfo.email) {
             return false;
           }
           return await this.sendEmail(
             contactInfo.email,
-            message.subject || "Re-engagement",
+            message.subject || 'Re-engagement',
             message.content
           );
 
-        case "whatsapp":
+        case 'whatsapp':
           if (!this.config.channels.whatsapp.enabled || !contactInfo.phone) {
             return false;
           }
@@ -790,11 +790,11 @@ Best,
   ): Promise<ResponseHandlingResult> {
     // Find active session for this lead
     const session = Array.from(this.activeSessions.values()).find(
-      (s) => s.leadId === leadId && s.status === "active"
+      (s) => s.leadId === leadId && s.status === 'active'
     );
 
     if (!session) {
-      throw new Error("No active re-engagement session found for lead");
+      throw new Error('No active re-engagement session found for lead');
     }
 
     // Analyze response
@@ -814,9 +814,9 @@ Best,
 
     // Execute next action
     switch (result.nextAction) {
-      case "continue_campaign":
+      case 'continue_campaign':
         result.reasoning.push(
-          "Neutral response - continuing campaign sequence"
+          'Neutral response - continuing campaign sequence'
         );
         // Schedule next message if available
         setTimeout(
@@ -825,24 +825,24 @@ Best,
         ); // 24 hours
         break;
 
-      case "escalate":
-        result.reasoning.push("Positive response - escalating to human agent");
+      case 'escalate':
+        result.reasoning.push('Positive response - escalating to human agent');
         await this.escalateToHumanAgent(session);
         break;
 
-      case "mark_converted":
-        result.reasoning.push("Strong positive response indicating conversion");
+      case 'mark_converted':
+        result.reasoning.push('Strong positive response indicating conversion');
         await this.markAsConverted(session);
         break;
 
-      case "pause":
-        result.reasoning.push("Negative response - pausing campaign");
+      case 'pause':
+        result.reasoning.push('Negative response - pausing campaign');
         await this.pauseCampaign(session);
         break;
 
-      case "end":
+      case 'end':
         result.reasoning.push(
-          "Opt-out request - ending campaign and updating preferences"
+          'Opt-out request - ending campaign and updating preferences'
         );
         await this.endCampaignWithOptOut(session);
         break;
@@ -851,15 +851,15 @@ Best,
     // Create interaction record for the response
     const interaction = InteractionModel.create({
       leadId,
-      agentId: "customer-retention-agent",
+      agentId: 'customer-retention-agent',
       type: channel,
-      direction: "inbound",
+      direction: 'inbound',
       content: responseContent,
       outcome: {
-        status: "successful",
-        appointmentBooked: result.nextAction === "escalate",
-        qualificationUpdated: responseType === "positive",
-        escalationRequired: result.nextAction === "escalate",
+        status: 'successful',
+        appointmentBooked: result.nextAction === 'escalate',
+        qualificationUpdated: responseType === 'positive',
+        escalationRequired: result.nextAction === 'escalate',
       },
     });
 
@@ -873,7 +873,7 @@ Best,
    */
   private analyzeResponse(
     content: string
-  ): ResponseHandlingResult["responseType"] {
+  ): ResponseHandlingResult['responseType'] {
     const lowerContent = content.toLowerCase();
 
     // Check for opt-out keywords first
@@ -882,7 +882,7 @@ Best,
         lowerContent.includes(keyword.toLowerCase())
       )
     ) {
-      return "opt_out";
+      return 'opt_out';
     }
 
     // Check for positive keywords
@@ -898,11 +898,11 @@ Best,
       ).length;
 
     if (positiveMatches > negativeMatches && positiveMatches > 0) {
-      return "positive";
+      return 'positive';
     } else if (negativeMatches > positiveMatches && negativeMatches > 0) {
-      return "negative";
+      return 'negative';
     } else {
-      return "neutral";
+      return 'neutral';
     }
   }
 
@@ -910,34 +910,34 @@ Best,
    * Determine next action based on response type and session state
    */
   private determineNextAction(
-    responseType: ResponseHandlingResult["responseType"],
+    responseType: ResponseHandlingResult['responseType'],
     session: ReengagementSession
-  ): ResponseHandlingResult["nextAction"] {
+  ): ResponseHandlingResult['nextAction'] {
     switch (responseType) {
-      case "positive":
+      case 'positive':
         // Strong positive responses should be escalated
         if (session.messagesAttempted <= 1) {
-          return "escalate";
+          return 'escalate';
         } else {
-          return "mark_converted";
+          return 'mark_converted';
         }
 
-      case "negative":
-        return "pause";
+      case 'negative':
+        return 'pause';
 
-      case "opt_out":
-        return "end";
+      case 'opt_out':
+        return 'end';
 
-      case "neutral":
+      case 'neutral':
       default:
         // Continue campaign if we haven't reached max attempts
         const campaign = this.config.campaigns.find(
           (c) => c.id === session.campaignId
         );
         if (campaign && session.messagesAttempted < campaign.maxAttempts) {
-          return "continue_campaign";
+          return 'continue_campaign';
         } else {
-          return "pause";
+          return 'pause';
         }
     }
   }
@@ -948,8 +948,8 @@ Best,
   private async escalateToHumanAgent(
     session: ReengagementSession
   ): Promise<void> {
-    session.status = "completed";
-    session.outcome = "re_engaged";
+    session.status = 'completed';
+    session.outcome = 're_engaged';
     session.completedAt = new Date();
     this.activeSessions.set(session.id, session);
 
@@ -961,8 +961,8 @@ Best,
    * Mark session as converted
    */
   private async markAsConverted(session: ReengagementSession): Promise<void> {
-    session.status = "completed";
-    session.outcome = "converted";
+    session.status = 'completed';
+    session.outcome = 'converted';
     session.completedAt = new Date();
     this.activeSessions.set(session.id, session);
 
@@ -975,7 +975,7 @@ Best,
    * Pause campaign
    */
   private async pauseCampaign(session: ReengagementSession): Promise<void> {
-    session.status = "paused";
+    session.status = 'paused';
     this.activeSessions.set(session.id, session);
 
     console.log(`Re-engagement campaign paused for lead ${session.leadId}`);
@@ -987,8 +987,8 @@ Best,
   private async endCampaignWithOptOut(
     session: ReengagementSession
   ): Promise<void> {
-    session.status = "completed";
-    session.outcome = "opted_out";
+    session.status = 'completed';
+    session.outcome = 'opted_out';
     session.completedAt = new Date();
     this.activeSessions.set(session.id, session);
 
@@ -1013,7 +1013,7 @@ Best,
       return acc;
     }, {} as Record<InteractionType, number>);
 
-    let preferredChannel: InteractionType = "email"; // Default
+    let preferredChannel: InteractionType = 'email'; // Default
     if (Object.keys(channelCounts).length > 0) {
       preferredChannel = Object.entries(channelCounts).reduce((a, b) =>
         channelCounts[a[0] as InteractionType] >
@@ -1038,11 +1038,11 @@ Best,
     else if (daysSinceLastInteraction > 90) engagementScore -= 0.2;
 
     // Determine risk level
-    let riskLevel: EngagementAnalysis["riskLevel"] = "low";
+    let riskLevel: EngagementAnalysis['riskLevel'] = 'low';
     if (daysSinceLastInteraction > 90 || engagementScore < 0.3) {
-      riskLevel = "high";
+      riskLevel = 'high';
     } else if (daysSinceLastInteraction > 60 || engagementScore < 0.5) {
-      riskLevel = "medium";
+      riskLevel = 'medium';
     }
 
     // Generate personalized factors
@@ -1092,11 +1092,11 @@ Best,
   private determineBestContactTime(interactions: Interaction[]): string {
     // Analyze interaction times to determine best contact time
     // Simplified implementation - in reality would analyze response rates by time
-    return "10:00 AM";
+    return '10:00 AM';
   }
 
   private formatBudget(budget?: { min?: number; max?: number }): string {
-    if (!budget) return "Budget not specified";
+    if (!budget) return 'Budget not specified';
 
     if (budget.min && budget.max) {
       return `$${budget.min.toLocaleString()} - $${budget.max.toLocaleString()}`;
@@ -1106,12 +1106,12 @@ Best,
       return `Up to $${budget.max.toLocaleString()}`;
     }
 
-    return "Budget not specified";
+    return 'Budget not specified';
   }
 
   private hasActiveCampaign(leadId: string): boolean {
     return Array.from(this.activeSessions.values()).some(
-      (session) => session.leadId === leadId && session.status === "active"
+      (session) => session.leadId === leadId && session.status === 'active'
     );
   }
 
@@ -1130,13 +1130,13 @@ Best,
     return {
       id: leadId,
       contactInfo: {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "+1234567890",
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '+1234567890',
       },
       qualificationData: {
-        location: "Downtown",
-        propertyType: "Condo",
+        location: 'Downtown',
+        propertyType: 'Condo',
         budget: { min: 400000, max: 600000 },
       },
     };
@@ -1150,8 +1150,8 @@ Best,
     // Simplified implementation
     return conditions.every((condition) => {
       switch (condition) {
-        case "no_sms_response":
-        case "no_email_response":
+        case 'no_sms_response':
+        case 'no_email_response':
           return !session.responseReceived;
         default:
           return true;
@@ -1172,7 +1172,7 @@ Best,
    */
   getActiveSessions(): ReengagementSession[] {
     return Array.from(this.activeSessions.values()).filter(
-      (session) => session.status === "active"
+      (session) => session.status === 'active'
     );
   }
 
@@ -1252,22 +1252,22 @@ Best,
   } {
     const allSessions = Array.from(this.activeSessions.values());
     const completedSessions = allSessions.filter(
-      (s) => s.status === "completed"
+      (s) => s.status === 'completed'
     );
 
     const reengaged = completedSessions.filter(
-      (s) => s.outcome === "re_engaged"
+      (s) => s.outcome === 're_engaged'
     ).length;
     const converted = completedSessions.filter(
-      (s) => s.outcome === "converted"
+      (s) => s.outcome === 'converted'
     ).length;
     const optedOut = completedSessions.filter(
-      (s) => s.outcome === "opted_out"
+      (s) => s.outcome === 'opted_out'
     ).length;
 
     return {
       totalCampaignsStarted: allSessions.length,
-      activeCampaigns: allSessions.filter((s) => s.status === "active").length,
+      activeCampaigns: allSessions.filter((s) => s.status === 'active').length,
       completedCampaigns: completedSessions.length,
       reengagementRate:
         completedSessions.length > 0 ? reengaged / completedSessions.length : 0,

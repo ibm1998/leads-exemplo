@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import request from "supertest";
-import { N8nClient } from "../n8n-client";
-import { N8nWebhookServer } from "../webhook-server";
-import { WorkflowManager } from "../workflow-manager";
-import { WorkflowTemplateGenerator } from "../workflow-templates";
-import { Lead, LeadType, LeadSource } from "../../types/lead";
-import { LeadAnalysisResult } from "../../agents/ai-head-agent";
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import request from 'supertest';
+import { N8nClient } from '../n8n-client';
+import { N8nWebhookServer } from '../webhook-server';
+import { WorkflowManager } from '../workflow-manager';
+import { WorkflowTemplateGenerator } from '../workflow-templates';
+import { Lead, LeadType, LeadSource } from '../../types/lead';
+import { LeadAnalysisResult } from '../../agents/ai-head-agent';
 
 // Mock N8nClient
-vi.mock("../n8n-client");
+vi.mock('../n8n-client');
 const MockedN8nClient = vi.mocked(N8nClient);
 
-describe("n8n Orchestration Integration", () => {
+describe('n8n Orchestration Integration', () => {
   let n8nClient: any;
   let webhookServer: N8nWebhookServer;
   let workflowManager: WorkflowManager;
@@ -43,146 +43,146 @@ describe("n8n Orchestration Integration", () => {
     await workflowManager.cleanup();
   });
 
-  describe("Workflow Template Generation", () => {
-    it("should generate lead routing workflow template", () => {
+  describe('Workflow Template Generation', () => {
+    it('should generate lead routing workflow template', () => {
       const config = {
-        aiHeadAgentEndpoint: "http://localhost:3000/api/agents/ai-head",
-        inboundAgentEndpoint: "http://localhost:3000/api/agents/inbound",
-        outboundAgentEndpoint: "http://localhost:3000/api/agents/outbound",
+        aiHeadAgentEndpoint: 'http://localhost:3000/api/agents/ai-head',
+        inboundAgentEndpoint: 'http://localhost:3000/api/agents/inbound',
+        outboundAgentEndpoint: 'http://localhost:3000/api/agents/outbound',
       };
 
       const workflow =
         WorkflowTemplateGenerator.generateLeadRoutingWorkflow(config);
 
-      expect(workflow.name).toBe("Lead Routing Workflow");
+      expect(workflow.name).toBe('Lead Routing Workflow');
       expect(workflow.active).toBe(true);
       expect(workflow.nodes).toHaveLength(6);
 
       // Check for required nodes
       const nodeTypes = workflow.nodes.map((node) => node.type);
-      expect(nodeTypes).toContain("n8n-nodes-base.webhook");
-      expect(nodeTypes).toContain("n8n-nodes-base.httpRequest");
-      expect(nodeTypes).toContain("n8n-nodes-base.switch");
-      expect(nodeTypes).toContain("n8n-nodes-base.respondToWebhook");
+      expect(nodeTypes).toContain('n8n-nodes-base.webhook');
+      expect(nodeTypes).toContain('n8n-nodes-base.httpRequest');
+      expect(nodeTypes).toContain('n8n-nodes-base.switch');
+      expect(nodeTypes).toContain('n8n-nodes-base.respondToWebhook');
 
       // Check webhook configuration
       const webhookNode = workflow.nodes.find(
-        (node) => node.type === "n8n-nodes-base.webhook"
+        (node) => node.type === 'n8n-nodes-base.webhook'
       );
-      expect(webhookNode?.parameters.path).toBe("lead-routing");
-      expect(webhookNode?.parameters.httpMethod).toBe("POST");
+      expect(webhookNode?.parameters.path).toBe('lead-routing');
+      expect(webhookNode?.parameters.httpMethod).toBe('POST');
 
       // Check AI Head Agent node
       const aiHeadNode = workflow.nodes.find(
-        (node) => node.name === "AI Head Agent Analysis"
+        (node) => node.name === 'AI Head Agent Analysis'
       );
       expect(aiHeadNode?.parameters.url).toBe(config.aiHeadAgentEndpoint);
     });
 
-    it("should generate inbound processing workflow template", () => {
+    it('should generate inbound processing workflow template', () => {
       const config = {
         virtualSalesAssistantEndpoint:
-          "http://localhost:3000/api/agents/virtual-sales",
+          'http://localhost:3000/api/agents/virtual-sales',
         customerRetentionEndpoint:
-          "http://localhost:3000/api/agents/customer-retention",
+          'http://localhost:3000/api/agents/customer-retention',
         feedbackCollectorEndpoint:
-          "http://localhost:3000/api/agents/feedback-collector",
+          'http://localhost:3000/api/agents/feedback-collector',
         crmManagementEndpoint:
-          "http://localhost:3000/api/agents/crm-management",
+          'http://localhost:3000/api/agents/crm-management',
       };
 
       const workflow =
         WorkflowTemplateGenerator.generateInboundProcessingWorkflow(config);
 
-      expect(workflow.name).toBe("Inbound Processing Workflow");
+      expect(workflow.name).toBe('Inbound Processing Workflow');
       expect(workflow.nodes).toHaveLength(6);
 
       // Check for agent-specific nodes
       const nodeNames = workflow.nodes.map((node) => node.name);
-      expect(nodeNames).toContain("Virtual Sales Assistant");
-      expect(nodeNames).toContain("Customer Retention Agent");
-      expect(nodeNames).toContain("Review & Feedback Collector");
-      expect(nodeNames).toContain("CRM Management Update");
+      expect(nodeNames).toContain('Virtual Sales Assistant');
+      expect(nodeNames).toContain('Customer Retention Agent');
+      expect(nodeNames).toContain('Review & Feedback Collector');
+      expect(nodeNames).toContain('CRM Management Update');
     });
 
-    it("should generate outbound processing workflow template", () => {
+    it('should generate outbound processing workflow template', () => {
       const config = {
         leadGenerationEndpoint:
-          "http://localhost:3000/api/agents/lead-generation",
+          'http://localhost:3000/api/agents/lead-generation',
         appointmentCoordinatorEndpoint:
-          "http://localhost:3000/api/agents/appointment-coordinator",
+          'http://localhost:3000/api/agents/appointment-coordinator',
         crmManagementEndpoint:
-          "http://localhost:3000/api/agents/crm-management",
+          'http://localhost:3000/api/agents/crm-management',
       };
 
       const workflow =
         WorkflowTemplateGenerator.generateOutboundProcessingWorkflow(config);
 
-      expect(workflow.name).toBe("Outbound Processing Workflow");
+      expect(workflow.name).toBe('Outbound Processing Workflow');
       expect(workflow.nodes).toHaveLength(5);
 
       // Check for outbound-specific nodes
       const nodeNames = workflow.nodes.map((node) => node.name);
-      expect(nodeNames).toContain("AI Lead Generation Agent");
-      expect(nodeNames).toContain("Appointment & Workflow Coordinator");
+      expect(nodeNames).toContain('AI Lead Generation Agent');
+      expect(nodeNames).toContain('Appointment & Workflow Coordinator');
     });
 
-    it("should generate optimization loop workflow template", () => {
+    it('should generate optimization loop workflow template', () => {
       const config = {
-        analyticsAgentEndpoint: "http://localhost:3000/api/agents/analytics",
-        aiHeadAgentEndpoint: "http://localhost:3000/api/agents/ai-head",
-        scheduleInterval: "hour",
+        analyticsAgentEndpoint: 'http://localhost:3000/api/agents/analytics',
+        aiHeadAgentEndpoint: 'http://localhost:3000/api/agents/ai-head',
+        scheduleInterval: 'hour',
       };
 
       const workflow =
         WorkflowTemplateGenerator.generateOptimizationLoopWorkflow(config);
 
-      expect(workflow.name).toBe("Optimization Loop Workflow");
+      expect(workflow.name).toBe('Optimization Loop Workflow');
       expect(workflow.nodes).toHaveLength(4);
 
       // Check for schedule trigger
       const scheduleNode = workflow.nodes.find(
-        (node) => node.type === "n8n-nodes-base.cron"
+        (node) => node.type === 'n8n-nodes-base.cron'
       );
       expect(scheduleNode).toBeDefined();
-      expect(scheduleNode?.parameters.rule.interval[0].field).toBe("hour");
+      expect(scheduleNode?.parameters.rule.interval[0].field).toBe('hour');
     });
   });
 
-  describe("Webhook Server Integration", () => {
-    it("should handle lead routing webhook", async () => {
+  describe('Webhook Server Integration', () => {
+    it('should handle lead routing webhook', async () => {
       const mockLead: Lead = {
-        id: "test-lead-1",
-        source: "website" as LeadSource,
+        id: 'test-lead-1',
+        source: 'website' as LeadSource,
         contactInfo: {
-          name: "John Doe",
-          email: "john@example.com",
-          preferredChannel: "email",
-          timezone: "UTC",
+          name: 'John Doe',
+          email: 'john@example.com',
+          preferredChannel: 'email',
+          timezone: 'UTC',
         },
-        leadType: "hot" as LeadType,
+        leadType: 'hot' as LeadType,
         urgencyLevel: 8,
-        intentSignals: ["requested_callback"],
+        intentSignals: ['requested_callback'],
         qualificationData: {
           qualificationScore: 0.8,
         },
-        status: "new",
+        status: 'new',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       const mockAnalysis: LeadAnalysisResult = {
-        leadId: "test-lead-1",
-        leadType: "hot",
+        leadId: 'test-lead-1',
+        leadType: 'hot',
         urgencyLevel: 8,
         intentScore: 0.8,
         sourceQuality: 0.9,
         routingRecommendation: {
-          targetAgent: "inbound",
-          priority: "high",
-          reasoning: ["Hot lead requires immediate attention"],
+          targetAgent: 'inbound',
+          priority: 'high',
+          reasoning: ['Hot lead requires immediate attention'],
           estimatedResponseTime: 30,
-          suggestedActions: ["Activate Virtual Sales Assistant"],
+          suggestedActions: ['Activate Virtual Sales Assistant'],
         },
         analysisTimestamp: new Date(),
         confidence: 0.9,
@@ -190,17 +190,17 @@ describe("n8n Orchestration Integration", () => {
 
       // Mock workflow execution
       const mockExecution = {
-        id: "exec-123",
-        workflowId: "workflow-123",
-        status: "success" as const,
+        id: 'exec-123',
+        workflowId: 'workflow-123',
+        status: 'success' as const,
         startedAt: new Date(),
-        data: { result: "routed" },
+        data: { result: 'routed' },
       };
 
       n8nClient.getWorkflows.mockResolvedValue([
         {
-          id: "workflow-123",
-          name: "Lead Routing Workflow",
+          id: 'workflow-123',
+          name: 'Lead Routing Workflow',
           active: true,
         },
       ]);
@@ -213,66 +213,66 @@ describe("n8n Orchestration Integration", () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.workflowExecutionId).toBe("exec-123");
+      expect(result.workflowExecutionId).toBe('exec-123');
       expect(n8nClient.executeWorkflow).toHaveBeenCalledWith(
-        "workflow-123",
+        'workflow-123',
         expect.objectContaining({
-          eventType: "lead_routed",
+          eventType: 'lead_routed',
           data: { lead: mockLead, analysis: mockAnalysis },
         })
       );
     });
 
-    it("should handle inbound processing webhook", async () => {
+    it('should handle inbound processing webhook', async () => {
       const mockLead: Lead = {
-        id: "test-lead-2",
-        source: "gmail" as LeadSource,
+        id: 'test-lead-2',
+        source: 'gmail' as LeadSource,
         contactInfo: {
-          name: "Jane Smith",
-          email: "jane@example.com",
-          preferredChannel: "email",
-          timezone: "UTC",
+          name: 'Jane Smith',
+          email: 'jane@example.com',
+          preferredChannel: 'email',
+          timezone: 'UTC',
         },
-        leadType: "warm" as LeadType,
+        leadType: 'warm' as LeadType,
         urgencyLevel: 6,
-        intentSignals: ["email_opened"],
+        intentSignals: ['email_opened'],
         qualificationData: {
           qualificationScore: 0.6,
         },
-        status: "contacted",
+        status: 'contacted',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       const mockAnalysis: LeadAnalysisResult = {
-        leadId: "test-lead-2",
-        leadType: "warm",
+        leadId: 'test-lead-2',
+        leadType: 'warm',
         urgencyLevel: 6,
         intentScore: 0.6,
         sourceQuality: 0.8,
         routingRecommendation: {
-          targetAgent: "inbound",
-          priority: "medium",
-          reasoning: ["Warm lead needs nurturing"],
+          targetAgent: 'inbound',
+          priority: 'medium',
+          reasoning: ['Warm lead needs nurturing'],
           estimatedResponseTime: 120,
-          suggestedActions: ["Customer retention sequence"],
+          suggestedActions: ['Customer retention sequence'],
         },
         analysisTimestamp: new Date(),
         confidence: 0.8,
       };
 
       const mockExecution = {
-        id: "exec-456",
-        workflowId: "workflow-456",
-        status: "success" as const,
+        id: 'exec-456',
+        workflowId: 'workflow-456',
+        status: 'success' as const,
         startedAt: new Date(),
-        data: { result: "processed" },
+        data: { result: 'processed' },
       };
 
       n8nClient.getWorkflows.mockResolvedValue([
         {
-          id: "workflow-456",
-          name: "Inbound Processing Workflow",
+          id: 'workflow-456',
+          name: 'Inbound Processing Workflow',
           active: true,
         },
       ]);
@@ -285,59 +285,59 @@ describe("n8n Orchestration Integration", () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.workflowExecutionId).toBe("exec-456");
+      expect(result.workflowExecutionId).toBe('exec-456');
     });
 
-    it("should handle outbound processing webhook", async () => {
+    it('should handle outbound processing webhook', async () => {
       const mockLead: Lead = {
-        id: "test-lead-3",
-        source: "meta_ads" as LeadSource,
+        id: 'test-lead-3',
+        source: 'meta_ads' as LeadSource,
         contactInfo: {
-          name: "Bob Johnson",
-          phone: "+1234567890",
-          preferredChannel: "sms",
-          timezone: "UTC",
+          name: 'Bob Johnson',
+          phone: '+1234567890',
+          preferredChannel: 'sms',
+          timezone: 'UTC',
         },
-        leadType: "cold" as LeadType,
+        leadType: 'cold' as LeadType,
         urgencyLevel: 3,
         intentSignals: [],
         qualificationData: {
           qualificationScore: 0.2,
         },
-        status: "new",
+        status: 'new',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       const mockAnalysis: LeadAnalysisResult = {
-        leadId: "test-lead-3",
-        leadType: "cold",
+        leadId: 'test-lead-3',
+        leadType: 'cold',
         urgencyLevel: 3,
         intentScore: 0.2,
         sourceQuality: 0.9,
         routingRecommendation: {
-          targetAgent: "outbound",
-          priority: "low",
-          reasoning: ["Cold lead requires outbound approach"],
+          targetAgent: 'outbound',
+          priority: 'low',
+          reasoning: ['Cold lead requires outbound approach'],
           estimatedResponseTime: 300,
-          suggestedActions: ["Cold outreach sequence"],
+          suggestedActions: ['Cold outreach sequence'],
         },
         analysisTimestamp: new Date(),
         confidence: 0.7,
       };
 
       const mockExecution = {
-        id: "exec-789",
-        workflowId: "workflow-789",
-        status: "success" as const,
+        id: 'exec-789',
+        workflowId: 'workflow-789',
+        status: 'success' as const,
         startedAt: new Date(),
-        data: { result: "processed" },
+        data: { result: 'processed' },
       };
 
       n8nClient.getWorkflows.mockResolvedValue([
         {
-          id: "workflow-789",
-          name: "Outbound Processing Workflow",
+          id: 'workflow-789',
+          name: 'Outbound Processing Workflow',
           active: true,
         },
       ]);
@@ -350,22 +350,22 @@ describe("n8n Orchestration Integration", () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.workflowExecutionId).toBe("exec-789");
+      expect(result.workflowExecutionId).toBe('exec-789');
     });
 
-    it("should handle optimization loop trigger", async () => {
+    it('should handle optimization loop trigger', async () => {
       const mockExecution = {
-        id: "exec-opt",
-        workflowId: "workflow-opt",
-        status: "success" as const,
+        id: 'exec-opt',
+        workflowId: 'workflow-opt',
+        status: 'success' as const,
         startedAt: new Date(),
-        data: { result: "optimized" },
+        data: { result: 'optimized' },
       };
 
       n8nClient.getWorkflows.mockResolvedValue([
         {
-          id: "workflow-opt",
-          name: "Optimization Loop Workflow",
+          id: 'workflow-opt',
+          name: 'Optimization Loop Workflow',
           active: true,
         },
       ]);
@@ -375,61 +375,61 @@ describe("n8n Orchestration Integration", () => {
       const result = await webhookServer.triggerOptimizationLoop();
 
       expect(result.success).toBe(true);
-      expect(result.workflowExecutionId).toBe("exec-opt");
+      expect(result.workflowExecutionId).toBe('exec-opt');
       expect(n8nClient.executeWorkflow).toHaveBeenCalledWith(
-        "workflow-opt",
+        'workflow-opt',
         expect.objectContaining({
-          eventType: "optimization_triggered",
+          eventType: 'optimization_triggered',
           data: {},
         })
       );
     });
 
-    it("should handle webhook server HTTP endpoints", async () => {
+    it('should handle webhook server HTTP endpoints', async () => {
       const app = webhookServer.getApp();
 
       // Test health endpoint
       const healthResponse = await request(app)
-        .get("/webhooks/health")
+        .get('/webhooks/health')
         .expect(200);
 
-      expect(healthResponse.body.status).toBe("healthy");
+      expect(healthResponse.body.status).toBe('healthy');
       expect(healthResponse.body.endpoints).toBeInstanceOf(Array);
 
       // Test lead routing webhook endpoint
       n8nClient.getWorkflows.mockResolvedValue([
         {
-          id: "workflow-123",
-          name: "Lead Routing Workflow",
+          id: 'workflow-123',
+          name: 'Lead Routing Workflow',
           active: true,
         },
       ]);
 
       n8nClient.executeWorkflow.mockResolvedValue({
-        id: "exec-123",
-        workflowId: "workflow-123",
-        status: "success",
+        id: 'exec-123',
+        workflowId: 'workflow-123',
+        status: 'success',
         startedAt: new Date(),
       });
 
       const webhookResponse = await request(app)
-        .post("/webhooks/lead-routing")
+        .post('/webhooks/lead-routing')
         .send({
           lead: {
-            id: "test-lead",
-            source: "website",
-            contactInfo: { name: "Test User" },
+            id: 'test-lead',
+            source: 'website',
+            contactInfo: { name: 'Test User' },
           },
         })
         .expect(200);
 
       expect(webhookResponse.body.success).toBe(true);
-      expect(webhookResponse.body.workflowExecutionId).toBe("exec-123");
+      expect(webhookResponse.body.workflowExecutionId).toBe('exec-123');
     });
   });
 
-  describe("Workflow Manager Integration", () => {
-    it("should deploy and manage complete workflow lifecycle", async () => {
+  describe('Workflow Manager Integration', () => {
+    it('should deploy and manage complete workflow lifecycle', async () => {
       // Mock n8n responses
       n8nClient.getWorkflows.mockResolvedValue([]);
       n8nClient.getWorkflowExecutions.mockResolvedValue([]);
@@ -445,12 +445,12 @@ describe("n8n Orchestration Integration", () => {
 
       // Deploy lead routing workflow
       const deployConfig = {
-        name: "Integration Test Lead Routing",
-        type: "lead_routing" as const,
+        name: 'Integration Test Lead Routing',
+        type: 'lead_routing' as const,
         parameters: {
-          aiHeadAgentEndpoint: "http://localhost:3000/api/agents/ai-head",
-          inboundAgentEndpoint: "http://localhost:3000/api/agents/inbound",
-          outboundAgentEndpoint: "http://localhost:3000/api/agents/outbound",
+          aiHeadAgentEndpoint: 'http://localhost:3000/api/agents/ai-head',
+          inboundAgentEndpoint: 'http://localhost:3000/api/agents/inbound',
+          outboundAgentEndpoint: 'http://localhost:3000/api/agents/outbound',
         },
         autoActivate: true,
         monitoring: {
@@ -464,8 +464,8 @@ describe("n8n Orchestration Integration", () => {
       };
 
       const createdWorkflow = {
-        id: "integration-workflow-id",
-        name: "Integration Test Lead Routing",
+        id: 'integration-workflow-id',
+        name: 'Integration Test Lead Routing',
         active: true,
         nodes: [],
         connections: {},
@@ -475,10 +475,10 @@ describe("n8n Orchestration Integration", () => {
 
       const workflowId = await workflowManager.deployWorkflow(deployConfig);
 
-      expect(workflowId).toBe("integration-workflow-id");
+      expect(workflowId).toBe('integration-workflow-id');
       expect(n8nClient.createWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: "Integration Test Lead Routing",
+          name: 'Integration Test Lead Routing',
           active: true,
         })
       );
@@ -486,8 +486,8 @@ describe("n8n Orchestration Integration", () => {
       // Verify workflow status
       const status = workflowManager.getWorkflowStatus(workflowId);
       expect(status).toBeDefined();
-      expect(status?.name).toBe("Integration Test Lead Routing");
-      expect(status?.type).toBe("lead_routing");
+      expect(status?.name).toBe('Integration Test Lead Routing');
+      expect(status?.type).toBe('lead_routing');
       expect(status?.active).toBe(true);
 
       // Test workflow activation/deactivation
@@ -499,10 +499,10 @@ describe("n8n Orchestration Integration", () => {
 
       // Test workflow update
       await workflowManager.updateWorkflow(workflowId, {
-        name: "Updated Workflow",
+        name: 'Updated Workflow',
       });
       expect(n8nClient.updateWorkflow).toHaveBeenCalledWith(workflowId, {
-        name: "Updated Workflow",
+        name: 'Updated Workflow',
       });
 
       // Test workflow deletion
@@ -513,12 +513,12 @@ describe("n8n Orchestration Integration", () => {
       expect(deletedStatus).toBeUndefined();
     });
 
-    it("should monitor workflow performance and generate alerts", async () => {
+    it('should monitor workflow performance and generate alerts', async () => {
       // Setup workflow with poor performance
       const mockWorkflows = [
         {
-          id: "failing-workflow",
-          name: "Failing Workflow",
+          id: 'failing-workflow',
+          name: 'Failing Workflow',
           active: true,
           nodes: [],
           connections: {},
@@ -540,11 +540,11 @@ describe("n8n Orchestration Integration", () => {
       await workflowManager.initialize();
 
       // Test that the workflow was loaded with the correct metrics
-      const status = workflowManager.getWorkflowStatus("failing-workflow");
+      const status = workflowManager.getWorkflowStatus('failing-workflow');
       expect(status).toBeDefined();
-      expect(status?.name).toBe("Failing Workflow");
+      expect(status?.name).toBe('Failing Workflow');
 
-      const metrics = workflowManager.getWorkflowMetrics("failing-workflow");
+      const metrics = workflowManager.getWorkflowMetrics('failing-workflow');
       expect(metrics).toBeDefined();
       expect(metrics?.totalExecutions).toBe(20);
       expect(metrics?.successfulExecutions).toBe(5);
@@ -559,17 +559,17 @@ describe("n8n Orchestration Integration", () => {
 
       // Should have error rate alert
       const errorRateAlert = alerts.find(
-        (alert) => alert.type === "error_rate"
+        (alert) => alert.type === 'error_rate'
       );
       expect(errorRateAlert).toBeDefined();
-      expect(errorRateAlert?.severity).toBe("critical");
+      expect(errorRateAlert?.severity).toBe('critical');
 
       // Should have execution time alert
       const executionTimeAlert = alerts.find(
-        (alert) => alert.type === "execution_time"
+        (alert) => alert.type === 'execution_time'
       );
       expect(executionTimeAlert).toBeDefined();
-      expect(executionTimeAlert?.severity).toBe("medium");
+      expect(executionTimeAlert?.severity).toBe('medium');
 
       // Test alert acknowledgment
       if (errorRateAlert) {
@@ -581,25 +581,25 @@ describe("n8n Orchestration Integration", () => {
       }
     });
 
-    it("should provide comprehensive system health summary", async () => {
+    it('should provide comprehensive system health summary', async () => {
       const mockWorkflows = [
         {
-          id: "healthy-workflow",
-          name: "Healthy Workflow",
+          id: 'healthy-workflow',
+          name: 'Healthy Workflow',
           active: true,
           nodes: [],
           connections: {},
         },
         {
-          id: "warning-workflow",
-          name: "Warning Workflow",
+          id: 'warning-workflow',
+          name: 'Warning Workflow',
           active: true,
           nodes: [],
           connections: {},
         },
         {
-          id: "critical-workflow",
-          name: "Critical Workflow",
+          id: 'critical-workflow',
+          name: 'Critical Workflow',
           active: false,
           nodes: [],
           connections: {},
@@ -611,7 +611,7 @@ describe("n8n Orchestration Integration", () => {
 
       // Mock different performance for each workflow
       n8nClient.getWorkflowStats.mockImplementation((workflowId) => {
-        if (workflowId === "healthy-workflow") {
+        if (workflowId === 'healthy-workflow') {
           return Promise.resolve({
             totalExecutions: 100,
             successfulExecutions: 98,
@@ -619,7 +619,7 @@ describe("n8n Orchestration Integration", () => {
             averageExecutionTime: 5000,
             lastExecution: new Date(),
           });
-        } else if (workflowId === "warning-workflow") {
+        } else if (workflowId === 'warning-workflow') {
           return Promise.resolve({
             totalExecutions: 50,
             successfulExecutions: 40,
@@ -651,23 +651,23 @@ describe("n8n Orchestration Integration", () => {
     });
   });
 
-  describe("End-to-End Workflow Orchestration", () => {
-    it("should orchestrate complete lead processing workflow", async () => {
+  describe('End-to-End Workflow Orchestration', () => {
+    it('should orchestrate complete lead processing workflow', async () => {
       // Setup all required workflows
       const mockWorkflows = [
         {
-          id: "lead-routing-wf",
-          name: "Lead Routing Workflow",
+          id: 'lead-routing-wf',
+          name: 'Lead Routing Workflow',
           active: true,
         },
         {
-          id: "inbound-processing-wf",
-          name: "Inbound Processing Workflow",
+          id: 'inbound-processing-wf',
+          name: 'Inbound Processing Workflow',
           active: true,
         },
         {
-          id: "outbound-processing-wf",
-          name: "Outbound Processing Workflow",
+          id: 'outbound-processing-wf',
+          name: 'Outbound Processing Workflow',
           active: true,
         },
       ];
@@ -685,42 +685,42 @@ describe("n8n Orchestration Integration", () => {
 
       // Simulate lead processing flow
       const testLead: Lead = {
-        id: "e2e-test-lead",
-        source: "website" as LeadSource,
+        id: 'e2e-test-lead',
+        source: 'website' as LeadSource,
         contactInfo: {
-          name: "E2E Test User",
-          email: "e2e@example.com",
-          preferredChannel: "email",
-          timezone: "UTC",
+          name: 'E2E Test User',
+          email: 'e2e@example.com',
+          preferredChannel: 'email',
+          timezone: 'UTC',
         },
-        leadType: "hot" as LeadType,
+        leadType: 'hot' as LeadType,
         urgencyLevel: 9,
-        intentSignals: ["requested_callback", "asked_about_pricing"],
+        intentSignals: ['requested_callback', 'asked_about_pricing'],
         qualificationData: {
           qualificationScore: 0.9,
         },
-        status: "new",
+        status: 'new',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       const testAnalysis: LeadAnalysisResult = {
-        leadId: "e2e-test-lead",
-        leadType: "hot",
+        leadId: 'e2e-test-lead',
+        leadType: 'hot',
         urgencyLevel: 9,
         intentScore: 0.9,
         sourceQuality: 0.95,
         routingRecommendation: {
-          targetAgent: "inbound",
-          priority: "high",
+          targetAgent: 'inbound',
+          priority: 'high',
           reasoning: [
-            "Hot lead with high intent",
-            "Immediate response required",
+            'Hot lead with high intent',
+            'Immediate response required',
           ],
           estimatedResponseTime: 30,
           suggestedActions: [
-            "Activate Virtual Sales Assistant",
-            "Schedule immediate callback",
+            'Activate Virtual Sales Assistant',
+            'Schedule immediate callback',
           ],
         },
         analysisTimestamp: new Date(),
@@ -732,9 +732,9 @@ describe("n8n Orchestration Integration", () => {
         return Promise.resolve({
           id: `exec-${workflowId}`,
           workflowId,
-          status: "success" as const,
+          status: 'success' as const,
           startedAt: new Date(),
-          data: { result: "processed", input: data },
+          data: { result: 'processed', input: data },
         });
       });
 
@@ -745,9 +745,9 @@ describe("n8n Orchestration Integration", () => {
       );
       expect(routingResult.success).toBe(true);
       expect(n8nClient.executeWorkflow).toHaveBeenCalledWith(
-        "lead-routing-wf",
+        'lead-routing-wf',
         expect.objectContaining({
-          eventType: "lead_routed",
+          eventType: 'lead_routed',
           data: { lead: testLead, analysis: testAnalysis },
         })
       );
@@ -759,9 +759,9 @@ describe("n8n Orchestration Integration", () => {
       );
       expect(inboundResult.success).toBe(true);
       expect(n8nClient.executeWorkflow).toHaveBeenCalledWith(
-        "inbound-processing-wf",
+        'inbound-processing-wf',
         expect.objectContaining({
-          eventType: "interaction_completed",
+          eventType: 'interaction_completed',
           data: { lead: testLead, analysis: testAnalysis },
         })
       );

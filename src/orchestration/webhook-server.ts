@@ -1,20 +1,20 @@
-import express, { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/logger";
-import { N8nClient, WebhookTriggerData } from "./n8n-client";
-import { Lead } from "../types/lead";
-import { LeadAnalysisResult } from "../agents/ai-head-agent";
+import express, { Request, Response, NextFunction } from 'express';
+import { logger } from '../utils/logger';
+import { N8nClient, WebhookTriggerData } from './n8n-client';
+import { Lead } from '../types/lead';
+import { LeadAnalysisResult } from '../agents/ai-head-agent';
 
 /**
  * Webhook event types
  */
 export type WebhookEventType =
-  | "lead_created"
-  | "lead_updated"
-  | "lead_routed"
-  | "interaction_completed"
-  | "appointment_scheduled"
-  | "feedback_received"
-  | "optimization_triggered";
+  | 'lead_created'
+  | 'lead_updated'
+  | 'lead_routed'
+  | 'interaction_completed'
+  | 'appointment_scheduled'
+  | 'feedback_received'
+  | 'optimization_triggered';
 
 /**
  * Webhook payload structure
@@ -32,10 +32,10 @@ export interface WebhookPayload {
  */
 export interface WebhookEndpointConfig {
   path: string;
-  method: "GET" | "POST" | "PUT" | "DELETE";
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   workflowId?: string;
   authentication?: {
-    type: "none" | "basic" | "bearer" | "api_key";
+    type: 'none' | 'basic' | 'bearer' | 'api_key';
     credentials?: Record<string, string>;
   };
   validation?: {
@@ -83,14 +83,14 @@ export class N8nWebhookServer {
    */
   private setupMiddleware(): void {
     // Body parsing middleware
-    this.app.use(express.json({ limit: "10mb" }));
+    this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
 
     // Request logging middleware
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       const startTime = Date.now();
 
-      res.on("finish", () => {
+      res.on('finish', () => {
         const processingTime = Date.now() - startTime;
         logger.info(
           `Webhook ${req.method} ${req.path} - ${res.statusCode} (${processingTime}ms)`
@@ -103,9 +103,9 @@ export class N8nWebhookServer {
     // Error handling middleware
     this.app.use(
       (error: Error, req: Request, res: Response, next: NextFunction) => {
-        logger.error("Webhook error:", error);
+        logger.error('Webhook error:', error);
         res.status(500).json({
-          error: "Internal server error",
+          error: 'Internal server error',
           message: error.message,
         });
       }
@@ -118,8 +118,8 @@ export class N8nWebhookServer {
   private setupDefaultEndpoints(): void {
     // Lead routing webhook
     this.registerEndpoint({
-      path: "/webhooks/lead-routing",
-      method: "POST",
+      path: '/webhooks/lead-routing',
+      method: 'POST',
       validation: {
         required: true,
       },
@@ -127,8 +127,8 @@ export class N8nWebhookServer {
 
     // Inbound processing webhook
     this.registerEndpoint({
-      path: "/webhooks/inbound-processing",
-      method: "POST",
+      path: '/webhooks/inbound-processing',
+      method: 'POST',
       validation: {
         required: true,
       },
@@ -136,8 +136,8 @@ export class N8nWebhookServer {
 
     // Outbound processing webhook
     this.registerEndpoint({
-      path: "/webhooks/outbound-processing",
-      method: "POST",
+      path: '/webhooks/outbound-processing',
+      method: 'POST',
       validation: {
         required: true,
       },
@@ -145,8 +145,8 @@ export class N8nWebhookServer {
 
     // Optimization trigger webhook
     this.registerEndpoint({
-      path: "/webhooks/optimization-trigger",
-      method: "POST",
+      path: '/webhooks/optimization-trigger',
+      method: 'POST',
       validation: {
         required: false,
       },
@@ -154,17 +154,17 @@ export class N8nWebhookServer {
 
     // Generic workflow trigger webhook
     this.registerEndpoint({
-      path: "/webhooks/workflow/:workflowId",
-      method: "POST",
+      path: '/webhooks/workflow/:workflowId',
+      method: 'POST',
       validation: {
         required: false,
       },
     });
 
     // Health check endpoint
-    this.app.get("/webhooks/health", (req: Request, res: Response) => {
+    this.app.get('/webhooks/health', (req: Request, res: Response) => {
       res.json({
-        status: "healthy",
+        status: 'healthy',
         timestamp: new Date().toISOString(),
         endpoints: Array.from(this.endpoints.keys()),
         stats: Object.fromEntries(this.processingStats),
@@ -186,8 +186,8 @@ export class N8nWebhookServer {
         // Validate request if required
         if (config.validation?.required && !this.validateRequest(req, config)) {
           res.status(400).json({
-            error: "Invalid request",
-            message: "Request validation failed",
+            error: 'Invalid request',
+            message: 'Request validation failed',
           });
           return;
         }
@@ -195,8 +195,8 @@ export class N8nWebhookServer {
         // Authenticate request if required
         if (config.authentication && !this.authenticateRequest(req, config)) {
           res.status(401).json({
-            error: "Unauthorized",
-            message: "Authentication failed",
+            error: 'Unauthorized',
+            message: 'Authentication failed',
           });
           return;
         }
@@ -226,13 +226,13 @@ export class N8nWebhookServer {
 
         this.updateProcessingStats(config.path, {
           success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : 'Unknown error',
           processingTime,
         });
 
         res.status(500).json({
           success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : 'Unknown error',
           processingTime,
         });
       }
@@ -240,16 +240,16 @@ export class N8nWebhookServer {
 
     // Register route with Express
     switch (config.method) {
-      case "GET":
+      case 'GET':
         this.app.get(config.path, handler);
         break;
-      case "POST":
+      case 'POST':
         this.app.post(config.path, handler);
         break;
-      case "PUT":
+      case 'PUT':
         this.app.put(config.path, handler);
         break;
-      case "DELETE":
+      case 'DELETE':
         this.app.delete(config.path, handler);
         break;
     }
@@ -278,8 +278,8 @@ export class N8nWebhookServer {
         eventType: this.determineEventType(req.path, req.body),
         timestamp: new Date(),
         data: req.body,
-        source: req.get("User-Agent") || "unknown",
-        correlationId: req.get("X-Correlation-ID") || undefined,
+        source: req.get('User-Agent') || 'unknown',
+        correlationId: req.get('X-Correlation-ID') || undefined,
       };
 
       // Process based on endpoint type
@@ -308,7 +308,7 @@ export class N8nWebhookServer {
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         processingTime,
       };
     }
@@ -326,19 +326,19 @@ export class N8nWebhookServer {
 
     let targetWorkflow;
 
-    if (path.includes("lead-routing")) {
-      targetWorkflow = workflows.find((w) => w.name.includes("Lead Routing"));
-    } else if (path.includes("inbound-processing")) {
+    if (path.includes('lead-routing')) {
+      targetWorkflow = workflows.find((w) => w.name.includes('Lead Routing'));
+    } else if (path.includes('inbound-processing')) {
       targetWorkflow = workflows.find((w) =>
-        w.name.includes("Inbound Processing")
+        w.name.includes('Inbound Processing')
       );
-    } else if (path.includes("outbound-processing")) {
+    } else if (path.includes('outbound-processing')) {
       targetWorkflow = workflows.find((w) =>
-        w.name.includes("Outbound Processing")
+        w.name.includes('Outbound Processing')
       );
-    } else if (path.includes("optimization-trigger")) {
+    } else if (path.includes('optimization-trigger')) {
       targetWorkflow = workflows.find((w) =>
-        w.name.includes("Optimization Loop")
+        w.name.includes('Optimization Loop')
       );
     }
 
@@ -353,19 +353,19 @@ export class N8nWebhookServer {
    * Determine event type from request
    */
   private determineEventType(path: string, body: any): WebhookEventType {
-    if (path.includes("lead-routing")) {
-      return "lead_routed";
-    } else if (path.includes("inbound-processing")) {
-      return "interaction_completed";
-    } else if (path.includes("outbound-processing")) {
-      return "interaction_completed";
-    } else if (path.includes("optimization-trigger")) {
-      return "optimization_triggered";
+    if (path.includes('lead-routing')) {
+      return 'lead_routed';
+    } else if (path.includes('inbound-processing')) {
+      return 'interaction_completed';
+    } else if (path.includes('outbound-processing')) {
+      return 'interaction_completed';
+    } else if (path.includes('optimization-trigger')) {
+      return 'optimization_triggered';
     } else if (body.eventType) {
       return body.eventType;
     }
 
-    return "lead_created"; // Default
+    return 'lead_created'; // Default
   }
 
   /**
@@ -377,7 +377,7 @@ export class N8nWebhookServer {
   ): boolean {
     // Basic validation - check if body exists for POST requests
     if (
-      config.method === "POST" &&
+      config.method === 'POST' &&
       (!req.body || Object.keys(req.body).length === 0)
     ) {
       return false;
@@ -399,31 +399,31 @@ export class N8nWebhookServer {
     req: Request,
     config: WebhookEndpointConfig
   ): boolean {
-    if (!config.authentication || config.authentication.type === "none") {
+    if (!config.authentication || config.authentication.type === 'none') {
       return true;
     }
 
     const auth = config.authentication;
 
     switch (auth.type) {
-      case "basic":
-        const authHeader = req.get("Authorization");
-        if (!authHeader || !authHeader.startsWith("Basic ")) {
+      case 'basic':
+        const authHeader = req.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Basic ')) {
           return false;
         }
         // Validate basic auth credentials
         return true; // Placeholder
 
-      case "bearer":
-        const bearerHeader = req.get("Authorization");
-        if (!bearerHeader || !bearerHeader.startsWith("Bearer ")) {
+      case 'bearer':
+        const bearerHeader = req.get('Authorization');
+        if (!bearerHeader || !bearerHeader.startsWith('Bearer ')) {
           return false;
         }
         // Validate bearer token
         return true; // Placeholder
 
-      case "api_key":
-        const apiKey = req.get("X-API-Key");
+      case 'api_key':
+        const apiKey = req.get('X-API-Key');
         if (!apiKey) {
           return false;
         }
@@ -473,20 +473,20 @@ export class N8nWebhookServer {
     analysis?: LeadAnalysisResult
   ): Promise<WebhookProcessingResult> {
     const payload: WebhookPayload = {
-      eventType: "lead_routed",
+      eventType: 'lead_routed',
       timestamp: new Date(),
       data: { lead, analysis },
-      source: "system",
+      source: 'system',
     };
 
     try {
       const workflows = await this.n8nClient.getWorkflows();
       const routingWorkflow = workflows.find((w) =>
-        w.name.includes("Lead Routing")
+        w.name.includes('Lead Routing')
       );
 
       if (!routingWorkflow) {
-        throw new Error("Lead routing workflow not found");
+        throw new Error('Lead routing workflow not found');
       }
 
       const execution = await this.n8nClient.executeWorkflow(
@@ -502,7 +502,7 @@ export class N8nWebhookServer {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         processingTime: 0,
       };
     }
@@ -516,20 +516,20 @@ export class N8nWebhookServer {
     analysis: LeadAnalysisResult
   ): Promise<WebhookProcessingResult> {
     const payload: WebhookPayload = {
-      eventType: "interaction_completed",
+      eventType: 'interaction_completed',
       timestamp: new Date(),
       data: { lead, analysis },
-      source: "system",
+      source: 'system',
     };
 
     try {
       const workflows = await this.n8nClient.getWorkflows();
       const inboundWorkflow = workflows.find((w) =>
-        w.name.includes("Inbound Processing")
+        w.name.includes('Inbound Processing')
       );
 
       if (!inboundWorkflow) {
-        throw new Error("Inbound processing workflow not found");
+        throw new Error('Inbound processing workflow not found');
       }
 
       const execution = await this.n8nClient.executeWorkflow(
@@ -545,7 +545,7 @@ export class N8nWebhookServer {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         processingTime: 0,
       };
     }
@@ -559,20 +559,20 @@ export class N8nWebhookServer {
     analysis: LeadAnalysisResult
   ): Promise<WebhookProcessingResult> {
     const payload: WebhookPayload = {
-      eventType: "interaction_completed",
+      eventType: 'interaction_completed',
       timestamp: new Date(),
       data: { lead, analysis },
-      source: "system",
+      source: 'system',
     };
 
     try {
       const workflows = await this.n8nClient.getWorkflows();
       const outboundWorkflow = workflows.find((w) =>
-        w.name.includes("Outbound Processing")
+        w.name.includes('Outbound Processing')
       );
 
       if (!outboundWorkflow) {
-        throw new Error("Outbound processing workflow not found");
+        throw new Error('Outbound processing workflow not found');
       }
 
       const execution = await this.n8nClient.executeWorkflow(
@@ -588,7 +588,7 @@ export class N8nWebhookServer {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         processingTime: 0,
       };
     }
@@ -599,20 +599,20 @@ export class N8nWebhookServer {
    */
   async triggerOptimizationLoop(): Promise<WebhookProcessingResult> {
     const payload: WebhookPayload = {
-      eventType: "optimization_triggered",
+      eventType: 'optimization_triggered',
       timestamp: new Date(),
       data: {},
-      source: "system",
+      source: 'system',
     };
 
     try {
       const workflows = await this.n8nClient.getWorkflows();
       const optimizationWorkflow = workflows.find((w) =>
-        w.name.includes("Optimization Loop")
+        w.name.includes('Optimization Loop')
       );
 
       if (!optimizationWorkflow) {
-        throw new Error("Optimization loop workflow not found");
+        throw new Error('Optimization loop workflow not found');
       }
 
       const execution = await this.n8nClient.executeWorkflow(
@@ -628,7 +628,7 @@ export class N8nWebhookServer {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
         processingTime: 0,
       };
     }

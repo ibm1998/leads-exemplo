@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { AICustomerAnalyticsAgent } from "../ai-customer-analytics-agent";
-import { DatabaseManager } from "../../database/manager";
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { AICustomerAnalyticsAgent } from '../ai-customer-analytics-agent';
+import { DatabaseManager } from '../../database/manager';
 import {
   AgentPerformance,
   AgentPerformanceModel,
-} from "../../types/agent-performance";
-import { InteractionModel } from "../../types/interaction";
-import { LeadModel } from "../../types/lead";
+} from '../../types/agent-performance';
+import { InteractionModel } from '../../types/interaction';
+import { LeadModel } from '../../types/lead';
 
-describe("AICustomerAnalyticsAgent Integration Tests", () => {
+describe('AICustomerAnalyticsAgent Integration Tests', () => {
   let analyticsAgent: AICustomerAnalyticsAgent;
   let dbManager: DatabaseManager;
 
@@ -25,18 +25,18 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
     }
   });
 
-  describe("End-to-End Analytics Workflow", () => {
-    it("should complete full analytics cycle from data collection to optimization", async () => {
-      const agentId = "integration-test-agent";
+  describe('End-to-End Analytics Workflow', () => {
+    it('should complete full analytics cycle from data collection to optimization', async () => {
+      const agentId = 'integration-test-agent';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // Step 1: Set baseline performance
       await analyticsAgent.setPerformanceBaseline(agentId, {
-        start: new Date("2023-12-01"),
-        end: new Date("2023-12-31"),
+        start: new Date('2023-12-01'),
+        end: new Date('2023-12-31'),
       });
 
       // Step 2: Collect current performance data
@@ -64,7 +64,7 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       // Step 6: Measure optimization impact
       const impact = await analyticsAgent.measureOptimizationImpact(
         agentId,
-        "test-optimization",
+        'test-optimization',
         period
       );
 
@@ -80,11 +80,11 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       expect(dashboardData.recentInsights).toBeDefined();
     });
 
-    it("should handle multiple agents performance analysis", async () => {
-      const agents = ["agent-1", "agent-2", "agent-3"];
+    it('should handle multiple agents performance analysis', async () => {
+      const agents = ['agent-1', 'agent-2', 'agent-3'];
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const performanceResults: AgentPerformance[] = [];
@@ -111,13 +111,13 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       // Verify insights include comparative analysis
       const hasComparativeInsight = insights.some(
         (insight) =>
-          insight.description.includes("performance") ||
-          insight.description.includes("comparison")
+          insight.description.includes('performance') ||
+          insight.description.includes('comparison')
       );
       expect(hasComparativeInsight).toBe(true);
     });
 
-    it("should provide real-time dashboard updates", async () => {
+    it('should provide real-time dashboard updates', async () => {
       // Get initial dashboard data
       const initialData = await analyticsAgent.getDashboardData();
       const initialTimestamp = initialData.lastUpdated;
@@ -144,16 +144,16 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
     });
   });
 
-  describe("Performance Optimization Loop", () => {
-    it("should identify and validate performance improvements", async () => {
-      const agentId = "optimization-test-agent";
+  describe('Performance Optimization Loop', () => {
+    it('should identify and validate performance improvements', async () => {
+      const agentId = 'optimization-test-agent';
       const baselinePeriod = {
-        start: new Date("2023-12-01"),
-        end: new Date("2023-12-31"),
+        start: new Date('2023-12-01'),
+        end: new Date('2023-12-31'),
       };
       const currentPeriod = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // Set baseline
@@ -185,27 +185,27 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       // Measure impact
       const impact = await analyticsAgent.measureOptimizationImpact(
         agentId,
-        "test-optimization",
+        'test-optimization',
         currentPeriod
       );
 
       expect(impact.improvement).toBeDefined();
-      expect(typeof impact.validated).toBe("boolean");
+      expect(typeof impact.validated).toBe('boolean');
     });
 
-    it("should generate insights across different time periods", async () => {
+    it('should generate insights across different time periods', async () => {
       const periods = [
         {
-          start: new Date("2024-01-01"),
-          end: new Date("2024-01-07"),
+          start: new Date('2024-01-01'),
+          end: new Date('2024-01-07'),
         },
         {
-          start: new Date("2024-01-08"),
-          end: new Date("2024-01-14"),
+          start: new Date('2024-01-08'),
+          end: new Date('2024-01-14'),
         },
         {
-          start: new Date("2024-01-15"),
-          end: new Date("2024-01-21"),
+          start: new Date('2024-01-15'),
+          end: new Date('2024-01-21'),
         },
       ];
 
@@ -229,8 +229,8 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
     });
   });
 
-  describe("Lead Source Analytics Integration", () => {
-    it("should analyze lead source effectiveness and provide recommendations", async () => {
+  describe('Lead Source Analytics Integration', () => {
+    it('should analyze lead source effectiveness and provide recommendations', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
       const leadSourceAnalysis = dashboardData.leadSourceAnalysis;
 
@@ -238,11 +238,11 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
 
       leadSourceAnalysis.forEach((source) => {
         expect(source.source).toBeDefined();
-        expect(typeof source.totalLeads).toBe("number");
-        expect(typeof source.conversionRate).toBe("number");
-        expect(typeof source.averageQualificationScore).toBe("number");
-        expect(typeof source.averageResponseTime).toBe("number");
-        expect(typeof source.qualityScore).toBe("number");
+        expect(typeof source.totalLeads).toBe('number');
+        expect(typeof source.conversionRate).toBe('number');
+        expect(typeof source.averageQualificationScore).toBe('number');
+        expect(typeof source.averageResponseTime).toBe('number');
+        expect(typeof source.qualityScore).toBe('number');
         expect(source.recommendations).toBeInstanceOf(Array);
 
         // Verify quality score is calculated correctly
@@ -256,7 +256,7 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       });
     });
 
-    it("should identify best and worst performing lead sources", async () => {
+    it('should identify best and worst performing lead sources', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
       const leadSources = dashboardData.leadSourceAnalysis;
 
@@ -282,12 +282,12 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
     });
   });
 
-  describe("Error Recovery and Resilience", () => {
-    it("should handle partial data gracefully", async () => {
-      const agentId = "partial-data-agent";
+  describe('Error Recovery and Resilience', () => {
+    it('should handle partial data gracefully', async () => {
+      const agentId = 'partial-data-agent';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // This should not throw even with limited data
@@ -305,7 +305,7 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       expect(performance.metrics.conversionRate).toBeLessThanOrEqual(1);
     });
 
-    it("should continue operation when some components fail", async () => {
+    it('should continue operation when some components fail', async () => {
       // Even if script analysis fails, other operations should continue
       try {
         const insights = await analyticsAgent.generateIntelligenceReport();
@@ -322,8 +322,8 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
     });
   });
 
-  describe("Performance Validation", () => {
-    it("should validate metrics are within acceptable ranges", async () => {
+  describe('Performance Validation', () => {
+    it('should validate metrics are within acceptable ranges', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
       const overview = dashboardData.overview;
 
@@ -366,7 +366,7 @@ describe("AICustomerAnalyticsAgent Integration Tests", () => {
       });
     });
 
-    it("should ensure insights are actionable and relevant", async () => {
+    it('should ensure insights are actionable and relevant', async () => {
       const insights = await analyticsAgent.generateIntelligenceReport();
 
       insights.forEach((insight) => {

@@ -1,9 +1,9 @@
-import { N8nClient, WorkflowDefinition } from "./n8n-client";
+import { N8nClient, WorkflowDefinition } from './n8n-client';
 import {
   WorkflowTemplateGenerator,
   AgentWorkflowType,
-} from "./workflow-templates";
-import { logger } from "../utils/logger";
+} from './workflow-templates';
+import { logger } from '../utils/logger';
 
 /**
  * Workflow status monitoring data
@@ -19,7 +19,7 @@ export interface WorkflowStatus {
   averageExecutionTime: number;
   errorCount: number;
   lastError?: string;
-  health: "healthy" | "warning" | "critical";
+  health: 'healthy' | 'warning' | 'critical';
 }
 
 /**
@@ -34,7 +34,7 @@ export interface WorkflowPerformanceMetrics {
   executionsPerHour: number;
   lastExecutionTime?: Date;
   errorRate: number;
-  performanceTrend: "improving" | "stable" | "degrading";
+  performanceTrend: 'improving' | 'stable' | 'degrading';
 }
 
 /**
@@ -61,10 +61,10 @@ export interface WorkflowDeploymentConfig {
 export interface WorkflowAlert {
   id: string;
   workflowId: string;
-  type: "error_rate" | "execution_time" | "failure_count" | "workflow_inactive";
+  type: 'error_rate' | 'execution_time' | 'failure_count' | 'workflow_inactive';
   threshold: number;
   currentValue: number;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   timestamp: Date;
   acknowledged: boolean;
@@ -91,7 +91,7 @@ export class WorkflowManager {
    */
   async initialize(): Promise<void> {
     try {
-      logger.info("Initializing workflow manager...");
+      logger.info('Initializing workflow manager...');
 
       // Load existing workflows
       await this.loadExistingWorkflows();
@@ -99,9 +99,9 @@ export class WorkflowManager {
       // Start monitoring
       await this.startMonitoring();
 
-      logger.info("Workflow manager initialized successfully");
+      logger.info('Workflow manager initialized successfully');
     } catch (error) {
-      logger.error("Failed to initialize workflow manager:", error);
+      logger.error('Failed to initialize workflow manager:', error);
       throw error;
     }
   }
@@ -124,7 +124,7 @@ export class WorkflowManager {
           successRate: 0,
           averageExecutionTime: 0,
           errorCount: 0,
-          health: "healthy",
+          health: 'healthy',
         };
 
         this.workflowStatuses.set(workflow.id, status);
@@ -138,7 +138,7 @@ export class WorkflowManager {
           averageExecutionTime: 0,
           executionsPerHour: 0,
           errorRate: 0,
-          performanceTrend: "stable",
+          performanceTrend: 'stable',
         };
         this.performanceMetrics.set(workflow.id, metrics);
 
@@ -148,7 +148,7 @@ export class WorkflowManager {
 
       logger.info(`Loaded ${workflows.length} existing workflows`);
     } catch (error) {
-      logger.error("Failed to load existing workflows:", error);
+      logger.error('Failed to load existing workflows:', error);
       throw error;
     }
   }
@@ -159,17 +159,17 @@ export class WorkflowManager {
   private determineWorkflowType(name: string): AgentWorkflowType {
     const lowerName = name.toLowerCase();
 
-    if (lowerName.includes("lead routing")) return "lead_routing";
-    if (lowerName.includes("inbound")) return "inbound_processing";
-    if (lowerName.includes("outbound")) return "outbound_processing";
-    if (lowerName.includes("retention")) return "customer_retention";
-    if (lowerName.includes("feedback")) return "feedback_collection";
-    if (lowerName.includes("appointment")) return "appointment_coordination";
-    if (lowerName.includes("crm")) return "crm_management";
-    if (lowerName.includes("analytics")) return "analytics_processing";
-    if (lowerName.includes("optimization")) return "optimization_loop";
+    if (lowerName.includes('lead routing')) return 'lead_routing';
+    if (lowerName.includes('inbound')) return 'inbound_processing';
+    if (lowerName.includes('outbound')) return 'outbound_processing';
+    if (lowerName.includes('retention')) return 'customer_retention';
+    if (lowerName.includes('feedback')) return 'feedback_collection';
+    if (lowerName.includes('appointment')) return 'appointment_coordination';
+    if (lowerName.includes('crm')) return 'crm_management';
+    if (lowerName.includes('analytics')) return 'analytics_processing';
+    if (lowerName.includes('optimization')) return 'optimization_loop';
 
-    return "lead_routing"; // Default
+    return 'lead_routing'; // Default
   }
 
   /**
@@ -183,7 +183,7 @@ export class WorkflowManager {
       let workflowDefinition: WorkflowDefinition;
 
       switch (config.type) {
-        case "lead_routing":
+        case 'lead_routing':
           workflowDefinition =
             WorkflowTemplateGenerator.generateLeadRoutingWorkflow(
               config.parameters as {
@@ -194,7 +194,7 @@ export class WorkflowManager {
               }
             );
           break;
-        case "inbound_processing":
+        case 'inbound_processing':
           workflowDefinition =
             WorkflowTemplateGenerator.generateInboundProcessingWorkflow(
               config.parameters as {
@@ -205,7 +205,7 @@ export class WorkflowManager {
               }
             );
           break;
-        case "outbound_processing":
+        case 'outbound_processing':
           workflowDefinition =
             WorkflowTemplateGenerator.generateOutboundProcessingWorkflow(
               config.parameters as {
@@ -215,7 +215,7 @@ export class WorkflowManager {
               }
             );
           break;
-        case "optimization_loop":
+        case 'optimization_loop':
           workflowDefinition =
             WorkflowTemplateGenerator.generateOptimizationLoopWorkflow(
               config.parameters as {
@@ -248,7 +248,7 @@ export class WorkflowManager {
         successRate: 0,
         averageExecutionTime: 0,
         errorCount: 0,
-        health: "healthy",
+        health: 'healthy',
       };
 
       this.workflowStatuses.set(createdWorkflow.id, status);
@@ -262,7 +262,7 @@ export class WorkflowManager {
         averageExecutionTime: 0,
         executionsPerHour: 0,
         errorRate: 0,
-        performanceTrend: "stable",
+        performanceTrend: 'stable',
       };
 
       this.performanceMetrics.set(createdWorkflow.id, metrics);
@@ -382,7 +382,7 @@ export class WorkflowManager {
         await this.updateAllWorkflowMetrics();
         await this.checkAlertConditions();
       } catch (error) {
-        logger.error("Error during workflow monitoring:", error);
+        logger.error('Error during workflow monitoring:', error);
       }
     }, intervalMs);
 
@@ -399,7 +399,7 @@ export class WorkflowManager {
     }
 
     this.isMonitoring = false;
-    logger.info("Stopped workflow monitoring");
+    logger.info('Stopped workflow monitoring');
   }
 
   /**
@@ -441,7 +441,7 @@ export class WorkflowManager {
 
         // Set last error if any recent failures
         const recentFailures = executions
-          .filter((e) => e.status === "error")
+          .filter((e) => e.status === 'error')
           .slice(0, 1);
         if (recentFailures.length > 0) {
           status.lastError = recentFailures[0].error;
@@ -474,7 +474,7 @@ export class WorkflowManager {
         if (stats.totalExecutions > previousTotal) {
           const recentSuccessRate =
             recentExecutions.length > 0
-              ? recentExecutions.filter((e) => e.status === "success").length /
+              ? recentExecutions.filter((e) => e.status === 'success').length /
                 recentExecutions.length
               : 0;
 
@@ -482,14 +482,14 @@ export class WorkflowManager {
             recentSuccessRate >
             metrics.successfulExecutions / metrics.totalExecutions
           ) {
-            metrics.performanceTrend = "improving";
+            metrics.performanceTrend = 'improving';
           } else if (
             recentSuccessRate <
             metrics.successfulExecutions / metrics.totalExecutions
           ) {
-            metrics.performanceTrend = "degrading";
+            metrics.performanceTrend = 'degrading';
           } else {
-            metrics.performanceTrend = "stable";
+            metrics.performanceTrend = 'stable';
           }
         }
       }
@@ -506,14 +506,14 @@ export class WorkflowManager {
    */
   private calculateHealthStatus(
     status: WorkflowStatus
-  ): "healthy" | "warning" | "critical" {
+  ): 'healthy' | 'warning' | 'critical' {
     // Critical conditions
     if (!status.active) {
-      return "critical";
+      return 'critical';
     }
 
     if (status.successRate < 0.5 && status.executionCount > 10) {
-      return "critical";
+      return 'critical';
     }
 
     if (
@@ -521,27 +521,27 @@ export class WorkflowManager {
       status.lastExecution &&
       Date.now() - status.lastExecution.getTime() < 60 * 60 * 1000
     ) {
-      return "critical";
+      return 'critical';
     }
 
     // Warning conditions
     if (status.successRate < 0.8 && status.executionCount > 5) {
-      return "warning";
+      return 'warning';
     }
 
     if (status.averageExecutionTime > 30000) {
       // 30 seconds
-      return "warning";
+      return 'warning';
     }
 
     if (
       status.lastExecution &&
       Date.now() - status.lastExecution.getTime() > 24 * 60 * 60 * 1000
     ) {
-      return "warning";
+      return 'warning';
     }
 
-    return "healthy";
+    return 'healthy';
   }
 
   /**
@@ -556,10 +556,10 @@ export class WorkflowManager {
       if (metrics.errorRate > 0.2 && metrics.totalExecutions > 5) {
         this.createAlert({
           workflowId,
-          type: "error_rate",
+          type: 'error_rate',
           threshold: 0.2,
           currentValue: metrics.errorRate,
-          severity: metrics.errorRate > 0.5 ? "critical" : "high",
+          severity: metrics.errorRate > 0.5 ? 'critical' : 'high',
           message: `High error rate: ${Math.round(metrics.errorRate * 100)}%`,
         });
       }
@@ -568,10 +568,10 @@ export class WorkflowManager {
       if (metrics.averageExecutionTime > 30000) {
         this.createAlert({
           workflowId,
-          type: "execution_time",
+          type: 'execution_time',
           threshold: 30000,
           currentValue: metrics.averageExecutionTime,
-          severity: metrics.averageExecutionTime > 60000 ? "high" : "medium",
+          severity: metrics.averageExecutionTime > 60000 ? 'high' : 'medium',
           message: `Slow execution time: ${Math.round(
             metrics.averageExecutionTime / 1000
           )}s`,
@@ -582,10 +582,10 @@ export class WorkflowManager {
       if (metrics.failedExecutions > 5 && metrics.totalExecutions > 0) {
         this.createAlert({
           workflowId,
-          type: "failure_count",
+          type: 'failure_count',
           threshold: 5,
           currentValue: metrics.failedExecutions,
-          severity: metrics.failedExecutions > 20 ? "critical" : "medium",
+          severity: metrics.failedExecutions > 20 ? 'critical' : 'medium',
           message: `High failure count: ${metrics.failedExecutions} failures`,
         });
       }
@@ -598,12 +598,12 @@ export class WorkflowManager {
       ) {
         this.createAlert({
           workflowId,
-          type: "workflow_inactive",
+          type: 'workflow_inactive',
           threshold: 24,
           currentValue: Math.round(
             (Date.now() - status.lastExecution.getTime()) / (60 * 60 * 1000)
           ),
-          severity: "medium",
+          severity: 'medium',
           message: `Workflow inactive for ${Math.round(
             (Date.now() - status.lastExecution.getTime()) / (60 * 60 * 1000)
           )} hours`,
@@ -616,7 +616,7 @@ export class WorkflowManager {
    * Create or update alert
    */
   private createAlert(
-    alertData: Omit<WorkflowAlert, "id" | "timestamp" | "acknowledged">
+    alertData: Omit<WorkflowAlert, 'id' | 'timestamp' | 'acknowledged'>
   ): void {
     const alertId = `${alertData.workflowId}-${alertData.type}`;
 
@@ -712,9 +712,9 @@ export class WorkflowManager {
     return {
       totalWorkflows: statuses.length,
       activeWorkflows: statuses.filter((s) => s.active).length,
-      healthyWorkflows: statuses.filter((s) => s.health === "healthy").length,
-      warningWorkflows: statuses.filter((s) => s.health === "warning").length,
-      criticalWorkflows: statuses.filter((s) => s.health === "critical").length,
+      healthyWorkflows: statuses.filter((s) => s.health === 'healthy').length,
+      warningWorkflows: statuses.filter((s) => s.health === 'warning').length,
+      criticalWorkflows: statuses.filter((s) => s.health === 'critical').length,
       totalExecutions,
       overallSuccessRate:
         totalExecutions > 0 ? totalSuccessful / totalExecutions : 0,
@@ -731,6 +731,6 @@ export class WorkflowManager {
     this.performanceMetrics.clear();
     this.activeAlerts.clear();
 
-    logger.info("Workflow manager cleaned up");
+    logger.info('Workflow manager cleaned up');
   }
 }

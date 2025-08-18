@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   ContinuousOptimizationLoop,
   OptimizationFeedback,
   OptimizationRecommendation,
   OptimizationResult,
-} from "../optimization-loop";
-import { AIHeadAgent } from "../ai-head-agent";
-import { AICustomerAnalyticsAgent } from "../ai-customer-analytics-agent";
-import { DatabaseManager } from "../../database/manager";
-import { DateRange, PerformanceMetrics } from "../../types/agent-performance";
+} from '../optimization-loop';
+import { AIHeadAgent } from '../ai-head-agent';
+import { AICustomerAnalyticsAgent } from '../ai-customer-analytics-agent';
+import { DatabaseManager } from '../../database/manager';
+import { DateRange, PerformanceMetrics } from '../../types/agent-performance';
 
 // Mock the database manager
-vi.mock("../../database/manager");
+vi.mock('../../database/manager');
 
-describe("ContinuousOptimizationLoop Unit Tests", () => {
+describe('ContinuousOptimizationLoop Unit Tests', () => {
   let optimizationLoop: ContinuousOptimizationLoop;
   let mockAIHeadAgent: AIHeadAgent;
   let mockAnalyticsAgent: AICustomerAnalyticsAgent;
@@ -29,35 +29,35 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
     );
   });
 
-  describe("Constructor", () => {
-    it("should initialize with provided agents", () => {
+  describe('Constructor', () => {
+    it('should initialize with provided agents', () => {
       expect(optimizationLoop).toBeInstanceOf(ContinuousOptimizationLoop);
-      expect(optimizationLoop["aiHeadAgent"]).toBe(mockAIHeadAgent);
-      expect(optimizationLoop["analyticsAgent"]).toBe(mockAnalyticsAgent);
+      expect(optimizationLoop['aiHeadAgent']).toBe(mockAIHeadAgent);
+      expect(optimizationLoop['analyticsAgent']).toBe(mockAnalyticsAgent);
     });
 
-    it("should initialize with empty optimization history", () => {
+    it('should initialize with empty optimization history', () => {
       const history = optimizationLoop.getOptimizationHistory();
       expect(history.size).toBe(0);
     });
 
-    it("should initialize with empty active optimizations", () => {
+    it('should initialize with empty active optimizations', () => {
       const active = optimizationLoop.getActiveOptimizations();
       expect(active.size).toBe(0);
     });
   });
 
-  describe("Feedback Processing", () => {
-    it("should add feedback to queue", () => {
+  describe('Feedback Processing', () => {
+    it('should add feedback to queue', () => {
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "routing",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'routing',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -77,21 +77,21 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       };
 
       optimizationLoop.addFeedback(feedback);
-      expect(optimizationLoop["feedbackQueue"]).toContain(feedback);
+      expect(optimizationLoop['feedbackQueue']).toContain(feedback);
     });
   });
 
-  describe("Optimization Recommendation Generation", () => {
-    it("should generate routing optimization for poor conversion rate", async () => {
+  describe('Optimization Recommendation Generation', () => {
+    it('should generate routing optimization for poor conversion rate', async () => {
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "routing",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'routing',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -115,22 +115,22 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       ).generateOptimizationRecommendations([feedback]);
 
       expect(recommendations.length).toBeGreaterThan(0);
-      const routingRec = recommendations.find((r) => r.type === "routing_rule");
+      const routingRec = recommendations.find((r) => r.type === 'routing_rule');
       expect(routingRec).toBeDefined();
-      expect(routingRec?.description).toContain("conversion rate");
-      expect(routingRec?.priority).toBe("high");
+      expect(routingRec?.description).toContain('conversion rate');
+      expect(routingRec?.priority).toBe('high');
     });
 
-    it("should generate routing optimization for slow response time", async () => {
+    it('should generate routing optimization for slow response time', async () => {
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "routing",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'routing',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -155,22 +155,22 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
 
       expect(recommendations.length).toBeGreaterThan(0);
       const responseTimeRec = recommendations.find((r) =>
-        r.description.includes("response time")
+        r.description.includes('response time')
       );
       expect(responseTimeRec).toBeDefined();
-      expect(responseTimeRec?.priority).toBe("high");
+      expect(responseTimeRec?.priority).toBe('high');
     });
 
-    it("should sort recommendations by priority and impact", async () => {
+    it('should sort recommendations by priority and impact', async () => {
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "routing",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'routing',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -197,7 +197,7 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
 
       // Check that high priority items come first
       const highPriorityCount = recommendations.filter(
-        (r) => r.priority === "high"
+        (r) => r.priority === 'high'
       ).length;
       expect(highPriorityCount).toBeGreaterThan(0);
 
@@ -215,15 +215,15 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
     });
   });
 
-  describe("Script Optimization", () => {
-    it("should generate script optimization recommendations", async () => {
+  describe('Script Optimization', () => {
+    it('should generate script optimization recommendations', async () => {
       const mockScriptOptimizations = [
         {
-          scriptId: "test-script",
-          scriptName: "Test Script",
+          scriptId: 'test-script',
+          scriptName: 'Test Script',
           currentPerformance: {
-            scriptId: "test-script",
-            scriptName: "Test Script",
+            scriptId: 'test-script',
+            scriptName: 'Test Script',
             usageCount: 100,
             successRate: 0.6,
             averageResponseTime: 45000,
@@ -231,10 +231,10 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
           },
           recommendations: [
             {
-              type: "content" as const,
-              description: "Improve opening",
+              type: 'content' as const,
+              description: 'Improve opening',
               expectedImpact: 15,
-              priority: "high" as const,
+              priority: 'high' as const,
             },
           ],
           estimatedImpact: {
@@ -247,18 +247,18 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
 
       vi.spyOn(
         mockAnalyticsAgent,
-        "analyzeScriptPerformance"
+        'analyzeScriptPerformance'
       ).mockResolvedValue(mockScriptOptimizations);
 
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "script",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'script',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -282,19 +282,19 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       ).generateScriptOptimizations(feedback);
 
       expect(recommendations.length).toBeGreaterThan(0);
-      expect(recommendations[0].type).toBe("script_update");
-      expect(recommendations[0].description).toContain("Test Script");
+      expect(recommendations[0].type).toBe('script_update');
+      expect(recommendations[0].description).toContain('Test Script');
       expect(recommendations[0].expectedImpact).toBe(15);
     });
 
-    it("should not generate script optimization for low impact", async () => {
+    it('should not generate script optimization for low impact', async () => {
       const mockScriptOptimizations = [
         {
-          scriptId: "test-script",
-          scriptName: "Test Script",
+          scriptId: 'test-script',
+          scriptName: 'Test Script',
           currentPerformance: {
-            scriptId: "test-script",
-            scriptName: "Test Script",
+            scriptId: 'test-script',
+            scriptName: 'Test Script',
             usageCount: 100,
             successRate: 0.8,
             averageResponseTime: 35000,
@@ -311,18 +311,18 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
 
       vi.spyOn(
         mockAnalyticsAgent,
-        "analyzeScriptPerformance"
+        'analyzeScriptPerformance'
       ).mockResolvedValue(mockScriptOptimizations);
 
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "script",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'script',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -349,11 +349,11 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
     });
   });
 
-  describe("Timing Optimization", () => {
-    it("should generate timing optimization for declining trends", async () => {
+  describe('Timing Optimization', () => {
+    it('should generate timing optimization for declining trends', async () => {
       const mockTrends = [
         {
-          metric: "conversionRate",
+          metric: 'conversionRate',
           period: {
             start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -363,26 +363,26 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
             { date: new Date(Date.now() - 86400000), value: 0.65 },
             { date: new Date(Date.now() - 2 * 86400000), value: 0.7 },
           ],
-          trend: "decreasing" as const,
+          trend: 'decreasing' as const,
           changePercent: -15,
-          significance: "high" as const,
+          significance: 'high' as const,
         },
       ];
 
       vi.spyOn(
         mockAnalyticsAgent,
-        "analyzePerformanceTrends"
+        'analyzePerformanceTrends'
       ).mockResolvedValue(mockTrends);
 
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "timing",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'timing',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -406,39 +406,39 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       ).generateTimingOptimizations(feedback);
 
       expect(recommendations.length).toBeGreaterThan(0);
-      expect(recommendations[0].type).toBe("timing_adjustment");
-      expect(recommendations[0].description).toContain("conversionRate");
-      expect(recommendations[0].description).toContain("15% decline");
+      expect(recommendations[0].type).toBe('timing_adjustment');
+      expect(recommendations[0].description).toContain('conversionRate');
+      expect(recommendations[0].description).toContain('15% decline');
     });
   });
 
-  describe("Optimization Implementation", () => {
-    it("should implement routing optimization", async () => {
+  describe('Optimization Implementation', () => {
+    it('should implement routing optimization', async () => {
       const recommendation: OptimizationRecommendation = {
-        id: "test_routing_opt",
-        type: "routing_rule",
-        priority: "high",
-        description: "Test routing optimization",
+        id: 'test_routing_opt',
+        type: 'routing_rule',
+        priority: 'high',
+        description: 'Test routing optimization',
         expectedImpact: 15,
         implementation: {
-          action: "adjust_routing_thresholds",
+          action: 'adjust_routing_thresholds',
           parameters: {
-            agentId: "test-agent",
+            agentId: 'test-agent',
             urgencyThreshold: 7,
             intentThreshold: 0.5,
           },
-          rollbackPlan: "Revert thresholds",
+          rollbackPlan: 'Revert thresholds',
           testingPeriod: 7,
         },
         validationCriteria: {
-          metrics: ["conversionRate"],
+          metrics: ['conversionRate'],
           minimumImprovement: 10,
           testPeriod: 14,
           significanceThreshold: 0.05,
         },
       };
 
-      const updateConfigSpy = vi.spyOn(mockAIHeadAgent, "updateConfig");
+      const updateConfigSpy = vi.spyOn(mockAIHeadAgent, 'updateConfig');
 
       await (optimizationLoop as any).implementSingleOptimization(
         recommendation
@@ -460,32 +460,32 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       expect(history.has(recommendation.id)).toBe(true);
     });
 
-    it("should implement priority routing rule", async () => {
+    it('should implement priority routing rule', async () => {
       const recommendation: OptimizationRecommendation = {
-        id: "test_priority_opt",
-        type: "routing_rule",
-        priority: "high",
-        description: "Test priority optimization",
+        id: 'test_priority_opt',
+        type: 'routing_rule',
+        priority: 'high',
+        description: 'Test priority optimization',
         expectedImpact: 20,
         implementation: {
-          action: "prioritize_fast_agents",
+          action: 'prioritize_fast_agents',
           parameters: {
-            agentId: "test-agent",
+            agentId: 'test-agent',
             responseTimeSLA: 45000,
             priorityBoost: true,
           },
-          rollbackPlan: "Remove priority boost",
+          rollbackPlan: 'Remove priority boost',
           testingPeriod: 5,
         },
         validationCriteria: {
-          metrics: ["averageResponseTime"],
+          metrics: ['averageResponseTime'],
           minimumImprovement: 15,
           testPeriod: 10,
           significanceThreshold: 0.05,
         },
       };
 
-      const addRoutingRuleSpy = vi.spyOn(mockAIHeadAgent, "addRoutingRule");
+      const addRoutingRuleSpy = vi.spyOn(mockAIHeadAgent, 'addRoutingRule');
 
       await (optimizationLoop as any).implementSingleOptimization(
         recommendation
@@ -493,7 +493,7 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
 
       expect(addRoutingRuleSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: "Fast Response Priority",
+          name: 'Fast Response Priority',
           priority: 0,
           enabled: true,
         })
@@ -501,8 +501,8 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
     });
   });
 
-  describe("Optimization Validation", () => {
-    it("should calculate improvement correctly", async () => {
+  describe('Optimization Validation', () => {
+    it('should calculate improvement correctly', async () => {
       const baseline: PerformanceMetrics = {
         totalInteractions: 100,
         conversionRate: 0.6,
@@ -520,19 +520,19 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       };
 
       const recommendation: OptimizationRecommendation = {
-        id: "test_validation",
-        type: "routing_rule",
-        priority: "high",
-        description: "Test validation",
+        id: 'test_validation',
+        type: 'routing_rule',
+        priority: 'high',
+        description: 'Test validation',
         expectedImpact: 15,
         implementation: {
-          action: "test",
+          action: 'test',
           parameters: {},
-          rollbackPlan: "test",
+          rollbackPlan: 'test',
           testingPeriod: 7,
         },
         validationCriteria: {
-          metrics: ["conversionRate"],
+          metrics: ['conversionRate'],
           minimumImprovement: 10,
           testPeriod: 14,
           significanceThreshold: 0.05,
@@ -540,7 +540,7 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       };
 
       const result: OptimizationResult = {
-        recommendationId: "test_validation",
+        recommendationId: 'test_validation',
         implemented: true,
         implementedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
         baselineMetrics: baseline,
@@ -548,13 +548,13 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
         rollbackRequired: false,
       };
 
-      vi.spyOn(optimizationLoop as any, "getCurrentMetrics").mockResolvedValue(
+      vi.spyOn(optimizationLoop as any, 'getCurrentMetrics').mockResolvedValue(
         current
       );
 
       const validationResult = await (
         optimizationLoop as any
-      ).validateSingleOptimization("test_validation", result, recommendation);
+      ).validateSingleOptimization('test_validation', result, recommendation);
 
       expect(validationResult.improvement.conversionRate).toBeCloseTo(20, 1);
       expect(validationResult.improvement.responseTime).toBeCloseTo(20, 1);
@@ -562,7 +562,7 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       expect(validationResult.validated).toBe(true);
     });
 
-    it("should mark optimization for rollback on poor performance", async () => {
+    it('should mark optimization for rollback on poor performance', async () => {
       const baseline: PerformanceMetrics = {
         totalInteractions: 100,
         conversionRate: 0.6,
@@ -580,19 +580,19 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       };
 
       const recommendation: OptimizationRecommendation = {
-        id: "test_rollback",
-        type: "routing_rule",
-        priority: "high",
-        description: "Test rollback",
+        id: 'test_rollback',
+        type: 'routing_rule',
+        priority: 'high',
+        description: 'Test rollback',
         expectedImpact: 15,
         implementation: {
-          action: "test",
+          action: 'test',
           parameters: {},
-          rollbackPlan: "test",
+          rollbackPlan: 'test',
           testingPeriod: 7,
         },
         validationCriteria: {
-          metrics: ["conversionRate"],
+          metrics: ['conversionRate'],
           minimumImprovement: 10,
           testPeriod: 14,
           significanceThreshold: 0.05,
@@ -600,7 +600,7 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       };
 
       const result: OptimizationResult = {
-        recommendationId: "test_rollback",
+        recommendationId: 'test_rollback',
         implemented: true,
         implementedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
         baselineMetrics: baseline,
@@ -608,21 +608,21 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
         rollbackRequired: false,
       };
 
-      vi.spyOn(optimizationLoop as any, "getCurrentMetrics").mockResolvedValue(
+      vi.spyOn(optimizationLoop as any, 'getCurrentMetrics').mockResolvedValue(
         current
       );
 
       const validationResult = await (
         optimizationLoop as any
-      ).validateSingleOptimization("test_rollback", result, recommendation);
+      ).validateSingleOptimization('test_rollback', result, recommendation);
 
       expect(validationResult.improvement.overall).toBeLessThan(-5);
       expect(validationResult.validated).toBe(false);
     });
   });
 
-  describe("Optimization Statistics", () => {
-    it("should calculate statistics correctly", () => {
+  describe('Optimization Statistics', () => {
+    it('should calculate statistics correctly', () => {
       // Create a fresh optimization loop for this test to avoid interference
       const freshOptimizationLoop = new ContinuousOptimizationLoop(
         mockAIHeadAgent,
@@ -630,8 +630,8 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       );
 
       // Add mock optimization results using the new method
-      freshOptimizationLoop.addOptimizationResult("opt_1", {
-        recommendationId: "opt_1",
+      freshOptimizationLoop.addOptimizationResult('opt_1', {
+        recommendationId: 'opt_1',
         implemented: true,
         implementedAt: new Date(),
         baselineMetrics: {
@@ -652,8 +652,8 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
         rollbackRequired: false,
       });
 
-      freshOptimizationLoop.addOptimizationResult("opt_2", {
-        recommendationId: "opt_2",
+      freshOptimizationLoop.addOptimizationResult('opt_2', {
+        recommendationId: 'opt_2',
         implemented: true,
         implementedAt: new Date(),
         baselineMetrics: {
@@ -674,8 +674,8 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
         rollbackRequired: true,
       });
 
-      freshOptimizationLoop.addOptimizationResult("opt_3", {
-        recommendationId: "opt_3",
+      freshOptimizationLoop.addOptimizationResult('opt_3', {
+        recommendationId: 'opt_3',
         implemented: true,
         implementedAt: new Date(),
         baselineMetrics: {
@@ -698,7 +698,7 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       expect(stats.activeOptimizations).toBe(0);
     });
 
-    it("should handle empty optimization history", () => {
+    it('should handle empty optimization history', () => {
       const stats = optimizationLoop.getOptimizationStats();
 
       expect(stats.totalOptimizations).toBe(0);
@@ -709,12 +709,12 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
     });
   });
 
-  describe("Error Handling", () => {
-    it("should handle analytics agent errors gracefully", async () => {
+  describe('Error Handling', () => {
+    it('should handle analytics agent errors gracefully', async () => {
       vi.spyOn(
         mockAnalyticsAgent,
-        "generateIntelligenceReport"
-      ).mockRejectedValue(new Error("Analytics service down"));
+        'generateIntelligenceReport'
+      ).mockRejectedValue(new Error('Analytics service down'));
 
       const feedback = await (
         optimizationLoop as any
@@ -722,21 +722,21 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       expect(feedback).toEqual([]);
     });
 
-    it("should handle script analysis errors gracefully", async () => {
+    it('should handle script analysis errors gracefully', async () => {
       vi.spyOn(
         mockAnalyticsAgent,
-        "analyzeScriptPerformance"
-      ).mockRejectedValue(new Error("Script analysis failed"));
+        'analyzeScriptPerformance'
+      ).mockRejectedValue(new Error('Script analysis failed'));
 
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "script",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'script',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),
@@ -761,21 +761,21 @@ describe("ContinuousOptimizationLoop Unit Tests", () => {
       expect(recommendations).toEqual([]);
     });
 
-    it("should handle trend analysis errors gracefully", async () => {
+    it('should handle trend analysis errors gracefully', async () => {
       vi.spyOn(
         mockAnalyticsAgent,
-        "analyzePerformanceTrends"
-      ).mockRejectedValue(new Error("Trend analysis failed"));
+        'analyzePerformanceTrends'
+      ).mockRejectedValue(new Error('Trend analysis failed'));
 
       const feedback: OptimizationFeedback = {
-        id: "test_feedback_1",
-        type: "timing",
-        agentId: "test-agent",
+        id: 'test_feedback_1',
+        type: 'timing',
+        agentId: 'test-agent',
         insights: [],
         recommendations: [],
         performanceData: {
-          id: "perf_1",
-          agentId: "test-agent",
+          id: 'perf_1',
+          agentId: 'test-agent',
           period: {
             start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             end: new Date(),

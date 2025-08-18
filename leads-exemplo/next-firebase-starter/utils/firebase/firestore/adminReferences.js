@@ -1,4 +1,4 @@
-import admin from "@/firebase-admin";
+import admin from '@/firebase-admin';
 
 // firestore references used for server
 
@@ -6,4 +6,4 @@ import admin from "@/firebase-admin";
 // These should be used in getStaticProps, getStaticPaths, etc.
 // Do not use these for client!
 export const docRef = () =>
-  admin.firestore().collection("example").doc("yfvafvaf445");
+  admin.firestore().collection('example').doc('yfvafvaf445');

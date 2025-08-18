@@ -1,15 +1,15 @@
-import { logger } from "./logger";
-import { errorHandler, ErrorContext, ErrorSeverity } from "./error-handler";
+import { logger } from './logger';
+import { errorHandler, ErrorContext, ErrorSeverity } from './error-handler';
 
 /**
  * Degradation levels for system functionality
  */
 export enum DegradationLevel {
-  NONE = "none",
-  MINIMAL = "minimal",
-  MODERATE = "moderate",
-  SEVERE = "severe",
-  EMERGENCY = "emergency",
+  NONE = 'none',
+  MINIMAL = 'minimal',
+  MODERATE = 'moderate',
+  SEVERE = 'severe',
+  EMERGENCY = 'emergency',
 }
 
 /**
@@ -63,7 +63,7 @@ export interface DegradationContext {
  */
 export interface ServiceStatus {
   name: string;
-  status: "healthy" | "degraded" | "failed";
+  status: 'healthy' | 'degraded' | 'failed';
   errorRate: number;
   lastError?: Date;
   degradationLevel: DegradationLevel;
@@ -98,75 +98,75 @@ export class GracefulDegradationService {
   private initializeDefaultCapabilities(): void {
     const defaultCapabilities: ServiceCapability[] = [
       {
-        name: "lead_ingestion",
+        name: 'lead_ingestion',
         essential: true,
         degradationThreshold: 5, // 5 errors per minute
-        dependencies: ["database", "crm_integration"],
+        dependencies: ['database', 'crm_integration'],
       },
       {
-        name: "lead_routing",
+        name: 'lead_routing',
         essential: true,
         degradationThreshold: 3,
-        dependencies: ["ai_head_agent"],
+        dependencies: ['ai_head_agent'],
       },
       {
-        name: "voice_calling",
+        name: 'voice_calling',
         essential: false,
         degradationThreshold: 2,
         fallbackFunction: async () => {
           // Fallback to SMS/email instead of voice
           return {
-            method: "sms",
-            message: "Voice calling unavailable, using SMS",
+            method: 'sms',
+            message: 'Voice calling unavailable, using SMS',
           };
         },
-        dependencies: ["voice_api", "telephony_service"],
+        dependencies: ['voice_api', 'telephony_service'],
       },
       {
-        name: "real_time_analytics",
+        name: 'real_time_analytics',
         essential: false,
         degradationThreshold: 1,
         fallbackFunction: async () => {
           // Fallback to cached/delayed analytics
-          return { cached: true, message: "Using cached analytics data" };
+          return { cached: true, message: 'Using cached analytics data' };
         },
-        dependencies: ["analytics_engine"],
+        dependencies: ['analytics_engine'],
       },
       {
-        name: "appointment_booking",
+        name: 'appointment_booking',
         essential: true,
         degradationThreshold: 4,
         fallbackFunction: async () => {
           // Fallback to manual booking process
-          return { manual: true, message: "Manual booking process activated" };
+          return { manual: true, message: 'Manual booking process activated' };
         },
-        dependencies: ["calendar_integration"],
+        dependencies: ['calendar_integration'],
       },
       {
-        name: "crm_sync",
+        name: 'crm_sync',
         essential: true,
         degradationThreshold: 3,
         fallbackFunction: async () => {
           // Fallback to local storage with delayed sync
           return {
             delayed: true,
-            message: "CRM sync delayed, using local storage",
+            message: 'CRM sync delayed, using local storage',
           };
         },
-        dependencies: ["gohighlevel_api"],
+        dependencies: ['gohighlevel_api'],
       },
       {
-        name: "multi_channel_communication",
+        name: 'multi_channel_communication',
         essential: true,
         degradationThreshold: 2,
         fallbackFunction: async () => {
           // Fallback to single channel (email only)
           return {
-            channel: "email",
-            message: "Using email-only communication",
+            channel: 'email',
+            message: 'Using email-only communication',
           };
         },
-        dependencies: ["email_service", "sms_service", "whatsapp_service"],
+        dependencies: ['email_service', 'sms_service', 'whatsapp_service'],
       },
     ];
 
@@ -174,7 +174,7 @@ export class GracefulDegradationService {
       this.capabilities.set(capability.name, capability);
       this.serviceStatuses.set(capability.name, {
         name: capability.name,
-        status: "healthy",
+        status: 'healthy',
         errorRate: 0,
         degradationLevel: DegradationLevel.NONE,
         disabledCapabilities: [],
@@ -189,57 +189,57 @@ export class GracefulDegradationService {
   private initializeDefaultRules(): void {
     this.degradationRules = [
       {
-        id: "critical_system_failure",
-        name: "Critical System Failure",
+        id: 'critical_system_failure',
+        name: 'Critical System Failure',
         condition: (context) => context.criticalErrors >= 3,
         action: {
           level: DegradationLevel.EMERGENCY,
-          disabledCapabilities: ["real_time_analytics", "voice_calling"],
-          fallbackCapabilities: ["crm_sync", "appointment_booking"],
+          disabledCapabilities: ['real_time_analytics', 'voice_calling'],
+          fallbackCapabilities: ['crm_sync', 'appointment_booking'],
           message:
-            "Critical system failure detected - emergency mode activated",
+            'Critical system failure detected - emergency mode activated',
         },
         priority: 1,
         enabled: true,
       },
       {
-        id: "high_error_rate",
-        name: "High Error Rate",
+        id: 'high_error_rate',
+        name: 'High Error Rate',
         condition: (context) => context.errorRate >= 10,
         action: {
           level: DegradationLevel.SEVERE,
-          disabledCapabilities: ["real_time_analytics"],
+          disabledCapabilities: ['real_time_analytics'],
           fallbackCapabilities: [
-            "voice_calling",
-            "multi_channel_communication",
+            'voice_calling',
+            'multi_channel_communication',
           ],
-          message: "High error rate detected - reducing system load",
+          message: 'High error rate detected - reducing system load',
         },
         priority: 2,
         enabled: true,
       },
       {
-        id: "multiple_circuit_breakers",
-        name: "Multiple Circuit Breakers Open",
+        id: 'multiple_circuit_breakers',
+        name: 'Multiple Circuit Breakers Open',
         condition: (context) => context.circuitBreakerTrips >= 3,
         action: {
           level: DegradationLevel.MODERATE,
           disabledCapabilities: [],
-          fallbackCapabilities: ["voice_calling", "crm_sync"],
-          message: "Multiple services failing - activating fallbacks",
+          fallbackCapabilities: ['voice_calling', 'crm_sync'],
+          message: 'Multiple services failing - activating fallbacks',
         },
         priority: 3,
         enabled: true,
       },
       {
-        id: "integration_failures",
-        name: "External Integration Failures",
+        id: 'integration_failures',
+        name: 'External Integration Failures',
         condition: (context) => context.failedServices.length >= 2,
         action: {
           level: DegradationLevel.MINIMAL,
           disabledCapabilities: [],
-          fallbackCapabilities: ["crm_sync", "multi_channel_communication"],
-          message: "External service issues - using fallback methods",
+          fallbackCapabilities: ['crm_sync', 'multi_channel_communication'],
+          message: 'External service issues - using fallback methods',
         },
         priority: 4,
         enabled: true,
@@ -267,7 +267,7 @@ export class GracefulDegradationService {
       const rule = applicableRules[0];
       await this.applyDegradation(rule.action, rule.name, context);
     } catch (error) {
-      logger.error("Error during degradation evaluation", {
+      logger.error('Error during degradation evaluation', {
         error: error instanceof Error ? error.message : error,
         context,
       });
@@ -285,7 +285,7 @@ export class GracefulDegradationService {
     const previousLevel = this.currentDegradationLevel;
     this.currentDegradationLevel = action.level;
 
-    logger.warn("Applying system degradation", {
+    logger.warn('Applying system degradation', {
       level: action.level,
       reason,
       disabledCapabilities: action.disabledCapabilities,
@@ -331,17 +331,17 @@ export class GracefulDegradationService {
   private async disableCapability(capabilityName: string): Promise<void> {
     const status = this.serviceStatuses.get(capabilityName);
     if (!status) {
-      logger.warn("Attempted to disable unknown capability", {
+      logger.warn('Attempted to disable unknown capability', {
         capabilityName,
       });
       return;
     }
 
-    status.status = "degraded";
+    status.status = 'degraded';
     status.degradationLevel = this.currentDegradationLevel;
     status.disabledCapabilities.push(capabilityName);
 
-    logger.info("Capability disabled", {
+    logger.info('Capability disabled', {
       capability: capabilityName,
       degradationLevel: this.currentDegradationLevel,
     });
@@ -355,7 +355,7 @@ export class GracefulDegradationService {
     const status = this.serviceStatuses.get(capabilityName);
 
     if (!capability || !status) {
-      logger.warn("Attempted to activate fallback for unknown capability", {
+      logger.warn('Attempted to activate fallback for unknown capability', {
         capabilityName,
       });
       return;
@@ -365,14 +365,14 @@ export class GracefulDegradationService {
       try {
         const fallbackResult = await capability.fallbackFunction();
         status.fallbacksActive.push(capabilityName);
-        status.status = "degraded";
+        status.status = 'degraded';
 
-        logger.info("Fallback activated", {
+        logger.info('Fallback activated', {
           capability: capabilityName,
           fallbackResult,
         });
       } catch (error) {
-        logger.error("Failed to activate fallback", {
+        logger.error('Failed to activate fallback', {
           capability: capabilityName,
           error: error instanceof Error ? error.message : error,
         });
@@ -381,7 +381,7 @@ export class GracefulDegradationService {
         await this.disableCapability(capabilityName);
       }
     } else {
-      logger.warn("No fallback function available for capability", {
+      logger.warn('No fallback function available for capability', {
         capabilityName,
       });
     }
@@ -395,7 +395,7 @@ export class GracefulDegradationService {
       return; // Already at normal operation
     }
 
-    logger.info("Attempting system recovery", {
+    logger.info('Attempting system recovery', {
       currentLevel: this.currentDegradationLevel,
     });
 
@@ -405,7 +405,7 @@ export class GracefulDegradationService {
     if (canRecover) {
       await this.performRecovery();
     } else {
-      logger.info("Recovery conditions not met, maintaining degradation", {
+      logger.info('Recovery conditions not met, maintaining degradation', {
         currentLevel: this.currentDegradationLevel,
       });
     }
@@ -422,7 +422,7 @@ export class GracefulDegradationService {
     const currentErrorRate = this.calculateCurrentErrorRate();
     const criticalErrors = this.countRecentCriticalErrors();
     const openCircuitBreakers = errorStats.circuitBreakerStates.filter(
-      (cb) => cb.state === "open"
+      (cb) => cb.state === 'open'
     ).length;
 
     // Recovery thresholds (more conservative than degradation thresholds)
@@ -447,14 +447,14 @@ export class GracefulDegradationService {
 
     // Gradually recover capabilities
     for (const [capabilityName, status] of this.serviceStatuses.entries()) {
-      if (status.status === "degraded") {
+      if (status.status === 'degraded') {
         await this.recoverCapability(capabilityName);
       }
     }
 
     this.currentDegradationLevel = DegradationLevel.NONE;
 
-    logger.info("System recovery completed", {
+    logger.info('System recovery completed', {
       previousLevel,
       currentLevel: this.currentDegradationLevel,
     });
@@ -463,11 +463,11 @@ export class GracefulDegradationService {
     this.degradationHistory.push({
       timestamp: new Date(),
       level: DegradationLevel.NONE,
-      reason: "Automatic recovery - conditions improved",
+      reason: 'Automatic recovery - conditions improved',
       affectedServices: [],
     });
 
-    this.notifyDegradationChange(DegradationLevel.NONE, "System recovered");
+    this.notifyDegradationChange(DegradationLevel.NONE, 'System recovered');
   }
 
   /**
@@ -483,17 +483,17 @@ export class GracefulDegradationService {
     const testResult = await this.testCapability(capabilityName);
 
     if (testResult.success) {
-      status.status = "healthy";
+      status.status = 'healthy';
       status.degradationLevel = DegradationLevel.NONE;
       status.disabledCapabilities = [];
       status.fallbacksActive = [];
 
-      logger.info("Capability recovered", {
+      logger.info('Capability recovered', {
         capability: capabilityName,
         testResult,
       });
     } else {
-      logger.warn("Capability recovery failed test", {
+      logger.warn('Capability recovery failed test', {
         capability: capabilityName,
         testResult,
       });
@@ -508,7 +508,7 @@ export class GracefulDegradationService {
   ): Promise<{ success: boolean; message?: string }> {
     const capability = this.capabilities.get(capabilityName);
     if (!capability) {
-      return { success: false, message: "Capability not found" };
+      return { success: false, message: 'Capability not found' };
     }
 
     try {
@@ -548,13 +548,13 @@ export class GracefulDegradationService {
         const context = await this.gatherDegradationContext();
         await this.evaluateDegradation(context);
       } catch (error) {
-        logger.error("Error during degradation monitoring", {
+        logger.error('Error during degradation monitoring', {
           error: error instanceof Error ? error.message : error,
         });
       }
     }, monitoringInterval);
 
-    logger.info("Graceful degradation monitoring started");
+    logger.info('Graceful degradation monitoring started');
   }
 
   /**
@@ -568,7 +568,7 @@ export class GracefulDegradationService {
       criticalErrors: this.countRecentCriticalErrors(),
       failedServices: this.getFailedServices(),
       circuitBreakerTrips: errorStats.circuitBreakerStates.filter(
-        (cb) => cb.state === "open"
+        (cb) => cb.state === 'open'
       ).length,
       systemLoad: await this.getSystemLoad(),
       timestamp: new Date(),
@@ -598,7 +598,7 @@ export class GracefulDegradationService {
    */
   private getFailedServices(): string[] {
     return Array.from(this.serviceStatuses.entries())
-      .filter(([_, status]) => status.status === "failed")
+      .filter(([_, status]) => status.status === 'failed')
       .map(([name, _]) => name);
   }
 
@@ -619,7 +619,7 @@ export class GracefulDegradationService {
     reason: string
   ): void {
     // This would integrate with the monitoring service
-    logger.info("Degradation level changed", {
+    logger.info('Degradation level changed', {
       level,
       reason,
       timestamp: new Date(),
@@ -633,14 +633,14 @@ export class GracefulDegradationService {
     this.capabilities.set(capability.name, capability);
     this.serviceStatuses.set(capability.name, {
       name: capability.name,
-      status: "healthy",
+      status: 'healthy',
       errorRate: 0,
       degradationLevel: DegradationLevel.NONE,
       disabledCapabilities: [],
       fallbacksActive: [],
     });
 
-    logger.info("Service capability registered", {
+    logger.info('Service capability registered', {
       capability: capability.name,
       essential: capability.essential,
     });
@@ -662,7 +662,7 @@ export class GracefulDegradationService {
     // Sort rules by priority
     this.degradationRules.sort((a, b) => a.priority - b.priority);
 
-    logger.info("Degradation rule added", {
+    logger.info('Degradation rule added', {
       ruleId: rule.id,
       ruleName: rule.name,
     });
@@ -736,7 +736,7 @@ export class GracefulDegradationService {
    */
   clearHistory(): void {
     this.degradationHistory = [];
-    logger.info("Degradation history cleared");
+    logger.info('Degradation history cleared');
   }
 }
 

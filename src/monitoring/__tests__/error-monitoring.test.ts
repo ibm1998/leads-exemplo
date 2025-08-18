@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   ErrorMonitoringService,
   AlertChannel,
   AlertMessage,
   SystemHealthMetrics,
-} from "../error-monitoring";
-import { ErrorSeverity, ErrorCategory } from "../../utils/error-handler";
+} from '../error-monitoring';
+import { ErrorSeverity, ErrorCategory } from '../../utils/error-handler';
 
-describe("ErrorMonitoringService", () => {
+describe('ErrorMonitoringService', () => {
   let monitoringService: ErrorMonitoringService;
 
   beforeEach(() => {
@@ -28,8 +28,8 @@ describe("ErrorMonitoringService", () => {
     vi.clearAllMocks();
   });
 
-  describe("Error Recording", () => {
-    it("should record errors for monitoring", () => {
+  describe('Error Recording', () => {
+    it('should record errors for monitoring', () => {
       monitoringService.recordError(ErrorSeverity.HIGH, ErrorCategory.NETWORK);
       monitoringService.recordError(
         ErrorSeverity.MEDIUM,
@@ -40,7 +40,7 @@ describe("ErrorMonitoringService", () => {
       expect(stats.errorHistory).toBe(2);
     });
 
-    it("should track different error severities", () => {
+    it('should track different error severities', () => {
       monitoringService.recordError(
         ErrorSeverity.CRITICAL,
         ErrorCategory.SYSTEM
@@ -54,7 +54,7 @@ describe("ErrorMonitoringService", () => {
       expect(metrics.criticalErrorCount).toBe(1);
     });
 
-    it("should calculate error rates correctly", () => {
+    it('should calculate error rates correctly', () => {
       // Record multiple errors in quick succession
       for (let i = 0; i < 3; i++) {
         monitoringService.recordError(
@@ -68,43 +68,43 @@ describe("ErrorMonitoringService", () => {
     });
   });
 
-  describe("Component Health Tracking", () => {
-    it("should update component health status", () => {
-      monitoringService.updateComponentHealth("test_component", {
-        status: "degraded",
+  describe('Component Health Tracking', () => {
+    it('should update component health status', () => {
+      monitoringService.updateComponentHealth('test_component', {
+        status: 'degraded',
         errorRate: 2.5,
         lastError: new Date(),
       });
 
       const metrics = monitoringService.getSystemHealthMetrics();
-      expect(metrics.componentHealth["test_component"]).toBeDefined();
-      expect(metrics.componentHealth["test_component"].status).toBe("degraded");
-      expect(metrics.componentHealth["test_component"].errorRate).toBe(2.5);
+      expect(metrics.componentHealth['test_component']).toBeDefined();
+      expect(metrics.componentHealth['test_component'].status).toBe('degraded');
+      expect(metrics.componentHealth['test_component'].errorRate).toBe(2.5);
     });
 
-    it("should track multiple components", () => {
-      monitoringService.updateComponentHealth("component_a", {
-        status: "healthy",
+    it('should track multiple components', () => {
+      monitoringService.updateComponentHealth('component_a', {
+        status: 'healthy',
         errorRate: 0,
       });
 
-      monitoringService.updateComponentHealth("component_b", {
-        status: "critical",
+      monitoringService.updateComponentHealth('component_b', {
+        status: 'critical',
         errorRate: 10,
       });
 
       const metrics = monitoringService.getSystemHealthMetrics();
       expect(Object.keys(metrics.componentHealth)).toHaveLength(2);
-      expect(metrics.componentHealth["component_a"].status).toBe("healthy");
-      expect(metrics.componentHealth["component_b"].status).toBe("critical");
+      expect(metrics.componentHealth['component_a'].status).toBe('healthy');
+      expect(metrics.componentHealth['component_b'].status).toBe('critical');
     });
   });
 
-  describe("System Health Metrics", () => {
-    it("should calculate system status based on metrics", () => {
+  describe('System Health Metrics', () => {
+    it('should calculate system status based on metrics', () => {
       // Simulate healthy system
       const healthyMetrics = monitoringService.getSystemHealthMetrics();
-      expect(healthyMetrics.systemStatus).toBe("healthy");
+      expect(healthyMetrics.systemStatus).toBe('healthy');
 
       // Simulate degraded system
       for (let i = 0; i < 6; i++) {
@@ -115,10 +115,10 @@ describe("ErrorMonitoringService", () => {
       }
 
       const degradedMetrics = monitoringService.getSystemHealthMetrics();
-      expect(degradedMetrics.systemStatus).toBe("degraded");
+      expect(degradedMetrics.systemStatus).toBe('degraded');
     });
 
-    it("should identify critical system state", () => {
+    it('should identify critical system state', () => {
       // Simulate critical errors
       for (let i = 0; i < 3; i++) {
         monitoringService.recordError(
@@ -128,19 +128,19 @@ describe("ErrorMonitoringService", () => {
       }
 
       const metrics = monitoringService.getSystemHealthMetrics();
-      expect(metrics.systemStatus).toBe("critical");
+      expect(metrics.systemStatus).toBe('critical');
       expect(metrics.criticalErrorCount).toBe(3);
     });
 
-    it("should include timestamp in metrics", () => {
+    it('should include timestamp in metrics', () => {
       const metrics = monitoringService.getSystemHealthMetrics();
       expect(metrics.timestamp).toBeInstanceOf(Date);
       expect(metrics.timestamp.getTime()).toBeCloseTo(Date.now(), -2); // Within 100ms
     });
   });
 
-  describe("Alert System", () => {
-    it("should register alert callbacks", () => {
+  describe('Alert System', () => {
+    it('should register alert callbacks', () => {
       const mockCallback = vi.fn().mockResolvedValue(undefined);
       monitoringService.registerAlertCallback(AlertChannel.EMAIL, mockCallback);
 
@@ -148,7 +148,7 @@ describe("ErrorMonitoringService", () => {
       expect(stats.alertCallbacks).toBe(1);
     });
 
-    it("should send alerts when thresholds are exceeded", async () => {
+    it('should send alerts when thresholds are exceeded', async () => {
       const mockCallback = vi.fn().mockResolvedValue(undefined);
       monitoringService.registerAlertCallback(AlertChannel.LOG, mockCallback);
 
@@ -167,7 +167,7 @@ describe("ErrorMonitoringService", () => {
       expect(mockCallback).toHaveBeenCalled();
     });
 
-    it("should respect cooldown periods", async () => {
+    it('should respect cooldown periods', async () => {
       const mockCallback = vi.fn().mockResolvedValue(undefined);
       monitoringService.registerAlertCallback(AlertChannel.LOG, mockCallback);
 
@@ -197,7 +197,7 @@ describe("ErrorMonitoringService", () => {
       expect(secondCallCount).toBe(firstCallCount);
     });
 
-    it("should format alert messages correctly", async () => {
+    it('should format alert messages correctly', async () => {
       const mockCallback = vi.fn().mockResolvedValue(undefined);
       monitoringService.registerAlertCallback(AlertChannel.LOG, mockCallback);
 
@@ -213,31 +213,31 @@ describe("ErrorMonitoringService", () => {
 
       expect(mockCallback).toHaveBeenCalled();
       const alertMessage: AlertMessage = mockCallback.mock.calls[0][0];
-      expect(alertMessage.severity).toBe("critical");
-      expect(alertMessage.title).toContain("Critical Error");
-      expect(alertMessage.message).toContain("threshold");
+      expect(alertMessage.severity).toBe('critical');
+      expect(alertMessage.title).toContain('Critical Error');
+      expect(alertMessage.message).toContain('threshold');
     });
   });
 
-  describe("Escalation Handling", () => {
-    it("should handle escalations from error handler", async () => {
+  describe('Escalation Handling', () => {
+    it('should handle escalations from error handler', async () => {
       const mockCallback = vi.fn().mockResolvedValue(undefined);
       monitoringService.registerAlertCallback(AlertChannel.LOG, mockCallback);
 
       // Simulate escalation details
       const escalationDetails = {
-        errorId: "test_error_123",
+        errorId: 'test_error_123',
         severity: ErrorSeverity.HIGH,
         category: ErrorCategory.AUTHENTICATION,
         context: {
-          operation: "login",
-          component: "auth_service",
+          operation: 'login',
+          component: 'auth_service',
           timestamp: new Date(),
         },
         recoveryAttempts: [],
-        escalationReason: "Authentication failure",
-        suggestedActions: ["Check credentials", "Verify token"],
-        priority: "high" as const,
+        escalationReason: 'Authentication failure',
+        suggestedActions: ['Check credentials', 'Verify token'],
+        priority: 'high' as const,
       };
 
       // This would normally be called by the error handler
@@ -245,13 +245,13 @@ describe("ErrorMonitoringService", () => {
 
       expect(mockCallback).toHaveBeenCalled();
       const alertMessage: AlertMessage = mockCallback.mock.calls[0][0];
-      expect(alertMessage.title).toContain("Error Escalation");
-      expect(alertMessage.metadata?.errorId).toBe("test_error_123");
+      expect(alertMessage.title).toContain('Error Escalation');
+      expect(alertMessage.metadata?.errorId).toBe('test_error_123');
     });
   });
 
-  describe("Configuration Management", () => {
-    it("should update alert configuration", () => {
+  describe('Configuration Management', () => {
+    it('should update alert configuration', () => {
       const newConfig = {
         enabled: false,
         thresholds: {
@@ -278,12 +278,12 @@ describe("ErrorMonitoringService", () => {
     });
   });
 
-  describe("Data Management", () => {
-    it("should clear monitoring data", () => {
+  describe('Data Management', () => {
+    it('should clear monitoring data', () => {
       // Add some data
       monitoringService.recordError(ErrorSeverity.HIGH, ErrorCategory.NETWORK);
-      monitoringService.updateComponentHealth("test_component", {
-        status: "degraded",
+      monitoringService.updateComponentHealth('test_component', {
+        status: 'degraded',
         errorRate: 1,
       });
 
@@ -299,10 +299,10 @@ describe("ErrorMonitoringService", () => {
       expect(stats.componentMetrics).toBe(0);
     });
 
-    it("should provide comprehensive monitoring statistics", () => {
+    it('should provide comprehensive monitoring statistics', () => {
       monitoringService.recordError(ErrorSeverity.HIGH, ErrorCategory.NETWORK);
-      monitoringService.updateComponentHealth("test_component", {
-        status: "healthy",
+      monitoringService.updateComponentHealth('test_component', {
+        status: 'healthy',
         errorRate: 0,
       });
 
@@ -318,8 +318,8 @@ describe("ErrorMonitoringService", () => {
     });
   });
 
-  describe("Alert Channels", () => {
-    it("should support multiple alert channels", async () => {
+  describe('Alert Channels', () => {
+    it('should support multiple alert channels', async () => {
       const emailCallback = vi.fn().mockResolvedValue(undefined);
       const slackCallback = vi.fn().mockResolvedValue(undefined);
 
@@ -351,10 +351,10 @@ describe("ErrorMonitoringService", () => {
       expect(slackCallback).toHaveBeenCalled();
     });
 
-    it("should handle callback failures gracefully", async () => {
+    it('should handle callback failures gracefully', async () => {
       const failingCallback = vi
         .fn()
-        .mockRejectedValue(new Error("Callback failed"));
+        .mockRejectedValue(new Error('Callback failed'));
       const workingCallback = vi.fn().mockResolvedValue(undefined);
 
       monitoringService.registerAlertCallback(
@@ -385,8 +385,8 @@ describe("ErrorMonitoringService", () => {
     });
   });
 
-  describe("Time-based Metrics", () => {
-    it("should calculate metrics for different time windows", () => {
+  describe('Time-based Metrics', () => {
+    it('should calculate metrics for different time windows', () => {
       const now = Date.now();
 
       // Record errors at different times (simulated)
@@ -401,11 +401,11 @@ describe("ErrorMonitoringService", () => {
       expect(metrics.criticalErrorCount).toBeGreaterThan(0);
     });
 
-    it("should handle empty metrics gracefully", () => {
+    it('should handle empty metrics gracefully', () => {
       const metrics = monitoringService.getSystemHealthMetrics();
       expect(metrics.errorRate).toBe(0);
       expect(metrics.criticalErrorCount).toBe(0);
-      expect(metrics.systemStatus).toBe("healthy");
+      expect(metrics.systemStatus).toBe('healthy');
     });
   });
 });

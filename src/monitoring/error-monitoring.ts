@@ -1,11 +1,11 @@
-import { logger } from "../utils/logger";
+import { logger } from '../utils/logger';
 import {
   errorHandler,
   ErrorSeverity,
   ErrorCategory,
   EscalationDetails,
-} from "../utils/error-handler";
-import { config } from "../config/environment";
+} from '../utils/error-handler';
+import { config } from '../config/environment';
 
 /**
  * Alert configuration
@@ -25,10 +25,10 @@ export interface AlertConfig {
  * Alert channels for notifications
  */
 export enum AlertChannel {
-  EMAIL = "email",
-  SLACK = "slack",
-  WEBHOOK = "webhook",
-  LOG = "log",
+  EMAIL = 'email',
+  SLACK = 'slack',
+  WEBHOOK = 'webhook',
+  LOG = 'log',
 }
 
 /**
@@ -36,7 +36,7 @@ export enum AlertChannel {
  */
 export interface AlertMessage {
   id: string;
-  severity: "info" | "warning" | "error" | "critical";
+  severity: 'info' | 'warning' | 'error' | 'critical';
   title: string;
   message: string;
   timestamp: Date;
@@ -53,7 +53,7 @@ export interface SystemHealthMetrics {
   criticalErrorCount: number;
   circuitBreakerTrips: number;
   activeCircuitBreakers: number;
-  systemStatus: "healthy" | "degraded" | "critical";
+  systemStatus: 'healthy' | 'degraded' | 'critical';
   componentHealth: Record<string, ComponentHealth>;
 }
 
@@ -61,10 +61,10 @@ export interface SystemHealthMetrics {
  * Component health status
  */
 export interface ComponentHealth {
-  status: "healthy" | "degraded" | "critical" | "offline";
+  status: 'healthy' | 'degraded' | 'critical' | 'offline';
   errorRate: number;
   lastError?: Date;
-  circuitBreakerState?: "closed" | "open" | "half-open";
+  circuitBreakerState?: 'closed' | 'open' | 'half-open';
   responseTime?: number;
 }
 
@@ -118,7 +118,7 @@ export class ErrorMonitoringService {
     // Clean up old data periodically
     this.startDataCleanup();
 
-    logger.info("Error monitoring service initialized", {
+    logger.info('Error monitoring service initialized', {
       alertConfig: this.alertConfig,
     });
   }
@@ -179,7 +179,7 @@ export class ErrorMonitoringService {
     health: Partial<ComponentHealth>
   ): void {
     const currentHealth = this.componentMetrics.get(component) || {
-      status: "healthy",
+      status: 'healthy',
       errorRate: 0,
     };
 
@@ -214,12 +214,12 @@ export class ErrorMonitoringService {
     // Get circuit breaker information
     const errorStats = errorHandler.getErrorStatistics();
     const activeCircuitBreakers = errorStats.circuitBreakerStates.filter(
-      (cb) => cb.state === "open"
+      (cb) => cb.state === 'open'
     ).length;
 
     // Calculate circuit breaker trips in the last hour
     const recentTrips = errorStats.circuitBreakerStates.filter(
-      (cb) => cb.lastFailureTime >= oneHourAgo && cb.state === "open"
+      (cb) => cb.lastFailureTime >= oneHourAgo && cb.state === 'open'
     ).length;
 
     // Determine overall system status
@@ -259,10 +259,10 @@ export class ErrorMonitoringService {
     // Check error rate threshold
     if (metrics.errorRate >= this.alertConfig.thresholds.errorRate) {
       this.sendThresholdAlert(
-        "high_error_rate",
-        "High Error Rate Detected",
+        'high_error_rate',
+        'High Error Rate Detected',
         `Error rate: ${metrics.errorRate} errors/minute (threshold: ${this.alertConfig.thresholds.errorRate})`,
-        "warning",
+        'warning',
         {
           errorRate: metrics.errorRate,
           threshold: this.alertConfig.thresholds.errorRate,
@@ -275,10 +275,10 @@ export class ErrorMonitoringService {
       metrics.criticalErrorCount >= this.alertConfig.thresholds.criticalErrors
     ) {
       this.sendThresholdAlert(
-        "high_critical_errors",
-        "High Critical Error Count",
+        'high_critical_errors',
+        'High Critical Error Count',
         `Critical errors: ${metrics.criticalErrorCount} in the last hour (threshold: ${this.alertConfig.thresholds.criticalErrors})`,
-        "critical",
+        'critical',
         {
           criticalErrors: metrics.criticalErrorCount,
           threshold: this.alertConfig.thresholds.criticalErrors,
@@ -292,10 +292,10 @@ export class ErrorMonitoringService {
       this.alertConfig.thresholds.circuitBreakerTrips
     ) {
       this.sendThresholdAlert(
-        "high_circuit_breaker_trips",
-        "High Circuit Breaker Activity",
+        'high_circuit_breaker_trips',
+        'High Circuit Breaker Activity',
         `Circuit breaker trips: ${metrics.circuitBreakerTrips} in the last hour (threshold: ${this.alertConfig.thresholds.circuitBreakerTrips})`,
-        "error",
+        'error',
         {
           circuitBreakerTrips: metrics.circuitBreakerTrips,
           threshold: this.alertConfig.thresholds.circuitBreakerTrips,
@@ -311,7 +311,7 @@ export class ErrorMonitoringService {
     alertType: string,
     title: string,
     message: string,
-    severity: "info" | "warning" | "error" | "critical",
+    severity: 'info' | 'warning' | 'error' | 'critical',
     metadata?: Record<string, any>
   ): Promise<void> {
     // Check cooldown period
@@ -341,7 +341,7 @@ export class ErrorMonitoringService {
    * Send alert through configured channels
    */
   private async sendAlert(alert: AlertMessage): Promise<void> {
-    logger.info("Sending alert", {
+    logger.info('Sending alert', {
       alertId: alert.id,
       severity: alert.severity,
       title: alert.title,
@@ -358,7 +358,7 @@ export class ErrorMonitoringService {
           await this.logAlert(alert);
         }
       } catch (error) {
-        logger.error("Failed to send alert through channel", {
+        logger.error('Failed to send alert through channel', {
           alertId: alert.id,
           channel,
           error: error instanceof Error ? error.message : error,
@@ -380,17 +380,17 @@ export class ErrorMonitoringService {
     };
 
     switch (alert.severity) {
-      case "critical":
-        logger.error("CRITICAL ALERT", logData);
+      case 'critical':
+        logger.error('CRITICAL ALERT', logData);
         break;
-      case "error":
-        logger.error("ERROR ALERT", logData);
+      case 'error':
+        logger.error('ERROR ALERT', logData);
         break;
-      case "warning":
-        logger.warn("WARNING ALERT", logData);
+      case 'warning':
+        logger.warn('WARNING ALERT', logData);
         break;
-      case "info":
-        logger.info("INFO ALERT", logData);
+      case 'info':
+        logger.info('INFO ALERT', logData);
         break;
     }
   }
@@ -403,7 +403,7 @@ export class ErrorMonitoringService {
     callback: (alert: AlertMessage) => Promise<void>
   ): void {
     this.alertCallbacks.set(channel, callback);
-    logger.info("Alert callback registered", { channel });
+    logger.info('Alert callback registered', { channel });
   }
 
   /**
@@ -417,7 +417,7 @@ export class ErrorMonitoringService {
         const metrics = this.getSystemHealthMetrics();
 
         // Log health metrics periodically
-        logger.info("System health check", {
+        logger.info('System health check', {
           systemStatus: metrics.systemStatus,
           errorRate: metrics.errorRate,
           criticalErrors: metrics.criticalErrorCount,
@@ -427,7 +427,7 @@ export class ErrorMonitoringService {
         // Update component health based on recent activity
         this.updateComponentHealthFromMetrics(metrics);
       } catch (error) {
-        logger.error("Error during health check", {
+        logger.error('Error during health check', {
           error: error instanceof Error ? error.message : error,
         });
       }
@@ -460,12 +460,12 @@ export class ErrorMonitoringService {
           }
         }
 
-        logger.debug("Completed periodic data cleanup", {
+        logger.debug('Completed periodic data cleanup', {
           errorHistorySize: this.errorHistory.length,
           recentAlertsSize: this.recentAlerts.size,
         });
       } catch (error) {
-        logger.error("Error during data cleanup", {
+        logger.error('Error during data cleanup', {
           error: error instanceof Error ? error.message : error,
         });
       }
@@ -484,13 +484,13 @@ export class ErrorMonitoringService {
 
       const errorRate = componentErrors.length / 5; // errors per minute
 
-      let status: ComponentHealth["status"] = "healthy";
+      let status: ComponentHealth['status'] = 'healthy';
       if (errorRate >= 5) {
-        status = "critical";
+        status = 'critical';
       } else if (errorRate >= 2) {
-        status = "degraded";
+        status = 'degraded';
       } else if (errorRate >= 1) {
-        status = "degraded";
+        status = 'degraded';
       }
 
       this.updateComponentHealth(component, {
@@ -507,22 +507,22 @@ export class ErrorMonitoringService {
     errorRate: number,
     criticalErrors: number,
     activeCircuitBreakers: number
-  ): "healthy" | "degraded" | "critical" {
+  ): 'healthy' | 'degraded' | 'critical' {
     if (
       criticalErrors >= this.alertConfig.thresholds.criticalErrors ||
       activeCircuitBreakers >= 5
     ) {
-      return "critical";
+      return 'critical';
     }
 
     if (
       errorRate >= this.alertConfig.thresholds.errorRate ||
       activeCircuitBreakers >= 2
     ) {
-      return "degraded";
+      return 'degraded';
     }
 
-    return "healthy";
+    return 'healthy';
   }
 
   /**
@@ -541,18 +541,18 @@ export class ErrorMonitoringService {
    */
   private getHealthStatusFromSeverity(
     severity: ErrorSeverity
-  ): ComponentHealth["status"] {
+  ): ComponentHealth['status'] {
     switch (severity) {
       case ErrorSeverity.CRITICAL:
-        return "critical";
+        return 'critical';
       case ErrorSeverity.HIGH:
-        return "degraded";
+        return 'degraded';
       case ErrorSeverity.MEDIUM:
-        return "degraded";
+        return 'degraded';
       case ErrorSeverity.LOW:
-        return "healthy";
+        return 'healthy';
       default:
-        return "healthy";
+        return 'healthy';
     }
   }
 
@@ -561,18 +561,18 @@ export class ErrorMonitoringService {
    */
   private mapSeverityToAlertLevel(
     severity: ErrorSeverity
-  ): "info" | "warning" | "error" | "critical" {
+  ): 'info' | 'warning' | 'error' | 'critical' {
     switch (severity) {
       case ErrorSeverity.CRITICAL:
-        return "critical";
+        return 'critical';
       case ErrorSeverity.HIGH:
-        return "error";
+        return 'error';
       case ErrorSeverity.MEDIUM:
-        return "warning";
+        return 'warning';
       case ErrorSeverity.LOW:
-        return "info";
+        return 'info';
       default:
-        return "info";
+        return 'info';
     }
   }
 
@@ -601,13 +601,13 @@ export class ErrorMonitoringService {
     }
 
     if (details.suggestedActions.length > 0) {
-      lines.push("Suggested actions:");
+      lines.push('Suggested actions:');
       details.suggestedActions.forEach((action) => {
         lines.push(`  - ${action}`);
       });
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 
   /**
@@ -615,7 +615,7 @@ export class ErrorMonitoringService {
    */
   updateAlertConfig(updates: Partial<AlertConfig>): void {
     this.alertConfig = { ...this.alertConfig, ...updates };
-    logger.info("Alert configuration updated", {
+    logger.info('Alert configuration updated', {
       alertConfig: this.alertConfig,
     });
   }
@@ -646,7 +646,7 @@ export class ErrorMonitoringService {
     this.errorHistory = [];
     this.recentAlerts.clear();
     this.componentMetrics.clear();
-    logger.info("Monitoring data cleared");
+    logger.info('Monitoring data cleared');
   }
 }
 

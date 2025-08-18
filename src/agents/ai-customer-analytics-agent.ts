@@ -5,20 +5,20 @@ import {
   ScriptMetrics,
   PerformanceMetrics,
   DateRange,
-} from "../types/agent-performance";
-import { Interaction, InteractionModel } from "../types/interaction";
-import { Lead, LeadModel } from "../types/lead";
-import { DatabaseManager } from "../database/manager";
+} from '../types/agent-performance';
+import { Interaction, InteractionModel } from '../types/interaction';
+import { Lead, LeadModel } from '../types/lead';
+import { DatabaseManager } from '../database/manager';
 
 /**
  * Analytics insight types
  */
 export interface AnalyticsInsight {
   id: string;
-  type: "performance" | "script" | "trend" | "optimization";
+  type: 'performance' | 'script' | 'trend' | 'optimization';
   title: string;
   description: string;
-  impact: "high" | "medium" | "low";
+  impact: 'high' | 'medium' | 'low';
   actionable: boolean;
   recommendations: string[];
   data: Record<string, any>;
@@ -35,9 +35,9 @@ export interface PerformanceTrend {
     date: Date;
     value: number;
   }>;
-  trend: "increasing" | "decreasing" | "stable";
+  trend: 'increasing' | 'decreasing' | 'stable';
   changePercent: number;
-  significance: "high" | "medium" | "low";
+  significance: 'high' | 'medium' | 'low';
 }
 
 /**
@@ -48,10 +48,10 @@ export interface ScriptOptimization {
   scriptName: string;
   currentPerformance: ScriptMetrics;
   recommendations: Array<{
-    type: "timing" | "content" | "approach" | "targeting";
+    type: 'timing' | 'content' | 'approach' | 'targeting';
     description: string;
     expectedImpact: number; // percentage improvement
-    priority: "high" | "medium" | "low";
+    priority: 'high' | 'medium' | 'low';
   }>;
   estimatedImpact: {
     conversionRateImprovement: number;
@@ -191,7 +191,7 @@ export class AICustomerAnalyticsAgent {
 
       return optimizations;
     } catch (error) {
-      console.error("Error analyzing script performance:", error);
+      console.error('Error analyzing script performance:', error);
       throw error;
     }
   }
@@ -227,7 +227,7 @@ export class AICustomerAnalyticsAgent {
 
       return insights;
     } catch (error) {
-      console.error("Error generating intelligence report:", error);
+      console.error('Error generating intelligence report:', error);
       throw error;
     }
   }
@@ -244,35 +244,35 @@ export class AICustomerAnalyticsAgent {
 
       // Analyze conversion rate trends
       const conversionTrend = await this.analyzeMetricTrend(
-        "conversionRate",
+        'conversionRate',
         period
       );
       trends.push(conversionTrend);
 
       // Analyze response time trends
       const responseTimeTrend = await this.analyzeMetricTrend(
-        "averageResponseTime",
+        'averageResponseTime',
         period
       );
       trends.push(responseTimeTrend);
 
       // Analyze customer satisfaction trends
       const satisfactionTrend = await this.analyzeMetricTrend(
-        "customerSatisfactionScore",
+        'customerSatisfactionScore',
         period
       );
       trends.push(satisfactionTrend);
 
       // Analyze appointment booking rate trends
       const bookingTrend = await this.analyzeMetricTrend(
-        "appointmentBookingRate",
+        'appointmentBookingRate',
         period
       );
       trends.push(bookingTrend);
 
       return trends;
     } catch (error) {
-      console.error("Error analyzing performance trends:", error);
+      console.error('Error analyzing performance trends:', error);
       throw error;
     }
   }
@@ -351,7 +351,7 @@ export class AICustomerAnalyticsAgent {
         validated,
       };
     } catch (error) {
-      console.error("Error measuring optimization impact:", error);
+      console.error('Error measuring optimization impact:', error);
       throw error;
     }
   }
@@ -397,7 +397,7 @@ export class AICustomerAnalyticsAgent {
         lastUpdated: now,
       };
     } catch (error) {
-      console.error("Error getting dashboard data:", error);
+      console.error('Error getting dashboard data:', error);
       throw error;
     }
   }
@@ -444,7 +444,7 @@ export class AICustomerAnalyticsAgent {
     }
 
     const successful = interactions.filter(
-      (i) => i.outcome.status === "successful"
+      (i) => i.outcome.status === 'successful'
     );
     const withAppointments = interactions.filter(
       (i) => i.outcome.appointmentBooked
@@ -478,8 +478,8 @@ export class AICustomerAnalyticsAgent {
     // For now, return placeholder data
     return [
       {
-        scriptId: "default-qualification",
-        scriptName: "Default Qualification Script",
+        scriptId: 'default-qualification',
+        scriptName: 'Default Qualification Script',
         usageCount: interactions.length,
         successRate: 0.75,
         averageResponseTime: 45000,
@@ -496,25 +496,25 @@ export class AICustomerAnalyticsAgent {
 
     if (metrics.conversionRate < 0.6) {
       suggestions.push(
-        "Consider improving qualification questions to better identify high-intent leads"
+        'Consider improving qualification questions to better identify high-intent leads'
       );
     }
 
     if (metrics.averageResponseTime > 60000) {
       suggestions.push(
-        "Response time exceeds SLA - optimize routing and agent availability"
+        'Response time exceeds SLA - optimize routing and agent availability'
       );
     }
 
     if (metrics.customerSatisfactionScore < 4.0) {
       suggestions.push(
-        "Customer satisfaction below target - review conversation scripts and agent training"
+        'Customer satisfaction below target - review conversation scripts and agent training'
       );
     }
 
     if (metrics.appointmentBookingRate < 0.3) {
       suggestions.push(
-        "Low appointment booking rate - enhance closing techniques and availability options"
+        'Low appointment booking rate - enhance closing techniques and availability options'
       );
     }
 
@@ -526,24 +526,24 @@ export class AICustomerAnalyticsAgent {
     // Placeholder implementation with sample data
     return [
       {
-        scriptId: "default-qualification",
-        scriptName: "Default Qualification Script",
+        scriptId: 'default-qualification',
+        scriptName: 'Default Qualification Script',
         usageCount: 150,
         successRate: 0.75,
         averageResponseTime: 45000,
         conversionRate: 0.65,
       },
       {
-        scriptId: "appointment-booking",
-        scriptName: "Appointment Booking Script",
+        scriptId: 'appointment-booking',
+        scriptName: 'Appointment Booking Script',
         usageCount: 89,
         successRate: 0.82,
         averageResponseTime: 38000,
         conversionRate: 0.71,
       },
       {
-        scriptId: "follow-up-sequence",
-        scriptName: "Follow-up Sequence Script",
+        scriptId: 'follow-up-sequence',
+        scriptName: 'Follow-up Sequence Script',
         usageCount: 203,
         successRate: 0.68,
         averageResponseTime: 52000,
@@ -559,38 +559,38 @@ export class AICustomerAnalyticsAgent {
 
     if (script.conversionRate < 0.7) {
       recommendations.push({
-        type: "content" as const,
-        description: "Revise opening questions to better qualify leads",
+        type: 'content' as const,
+        description: 'Revise opening questions to better qualify leads',
         expectedImpact: 15,
-        priority: "high" as const,
+        priority: 'high' as const,
       });
     }
 
     if (script.averageResponseTime > 60000) {
       recommendations.push({
-        type: "timing" as const,
-        description: "Optimize script flow to reduce interaction time",
+        type: 'timing' as const,
+        description: 'Optimize script flow to reduce interaction time',
         expectedImpact: 20,
-        priority: "medium" as const,
+        priority: 'medium' as const,
       });
     }
 
     if (script.successRate < 0.8) {
       recommendations.push({
-        type: "approach" as const,
-        description: "Improve objection handling techniques",
+        type: 'approach' as const,
+        description: 'Improve objection handling techniques',
         expectedImpact: 12,
-        priority: "medium" as const,
+        priority: 'medium' as const,
       });
     }
 
     // Always provide at least one recommendation for continuous improvement
     if (recommendations.length === 0) {
       recommendations.push({
-        type: "content" as const,
-        description: "Fine-tune script based on recent interaction patterns",
+        type: 'content' as const,
+        description: 'Fine-tune script based on recent interaction patterns',
         expectedImpact: 8,
-        priority: "low" as const,
+        priority: 'low' as const,
       });
     }
 
@@ -614,15 +614,15 @@ export class AICustomerAnalyticsAgent {
     return [
       {
         id: `insight_${Date.now()}_performance`,
-        type: "performance",
-        title: "Conversion Rate Improvement Opportunity",
+        type: 'performance',
+        title: 'Conversion Rate Improvement Opportunity',
         description:
-          "Agent performance analysis shows potential for 15% conversion rate improvement",
-        impact: "high",
+          'Agent performance analysis shows potential for 15% conversion rate improvement',
+        impact: 'high',
         actionable: true,
         recommendations: [
-          "Implement advanced qualification scripts",
-          "Provide additional agent training on objection handling",
+          'Implement advanced qualification scripts',
+          'Provide additional agent training on objection handling',
         ],
         data: { currentRate: 0.65, targetRate: 0.75 },
         generatedAt: new Date(),
@@ -634,17 +634,17 @@ export class AICustomerAnalyticsAgent {
     return [
       {
         id: `insight_${Date.now()}_script`,
-        type: "script",
-        title: "Script Optimization Identified",
+        type: 'script',
+        title: 'Script Optimization Identified',
         description:
-          "Default qualification script shows room for improvement in closing rate",
-        impact: "medium",
+          'Default qualification script shows room for improvement in closing rate',
+        impact: 'medium',
         actionable: true,
         recommendations: [
-          "Add urgency-building questions",
-          "Improve appointment booking flow",
+          'Add urgency-building questions',
+          'Improve appointment booking flow',
         ],
-        data: { scriptId: "default-qualification", currentClosingRate: 0.45 },
+        data: { scriptId: 'default-qualification', currentClosingRate: 0.45 },
         generatedAt: new Date(),
       },
     ];
@@ -654,17 +654,17 @@ export class AICustomerAnalyticsAgent {
     return [
       {
         id: `insight_${Date.now()}_trend`,
-        type: "trend",
-        title: "Response Time Trending Upward",
+        type: 'trend',
+        title: 'Response Time Trending Upward',
         description:
-          "Average response time has increased 12% over the last 7 days",
-        impact: "medium",
+          'Average response time has increased 12% over the last 7 days',
+        impact: 'medium',
         actionable: true,
         recommendations: [
-          "Review agent workload distribution",
-          "Consider adding additional agents during peak hours",
+          'Review agent workload distribution',
+          'Consider adding additional agents during peak hours',
         ],
-        data: { trend: "increasing", changePercent: 12 },
+        data: { trend: 'increasing', changePercent: 12 },
         generatedAt: new Date(),
       },
     ];
@@ -674,15 +674,15 @@ export class AICustomerAnalyticsAgent {
     return [
       {
         id: `insight_${Date.now()}_source`,
-        type: "optimization",
-        title: "Lead Source Performance Variance",
+        type: 'optimization',
+        title: 'Lead Source Performance Variance',
         description:
-          "Meta ads leads show 25% higher conversion rate than website leads",
-        impact: "high",
+          'Meta ads leads show 25% higher conversion rate than website leads',
+        impact: 'high',
         actionable: true,
         recommendations: [
-          "Increase Meta ads budget allocation",
-          "Optimize website lead capture forms",
+          'Increase Meta ads budget allocation',
+          'Optimize website lead capture forms',
         ],
         data: { metaConversion: 0.78, websiteConversion: 0.58 },
         generatedAt: new Date(),
@@ -704,15 +704,15 @@ export class AICustomerAnalyticsAgent {
         { date: new Date(Date.now() - 86400000), value: 0.62 },
         { date: new Date(Date.now() - 2 * 86400000), value: 0.68 },
       ],
-      trend: "increasing",
+      trend: 'increasing',
       changePercent: 4.8,
-      significance: "medium",
+      significance: 'medium',
     };
   }
 
   private async calculateOverviewMetrics(
     period: DateRange
-  ): Promise<AnalyticsDashboard["overview"]> {
+  ): Promise<AnalyticsDashboard['overview']> {
     // This would calculate actual metrics from the database
     // Placeholder implementation
     return {
@@ -740,24 +740,24 @@ export class AICustomerAnalyticsAgent {
     // Placeholder implementation
     return [
       {
-        source: "meta_ads",
+        source: 'meta_ads',
         totalLeads: 245,
         conversionRate: 0.78,
         averageQualificationScore: 0.72,
         averageResponseTime: 38000,
         qualityScore: 0.85,
-        recommendations: ["Increase budget allocation", "Expand targeting"],
+        recommendations: ['Increase budget allocation', 'Expand targeting'],
       },
       {
-        source: "website",
+        source: 'website',
         totalLeads: 189,
         conversionRate: 0.58,
         averageQualificationScore: 0.61,
         averageResponseTime: 45000,
         qualityScore: 0.65,
         recommendations: [
-          "Optimize lead capture forms",
-          "Improve qualification questions",
+          'Optimize lead capture forms',
+          'Improve qualification questions',
         ],
       },
     ];

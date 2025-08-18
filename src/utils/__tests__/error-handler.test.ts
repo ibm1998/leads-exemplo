@@ -1,23 +1,23 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
   ErrorHandler,
   ErrorSeverity,
   ErrorCategory,
   RecoveryStrategy,
   ErrorContext,
-} from "../error-handler";
+} from '../error-handler';
 
-describe("ErrorHandler", () => {
+describe('ErrorHandler', () => {
   let errorHandler: ErrorHandler;
   let mockContext: ErrorContext;
 
   beforeEach(() => {
     errorHandler = new ErrorHandler();
     mockContext = {
-      operation: "test_operation",
-      component: "test_component",
-      leadId: "lead_123",
-      agentId: "agent_456",
+      operation: 'test_operation',
+      component: 'test_component',
+      leadId: 'lead_123',
+      agentId: 'agent_456',
       timestamp: new Date(),
     };
   });
@@ -27,9 +27,9 @@ describe("ErrorHandler", () => {
     vi.clearAllMocks();
   });
 
-  describe("Error Classification", () => {
-    it("should classify network errors correctly", () => {
-      const networkError = new Error("Connection timeout");
+  describe('Error Classification', () => {
+    it('should classify network errors correctly', () => {
+      const networkError = new Error('Connection timeout');
       const classification = errorHandler.classifyError(
         networkError,
         mockContext
@@ -42,9 +42,9 @@ describe("ErrorHandler", () => {
       expect(classification.maxRetries).toBe(5);
     });
 
-    it("should classify rate limit errors correctly", () => {
+    it('should classify rate limit errors correctly', () => {
       const rateLimitError = new Error(
-        "Too many requests - rate limit exceeded"
+        'Too many requests - rate limit exceeded'
       );
       const classification = errorHandler.classifyError(
         rateLimitError,
@@ -57,8 +57,8 @@ describe("ErrorHandler", () => {
       expect(classification.backoffMultiplier).toBe(3);
     });
 
-    it("should classify authentication errors correctly", () => {
-      const authError = new Error("Unauthorized - invalid token");
+    it('should classify authentication errors correctly', () => {
+      const authError = new Error('Unauthorized - invalid token');
       const classification = errorHandler.classifyError(authError, mockContext);
 
       expect(classification.severity).toBe(ErrorSeverity.HIGH);
@@ -68,9 +68,9 @@ describe("ErrorHandler", () => {
       expect(classification.escalationRequired).toBe(true);
     });
 
-    it("should classify validation errors correctly", () => {
+    it('should classify validation errors correctly', () => {
       const validationError = new Error(
-        "Validation failed - required field missing"
+        'Validation failed - required field missing'
       );
       const classification = errorHandler.classifyError(
         validationError,
@@ -83,8 +83,8 @@ describe("ErrorHandler", () => {
       expect(classification.retryable).toBe(false);
     });
 
-    it("should classify database errors correctly", () => {
-      const dbError = new Error("Database connection pool exhausted");
+    it('should classify database errors correctly', () => {
+      const dbError = new Error('Database connection pool exhausted');
       const classification = errorHandler.classifyError(dbError, mockContext);
 
       expect(classification.severity).toBe(ErrorSeverity.HIGH);
@@ -93,12 +93,12 @@ describe("ErrorHandler", () => {
       expect(classification.circuitBreakerThreshold).toBe(5);
     });
 
-    it("should classify integration errors correctly", () => {
+    it('should classify integration errors correctly', () => {
       const integrationContext = {
         ...mockContext,
-        component: "gohighlevel_integration",
+        component: 'gohighlevel_integration',
       };
-      const integrationError = new Error("API service unavailable");
+      const integrationError = new Error('API service unavailable');
       const classification = errorHandler.classifyError(
         integrationError,
         integrationContext
@@ -112,8 +112,8 @@ describe("ErrorHandler", () => {
       expect(classification.circuitBreakerThreshold).toBe(8);
     });
 
-    it("should classify system errors correctly", () => {
-      const systemError = new Error("Out of memory");
+    it('should classify system errors correctly', () => {
+      const systemError = new Error('Out of memory');
       const classification = errorHandler.classifyError(
         systemError,
         mockContext
@@ -125,8 +125,8 @@ describe("ErrorHandler", () => {
       expect(classification.escalationRequired).toBe(true);
     });
 
-    it("should provide default classification for unknown errors", () => {
-      const unknownError = new Error("Some unknown error");
+    it('should provide default classification for unknown errors', () => {
+      const unknownError = new Error('Some unknown error');
       const classification = errorHandler.classifyError(
         unknownError,
         mockContext
@@ -138,10 +138,10 @@ describe("ErrorHandler", () => {
     });
   });
 
-  describe("Error Handling", () => {
-    it("should handle retryable errors with backoff", async () => {
-      const retryableError = new Error("Network timeout");
-      const fallbackFn = vi.fn().mockResolvedValue("fallback_result");
+  describe('Error Handling', () => {
+    it('should handle retryable errors with backoff', async () => {
+      const retryableError = new Error('Network timeout');
+      const fallbackFn = vi.fn().mockResolvedValue('fallback_result');
 
       const result = await errorHandler.handleError(
         retryableError,
@@ -153,9 +153,9 @@ describe("ErrorHandler", () => {
       expect(result.escalated).toBe(false);
     });
 
-    it("should handle fallback strategy", async () => {
-      const validationError = new Error("Validation failed");
-      const fallbackFn = vi.fn().mockResolvedValue("fallback_result");
+    it('should handle fallback strategy', async () => {
+      const validationError = new Error('Validation failed');
+      const fallbackFn = vi.fn().mockResolvedValue('fallback_result');
 
       const result = await errorHandler.handleError(
         validationError,
@@ -164,12 +164,12 @@ describe("ErrorHandler", () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.result).toBe("fallback_result");
+      expect(result.result).toBe('fallback_result');
       expect(fallbackFn).toHaveBeenCalled();
     });
 
-    it("should escalate critical errors", async () => {
-      const criticalError = new Error("System failure");
+    it('should escalate critical errors', async () => {
+      const criticalError = new Error('System failure');
       const escalationCallback = vi.fn().mockResolvedValue(undefined);
       errorHandler.registerEscalationCallback(escalationCallback);
 
@@ -180,11 +180,11 @@ describe("ErrorHandler", () => {
       expect(escalationCallback).toHaveBeenCalled();
     });
 
-    it("should handle circuit breaker pattern", async () => {
-      const integrationError = new Error("API service unavailable");
+    it('should handle circuit breaker pattern', async () => {
+      const integrationError = new Error('API service unavailable');
       const integrationContext = {
         ...mockContext,
-        component: "external_api",
+        component: 'external_api',
       };
 
       // First call should attempt the operation
@@ -202,8 +202,8 @@ describe("ErrorHandler", () => {
       expect(result2.success).toBe(false);
     });
 
-    it("should track error frequency for escalation", async () => {
-      const error = new Error("Frequent error");
+    it('should track error frequency for escalation', async () => {
+      const error = new Error('Frequent error');
 
       // Generate multiple errors to trigger frequency-based escalation
       for (let i = 0; i < 15; i++) {
@@ -215,13 +215,13 @@ describe("ErrorHandler", () => {
     });
   });
 
-  describe("Circuit Breaker", () => {
-    it("should open circuit breaker after threshold failures", async () => {
-      const integrationError = new Error("Service unavailable");
+  describe('Circuit Breaker', () => {
+    it('should open circuit breaker after threshold failures', async () => {
+      const integrationError = new Error('Service unavailable');
       const integrationContext = {
         ...mockContext,
-        component: "integration_service",
-        operation: "api_call",
+        component: 'integration_service',
+        operation: 'api_call',
       };
 
       // Simulate multiple failures to trip circuit breaker
@@ -231,30 +231,30 @@ describe("ErrorHandler", () => {
 
       const stats = errorHandler.getErrorStatistics();
       const circuitBreaker = stats.circuitBreakerStates.find(
-        (cb) => cb.key === "integration_service:api_call"
+        (cb) => cb.key === 'integration_service:api_call'
       );
 
       expect(circuitBreaker).toBeDefined();
     });
 
-    it("should reset circuit breaker manually", () => {
-      errorHandler.resetCircuitBreaker("test_component", "test_operation");
+    it('should reset circuit breaker manually', () => {
+      errorHandler.resetCircuitBreaker('test_component', 'test_operation');
 
       const stats = errorHandler.getErrorStatistics();
       const circuitBreaker = stats.circuitBreakerStates.find(
-        (cb) => cb.key === "test_component:test_operation"
+        (cb) => cb.key === 'test_component:test_operation'
       );
 
       expect(circuitBreaker).toBeUndefined();
     });
   });
 
-  describe("Escalation", () => {
-    it("should register and call escalation callbacks", async () => {
+  describe('Escalation', () => {
+    it('should register and call escalation callbacks', async () => {
       const escalationCallback = vi.fn().mockResolvedValue(undefined);
       errorHandler.registerEscalationCallback(escalationCallback);
 
-      const authError = new Error("Authentication failed");
+      const authError = new Error('Authentication failed');
       await errorHandler.handleError(authError, mockContext);
 
       expect(escalationCallback).toHaveBeenCalled();
@@ -263,39 +263,39 @@ describe("ErrorHandler", () => {
       expect(escalationDetails.category).toBe(ErrorCategory.AUTHENTICATION);
     });
 
-    it("should provide suggested actions in escalation", async () => {
+    it('should provide suggested actions in escalation', async () => {
       const escalationCallback = vi.fn().mockResolvedValue(undefined);
       errorHandler.registerEscalationCallback(escalationCallback);
 
       // Use an authentication error which will escalate immediately
-      const authError = new Error("Authentication failed - invalid token");
+      const authError = new Error('Authentication failed - invalid token');
       await errorHandler.handleError(authError, mockContext);
 
       expect(escalationCallback).toHaveBeenCalled();
       const escalationDetails = escalationCallback.mock.calls[0][0];
       expect(escalationDetails.suggestedActions).toContain(
-        "Check API credentials and tokens"
+        'Check API credentials and tokens'
       );
       expect(escalationDetails.suggestedActions).toContain(
-        "Verify authentication configuration"
+        'Verify authentication configuration'
       );
     });
 
-    it("should set appropriate escalation priority", async () => {
+    it('should set appropriate escalation priority', async () => {
       const escalationCallback = vi.fn().mockResolvedValue(undefined);
       errorHandler.registerEscalationCallback(escalationCallback);
 
-      const criticalError = new Error("Out of memory");
+      const criticalError = new Error('Out of memory');
       await errorHandler.handleError(criticalError, mockContext);
 
       const escalationDetails = escalationCallback.mock.calls[0][0];
-      expect(escalationDetails.priority).toBe("urgent");
+      expect(escalationDetails.priority).toBe('urgent');
     });
   });
 
-  describe("Retry Logic", () => {
-    it("should calculate exponential backoff correctly", () => {
-      const networkError = new Error("Connection timeout");
+  describe('Retry Logic', () => {
+    it('should calculate exponential backoff correctly', () => {
+      const networkError = new Error('Connection timeout');
       const classification = errorHandler.classifyError(
         networkError,
         mockContext
@@ -306,8 +306,8 @@ describe("ErrorHandler", () => {
       expect(classification.maxRetries).toBe(5);
     });
 
-    it("should respect maximum retry attempts", async () => {
-      const retryableError = new Error("Temporary failure");
+    it('should respect maximum retry attempts', async () => {
+      const retryableError = new Error('Temporary failure');
 
       const result = await errorHandler.handleError(
         retryableError,
@@ -319,10 +319,10 @@ describe("ErrorHandler", () => {
     });
   });
 
-  describe("Error Statistics", () => {
-    it("should track error statistics", async () => {
-      const error1 = new Error("Network error");
-      const error2 = new Error("Validation error");
+  describe('Error Statistics', () => {
+    it('should track error statistics', async () => {
+      const error1 = new Error('Network error');
+      const error2 = new Error('Validation error');
 
       await errorHandler.handleError(error1, mockContext);
       await errorHandler.handleError(error2, mockContext);
@@ -331,7 +331,7 @@ describe("ErrorHandler", () => {
       expect(stats.totalErrors).toBeGreaterThan(0);
     });
 
-    it("should clear error statistics", () => {
+    it('should clear error statistics', () => {
       errorHandler.clearErrorStatistics();
       const stats = errorHandler.getErrorStatistics();
       expect(stats.totalErrors).toBe(0);
@@ -339,10 +339,10 @@ describe("ErrorHandler", () => {
     });
   });
 
-  describe("Fallback Handling", () => {
-    it("should execute fallback function when provided", async () => {
-      const validationError = new Error("Invalid input");
-      const fallbackFn = vi.fn().mockResolvedValue("default_value");
+  describe('Fallback Handling', () => {
+    it('should execute fallback function when provided', async () => {
+      const validationError = new Error('Invalid input');
+      const fallbackFn = vi.fn().mockResolvedValue('default_value');
 
       const result = await errorHandler.handleError(
         validationError,
@@ -351,15 +351,15 @@ describe("ErrorHandler", () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.result).toBe("default_value");
+      expect(result.result).toBe('default_value');
       expect(fallbackFn).toHaveBeenCalled();
     });
 
-    it("should handle fallback function failures", async () => {
-      const validationError = new Error("Invalid input");
+    it('should handle fallback function failures', async () => {
+      const validationError = new Error('Invalid input');
       const fallbackFn = vi
         .fn()
-        .mockRejectedValue(new Error("Fallback failed"));
+        .mockRejectedValue(new Error('Fallback failed'));
 
       const result = await errorHandler.handleError(
         validationError,
@@ -371,8 +371,8 @@ describe("ErrorHandler", () => {
       expect(fallbackFn).toHaveBeenCalled();
     });
 
-    it("should handle missing fallback function gracefully", async () => {
-      const validationError = new Error("Invalid input");
+    it('should handle missing fallback function gracefully', async () => {
+      const validationError = new Error('Invalid input');
 
       const result = await errorHandler.handleError(
         validationError,
@@ -383,14 +383,14 @@ describe("ErrorHandler", () => {
     });
   });
 
-  describe("Error Context", () => {
-    it("should include error context in classification", () => {
+  describe('Error Context', () => {
+    it('should include error context in classification', () => {
       const contextWithIntegration = {
         ...mockContext,
-        component: "api_integration",
+        component: 'api_integration',
       };
 
-      const error = new Error("Service error");
+      const error = new Error('Service error');
       const classification = errorHandler.classifyError(
         error,
         contextWithIntegration
@@ -399,14 +399,14 @@ describe("ErrorHandler", () => {
       expect(classification.category).toBe(ErrorCategory.INTEGRATION);
     });
 
-    it("should handle missing context gracefully", () => {
+    it('should handle missing context gracefully', () => {
       const minimalContext: ErrorContext = {
-        operation: "test",
-        component: "test",
+        operation: 'test',
+        component: 'test',
         timestamp: new Date(),
       };
 
-      const error = new Error("Test error");
+      const error = new Error('Test error');
       const classification = errorHandler.classifyError(error, minimalContext);
 
       expect(classification).toBeDefined();

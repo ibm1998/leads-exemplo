@@ -1,4 +1,4 @@
-import firebase from "@/firebase-client";
+import firebase from '@/firebase-client';
 
 // firestore references used in client functions or components
 
@@ -6,10 +6,10 @@ import firebase from "@/firebase-client";
 // These should be used in getStaticProps, getStaticPaths, etc.
 // Use admin references and functions instead.
 
-export const docRef = firebase.firestore().collection("example").doc("myDoc");
+export const docRef = firebase.firestore().collection('example').doc('myDoc');
 
 //user from 'users' collection
-export const user = (uid) => firebase.firestore().collection("users").doc(uid);
+export const user = (uid) => firebase.firestore().collection('users').doc(uid);
 
 //now time
 export const now = firebase.firestore.Timestamp.now();

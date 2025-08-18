@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi, Mock } from "vitest";
-import { AICustomerAnalyticsAgent } from "../ai-customer-analytics-agent";
-import { DatabaseManager } from "../../database/manager";
-import { AgentPerformanceModel } from "../../types/agent-performance";
-import { InteractionModel } from "../../types/interaction";
+import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import { AICustomerAnalyticsAgent } from '../ai-customer-analytics-agent';
+import { DatabaseManager } from '../../database/manager';
+import { AgentPerformanceModel } from '../../types/agent-performance';
+import { InteractionModel } from '../../types/interaction';
 
 // Mock the database manager
-vi.mock("../../database/manager");
+vi.mock('../../database/manager');
 
-describe("AICustomerAnalyticsAgent", () => {
+describe('AICustomerAnalyticsAgent', () => {
   let analyticsAgent: AICustomerAnalyticsAgent;
   let mockDbManager: DatabaseManager;
 
@@ -16,12 +16,12 @@ describe("AICustomerAnalyticsAgent", () => {
     analyticsAgent = new AICustomerAnalyticsAgent(mockDbManager);
   });
 
-  describe("Performance Data Collection (Requirement 10.1)", () => {
-    it("should collect agent performance data for a given period", async () => {
-      const agentId = "test-agent-1";
+  describe('Performance Data Collection (Requirement 10.1)', () => {
+    it('should collect agent performance data for a given period', async () => {
+      const agentId = 'test-agent-1';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const performance = await analyticsAgent.collectPerformanceData(
@@ -37,11 +37,11 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(performance.optimizationSuggestions).toBeDefined();
     });
 
-    it("should calculate performance metrics correctly", async () => {
-      const agentId = "test-agent-1";
+    it('should calculate performance metrics correctly', async () => {
+      const agentId = 'test-agent-1';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const performance = await analyticsAgent.collectPerformanceData(
@@ -65,11 +65,11 @@ describe("AICustomerAnalyticsAgent", () => {
       );
     });
 
-    it("should generate optimization suggestions based on performance", async () => {
-      const agentId = "test-agent-1";
+    it('should generate optimization suggestions based on performance', async () => {
+      const agentId = 'test-agent-1';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const performance = await analyticsAgent.collectPerformanceData(
@@ -81,26 +81,26 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(performance.optimizationSuggestions.length).toBeGreaterThan(0);
     });
 
-    it("should handle errors gracefully when collecting performance data", async () => {
-      const agentId = "invalid-agent";
+    it('should handle errors gracefully when collecting performance data', async () => {
+      const agentId = 'invalid-agent';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // Mock a database error
-      vi.spyOn(analyticsAgent as any, "getAgentInteractions").mockRejectedValue(
-        new Error("Database connection failed")
+      vi.spyOn(analyticsAgent as any, 'getAgentInteractions').mockRejectedValue(
+        new Error('Database connection failed')
       );
 
       await expect(
         analyticsAgent.collectPerformanceData(agentId, period)
-      ).rejects.toThrow("Database connection failed");
+      ).rejects.toThrow('Database connection failed');
     });
   });
 
-  describe("Script Performance Analysis (Requirement 10.2)", () => {
-    it("should analyze script performance and identify optimization opportunities", async () => {
+  describe('Script Performance Analysis (Requirement 10.2)', () => {
+    it('should analyze script performance and identify optimization opportunities', async () => {
       const optimizations = await analyticsAgent.analyzeScriptPerformance();
 
       expect(optimizations).toBeInstanceOf(Array);
@@ -114,7 +114,7 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(optimization.estimatedImpact).toBeDefined();
     });
 
-    it("should prioritize optimizations by potential impact", async () => {
+    it('should prioritize optimizations by potential impact', async () => {
       const optimizations = await analyticsAgent.analyzeScriptPerformance();
 
       // Should be sorted by impact (highest first)
@@ -127,7 +127,7 @@ describe("AICustomerAnalyticsAgent", () => {
       }
     });
 
-    it("should provide specific recommendations for script improvements", async () => {
+    it('should provide specific recommendations for script improvements', async () => {
       const optimizations = await analyticsAgent.analyzeScriptPerformance();
 
       const optimization = optimizations[0];
@@ -141,8 +141,8 @@ describe("AICustomerAnalyticsAgent", () => {
     });
   });
 
-  describe("Intelligence Report Generation (Requirement 10.3)", () => {
-    it("should generate actionable intelligence reports", async () => {
+  describe('Intelligence Report Generation (Requirement 10.3)', () => {
+    it('should generate actionable intelligence reports', async () => {
       const insights = await analyticsAgent.generateIntelligenceReport();
 
       expect(insights).toBeInstanceOf(Array);
@@ -160,35 +160,35 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(insight.generatedAt).toBeInstanceOf(Date);
     });
 
-    it("should include different types of insights", async () => {
+    it('should include different types of insights', async () => {
       const insights = await analyticsAgent.generateIntelligenceReport();
 
       const insightTypes = insights.map((insight) => insight.type);
-      expect(insightTypes).toContain("performance");
-      expect(insightTypes).toContain("script");
-      expect(insightTypes).toContain("trend");
-      expect(insightTypes).toContain("optimization");
+      expect(insightTypes).toContain('performance');
+      expect(insightTypes).toContain('script');
+      expect(insightTypes).toContain('trend');
+      expect(insightTypes).toContain('optimization');
     });
 
-    it("should provide actionable recommendations for each insight", async () => {
+    it('should provide actionable recommendations for each insight', async () => {
       const insights = await analyticsAgent.generateIntelligenceReport();
 
       insights.forEach((insight) => {
         expect(insight.actionable).toBe(true);
         expect(insight.recommendations.length).toBeGreaterThan(0);
         insight.recommendations.forEach((recommendation) => {
-          expect(typeof recommendation).toBe("string");
+          expect(typeof recommendation).toBe('string');
           expect(recommendation.length).toBeGreaterThan(0);
         });
       });
     });
   });
 
-  describe("Performance Trend Analysis (Requirement 10.4)", () => {
-    it("should analyze performance trends over time", async () => {
+  describe('Performance Trend Analysis (Requirement 10.4)', () => {
+    it('should analyze performance trends over time', async () => {
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const trends = await analyticsAgent.analyzePerformanceTrends(period);
@@ -201,29 +201,29 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(trend.period).toEqual(period);
       expect(trend.dataPoints).toBeInstanceOf(Array);
       expect(trend.trend).toMatch(/increasing|decreasing|stable/);
-      expect(typeof trend.changePercent).toBe("number");
+      expect(typeof trend.changePercent).toBe('number');
       expect(trend.significance).toMatch(/high|medium|low/);
     });
 
-    it("should analyze multiple performance metrics", async () => {
+    it('should analyze multiple performance metrics', async () => {
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const trends = await analyticsAgent.analyzePerformanceTrends(period);
 
       const metrics = trends.map((trend) => trend.metric);
-      expect(metrics).toContain("conversionRate");
-      expect(metrics).toContain("averageResponseTime");
-      expect(metrics).toContain("customerSatisfactionScore");
-      expect(metrics).toContain("appointmentBookingRate");
+      expect(metrics).toContain('conversionRate');
+      expect(metrics).toContain('averageResponseTime');
+      expect(metrics).toContain('customerSatisfactionScore');
+      expect(metrics).toContain('appointmentBookingRate');
     });
 
-    it("should provide data points for trend visualization", async () => {
+    it('should provide data points for trend visualization', async () => {
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const trends = await analyticsAgent.analyzePerformanceTrends(period);
@@ -232,25 +232,25 @@ describe("AICustomerAnalyticsAgent", () => {
         expect(trend.dataPoints.length).toBeGreaterThan(0);
         trend.dataPoints.forEach((point) => {
           expect(point.date).toBeInstanceOf(Date);
-          expect(typeof point.value).toBe("number");
+          expect(typeof point.value).toBe('number');
         });
       });
     });
   });
 
-  describe("Optimization Impact Measurement (Requirement 10.5)", () => {
-    it("should measure optimization impact against baseline", async () => {
-      const agentId = "test-agent-1";
-      const optimizationId = "opt-123";
+  describe('Optimization Impact Measurement (Requirement 10.5)', () => {
+    it('should measure optimization impact against baseline', async () => {
+      const agentId = 'test-agent-1';
+      const optimizationId = 'opt-123';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // Set a baseline first
       await analyticsAgent.setPerformanceBaseline(agentId, {
-        start: new Date("2023-12-01"),
-        end: new Date("2023-12-31"),
+        start: new Date('2023-12-01'),
+        end: new Date('2023-12-31'),
       });
 
       const impact = await analyticsAgent.measureOptimizationImpact(
@@ -262,25 +262,25 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(impact.baseline).toBeDefined();
       expect(impact.current).toBeDefined();
       expect(impact.improvement).toBeDefined();
-      expect(typeof impact.improvement.conversionRate).toBe("number");
-      expect(typeof impact.improvement.responseTime).toBe("number");
-      expect(typeof impact.improvement.satisfaction).toBe("number");
-      expect(typeof impact.improvement.overall).toBe("number");
-      expect(typeof impact.validated).toBe("boolean");
+      expect(typeof impact.improvement.conversionRate).toBe('number');
+      expect(typeof impact.improvement.responseTime).toBe('number');
+      expect(typeof impact.improvement.satisfaction).toBe('number');
+      expect(typeof impact.improvement.overall).toBe('number');
+      expect(typeof impact.validated).toBe('boolean');
     });
 
-    it("should validate improvements above threshold", async () => {
-      const agentId = "test-agent-1";
-      const optimizationId = "opt-123";
+    it('should validate improvements above threshold', async () => {
+      const agentId = 'test-agent-1';
+      const optimizationId = 'opt-123';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // Set a baseline first
       await analyticsAgent.setPerformanceBaseline(agentId, {
-        start: new Date("2023-12-01"),
-        end: new Date("2023-12-31"),
+        start: new Date('2023-12-01'),
+        end: new Date('2023-12-31'),
       });
 
       const impact = await analyticsAgent.measureOptimizationImpact(
@@ -297,12 +297,12 @@ describe("AICustomerAnalyticsAgent", () => {
       }
     });
 
-    it("should throw error when no baseline exists", async () => {
-      const agentId = "agent-without-baseline";
-      const optimizationId = "opt-123";
+    it('should throw error when no baseline exists', async () => {
+      const agentId = 'agent-without-baseline';
+      const optimizationId = 'opt-123';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       await expect(
@@ -311,12 +311,12 @@ describe("AICustomerAnalyticsAgent", () => {
           optimizationId,
           period
         )
-      ).rejects.toThrow("No baseline found");
+      ).rejects.toThrow('No baseline found');
     });
   });
 
-  describe("Real-time Dashboard", () => {
-    it("should provide comprehensive dashboard data", async () => {
+  describe('Real-time Dashboard', () => {
+    it('should provide comprehensive dashboard data', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
 
       expect(dashboardData.overview).toBeDefined();
@@ -328,19 +328,19 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(dashboardData.lastUpdated).toBeInstanceOf(Date);
     });
 
-    it("should include overview metrics", async () => {
+    it('should include overview metrics', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
 
       const overview = dashboardData.overview;
-      expect(typeof overview.totalInteractions).toBe("number");
-      expect(typeof overview.overallConversionRate).toBe("number");
-      expect(typeof overview.averageResponseTime).toBe("number");
-      expect(typeof overview.customerSatisfactionScore).toBe("number");
-      expect(typeof overview.activeLeads).toBe("number");
-      expect(typeof overview.convertedLeads).toBe("number");
+      expect(typeof overview.totalInteractions).toBe('number');
+      expect(typeof overview.overallConversionRate).toBe('number');
+      expect(typeof overview.averageResponseTime).toBe('number');
+      expect(typeof overview.customerSatisfactionScore).toBe('number');
+      expect(typeof overview.activeLeads).toBe('number');
+      expect(typeof overview.convertedLeads).toBe('number');
     });
 
-    it("should include lead source analysis", async () => {
+    it('should include lead source analysis', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
 
       const leadSources = dashboardData.leadSourceAnalysis;
@@ -348,27 +348,27 @@ describe("AICustomerAnalyticsAgent", () => {
 
       const source = leadSources[0];
       expect(source.source).toBeDefined();
-      expect(typeof source.totalLeads).toBe("number");
-      expect(typeof source.conversionRate).toBe("number");
-      expect(typeof source.averageQualificationScore).toBe("number");
-      expect(typeof source.averageResponseTime).toBe("number");
-      expect(typeof source.qualityScore).toBe("number");
+      expect(typeof source.totalLeads).toBe('number');
+      expect(typeof source.conversionRate).toBe('number');
+      expect(typeof source.averageQualificationScore).toBe('number');
+      expect(typeof source.averageResponseTime).toBe('number');
+      expect(typeof source.qualityScore).toBe('number');
       expect(source.recommendations).toBeInstanceOf(Array);
     });
 
-    it("should limit recent insights to reasonable number", async () => {
+    it('should limit recent insights to reasonable number', async () => {
       const dashboardData = await analyticsAgent.getDashboardData();
 
       expect(dashboardData.recentInsights.length).toBeLessThanOrEqual(10);
     });
   });
 
-  describe("Performance Baseline Management", () => {
-    it("should set performance baseline for an agent", async () => {
-      const agentId = "test-agent-1";
+  describe('Performance Baseline Management', () => {
+    it('should set performance baseline for an agent', async () => {
+      const agentId = 'test-agent-1';
       const period = {
-        start: new Date("2023-12-01"),
-        end: new Date("2023-12-31"),
+        start: new Date('2023-12-01'),
+        end: new Date('2023-12-31'),
       };
 
       await expect(
@@ -376,45 +376,45 @@ describe("AICustomerAnalyticsAgent", () => {
       ).resolves.not.toThrow();
     });
 
-    it("should handle errors when setting baseline", async () => {
-      const agentId = "invalid-agent";
+    it('should handle errors when setting baseline', async () => {
+      const agentId = 'invalid-agent';
       const period = {
-        start: new Date("2023-12-01"),
-        end: new Date("2023-12-31"),
+        start: new Date('2023-12-01'),
+        end: new Date('2023-12-31'),
       };
 
       // Mock an error in collectPerformanceData
-      vi.spyOn(analyticsAgent, "collectPerformanceData").mockRejectedValue(
-        new Error("Failed to collect performance data")
+      vi.spyOn(analyticsAgent, 'collectPerformanceData').mockRejectedValue(
+        new Error('Failed to collect performance data')
       );
 
       await expect(
         analyticsAgent.setPerformanceBaseline(agentId, period)
-      ).rejects.toThrow("Failed to collect performance data");
+      ).rejects.toThrow('Failed to collect performance data');
     });
   });
 
-  describe("Error Handling", () => {
-    it("should handle database errors gracefully", async () => {
+  describe('Error Handling', () => {
+    it('should handle database errors gracefully', async () => {
       // Mock database error
-      vi.spyOn(analyticsAgent as any, "getAllScriptMetrics").mockRejectedValue(
-        new Error("Database connection failed")
+      vi.spyOn(analyticsAgent as any, 'getAllScriptMetrics').mockRejectedValue(
+        new Error('Database connection failed')
       );
 
       await expect(analyticsAgent.analyzeScriptPerformance()).rejects.toThrow(
-        "Database connection failed"
+        'Database connection failed'
       );
     });
 
-    it("should handle missing data gracefully", async () => {
-      const agentId = "test-agent-1";
+    it('should handle missing data gracefully', async () => {
+      const agentId = 'test-agent-1';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       // Mock empty interactions
-      vi.spyOn(analyticsAgent as any, "getAgentInteractions").mockResolvedValue(
+      vi.spyOn(analyticsAgent as any, 'getAgentInteractions').mockResolvedValue(
         []
       );
 
@@ -428,12 +428,12 @@ describe("AICustomerAnalyticsAgent", () => {
     });
   });
 
-  describe("Data Validation", () => {
-    it("should validate performance metrics are within expected ranges", async () => {
-      const agentId = "test-agent-1";
+  describe('Data Validation', () => {
+    it('should validate performance metrics are within expected ranges', async () => {
+      const agentId = 'test-agent-1';
       const period = {
-        start: new Date("2024-01-01"),
-        end: new Date("2024-01-31"),
+        start: new Date('2024-01-01'),
+        end: new Date('2024-01-31'),
       };
 
       const performance = await analyticsAgent.collectPerformanceData(
@@ -463,7 +463,7 @@ describe("AICustomerAnalyticsAgent", () => {
       expect(performance.metrics.averageResponseTime).toBeGreaterThanOrEqual(0);
     });
 
-    it("should validate insight data structure", async () => {
+    it('should validate insight data structure', async () => {
       const insights = await analyticsAgent.generateIntelligenceReport();
 
       insights.forEach((insight) => {

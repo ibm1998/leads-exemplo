@@ -1,29 +1,29 @@
-import { z } from "zod";
+import { z } from 'zod';
 import {
   ValidationResult,
   validateData,
   generateUUID,
   sanitizeString,
-} from "./validation";
+} from './validation';
 
 // Interaction type enum
 export const InteractionTypeSchema = z.enum([
-  "call",
-  "sms",
-  "email",
-  "whatsapp",
+  'call',
+  'sms',
+  'email',
+  'whatsapp',
 ]);
 
 export type InteractionType = z.infer<typeof InteractionTypeSchema>;
 
 // Interaction direction enum
-export const InteractionDirectionSchema = z.enum(["inbound", "outbound"]);
+export const InteractionDirectionSchema = z.enum(['inbound', 'outbound']);
 
 export type InteractionDirection = z.infer<typeof InteractionDirectionSchema>;
 
 // Interaction outcome schema
 export const InteractionOutcomeSchema = z.object({
-  status: z.enum(["successful", "failed", "transferred", "pending"]),
+  status: z.enum(['successful', 'failed', 'transferred', 'pending']),
   appointmentBooked: z.boolean(),
   qualificationUpdated: z.boolean(),
   escalationRequired: z.boolean(),
@@ -52,13 +52,13 @@ export type ScheduledAction = z.infer<typeof ScheduledActionSchema>;
 export const InteractionSchema = z.object({
   id: z.string().uuid(),
   leadId: z.string().uuid(),
-  agentId: z.string().min(1, "Agent ID is required"),
+  agentId: z.string().min(1, 'Agent ID is required'),
   type: InteractionTypeSchema,
   direction: InteractionDirectionSchema,
   content: z
     .string()
-    .min(1, "Content is required")
-    .max(10000, "Content must be less than 10000 characters")
+    .min(1, 'Content is required')
+    .max(10000, 'Content must be less than 10000 characters')
     .transform(sanitizeString),
   outcome: InteractionOutcomeSchema,
   duration: z.number().min(0).max(86400).optional(), // Duration in seconds, max 24 hours
@@ -93,7 +93,7 @@ export const InteractionValidation = {
    * Validate a complete interaction object
    */
   validateInteraction(data: unknown): ValidationResult<Interaction> {
-    return validateData(InteractionSchema, data, "Interaction validation");
+    return validateData(InteractionSchema, data, 'Interaction validation');
   },
 
   /**
@@ -105,7 +105,7 @@ export const InteractionValidation = {
     return validateData(
       CreateInteractionSchema,
       data,
-      "Create interaction validation"
+      'Create interaction validation'
     );
   },
 
@@ -118,7 +118,7 @@ export const InteractionValidation = {
     return validateData(
       UpdateInteractionSchema,
       data,
-      "Update interaction validation"
+      'Update interaction validation'
     );
   },
 
@@ -129,7 +129,7 @@ export const InteractionValidation = {
     return validateData(
       SentimentScoreSchema,
       data,
-      "Sentiment score validation"
+      'Sentiment score validation'
     );
   },
 
@@ -140,7 +140,7 @@ export const InteractionValidation = {
     return validateData(
       ScheduledActionSchema,
       data,
-      "Scheduled action validation"
+      'Scheduled action validation'
     );
   },
 
@@ -148,7 +148,7 @@ export const InteractionValidation = {
    * Check if interaction is successful
    */
   isSuccessful(interaction: Interaction): boolean {
-    return interaction.outcome.status === "successful";
+    return interaction.outcome.status === 'successful';
   },
 
   /**
@@ -169,7 +169,7 @@ export const InteractionValidation = {
    * Check if interaction is a voice call
    */
   isVoiceCall(interaction: Interaction): boolean {
-    return interaction.type === "call";
+    return interaction.type === 'call';
   },
 
   /**
@@ -313,7 +313,7 @@ export class InteractionModel {
     }
 
     if (action.scheduledAt <= new Date()) {
-      throw new Error("Scheduled action must be in the future");
+      throw new Error('Scheduled action must be in the future');
     }
 
     this._data.nextAction = action;
@@ -323,21 +323,21 @@ export class InteractionModel {
    * Mark as successful
    */
   markAsSuccessful(): void {
-    this.updateOutcome({ status: "successful" });
+    this.updateOutcome({ status: 'successful' });
   }
 
   /**
    * Mark as failed
    */
   markAsFailed(): void {
-    this.updateOutcome({ status: "failed" });
+    this.updateOutcome({ status: 'failed' });
   }
 
   /**
    * Mark as transferred
    */
   markAsTransferred(): void {
-    this.updateOutcome({ status: "transferred" });
+    this.updateOutcome({ status: 'transferred' });
   }
 
   /**
@@ -432,12 +432,12 @@ export class InteractionModel {
    */
   getSummary(): string {
     const duration = this.getDurationInMinutes();
-    const durationText = duration ? ` (${duration}min)` : "";
+    const durationText = duration ? ` (${duration}min)` : '';
     const sentiment = this._data.sentiment
       ? ` [${
-          this._data.sentiment.score > 0 ? "+" : ""
+          this._data.sentiment.score > 0 ? '+' : ''
         }${this._data.sentiment.score.toFixed(2)}]`
-      : "";
+      : '';
 
     return `${this._data.type.toUpperCase()} ${this._data.direction} - ${
       this._data.outcome.status

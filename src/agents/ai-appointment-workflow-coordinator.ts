@@ -1,25 +1,25 @@
-import { Lead, LeadModel } from "../types/lead";
+import { Lead, LeadModel } from '../types/lead';
 import {
   Interaction,
   InteractionModel,
   CreateInteraction,
-} from "../types/interaction";
+} from '../types/interaction';
 import {
   AgentPerformance,
   AgentPerformanceModel,
-} from "../types/agent-performance";
-import { generateUUID } from "../types/validation";
+} from '../types/agent-performance';
+import { generateUUID } from '../types/validation';
 
 // Campaign types and interfaces
 export interface Campaign {
   id: string;
   name: string;
   type:
-    | "callback_sequence"
-    | "appointment_booking"
-    | "follow_up"
-    | "re_engagement";
-  status: "active" | "paused" | "completed" | "cancelled";
+    | 'callback_sequence'
+    | 'appointment_booking'
+    | 'follow_up'
+    | 're_engagement';
+  status: 'active' | 'paused' | 'completed' | 'cancelled';
   targetAudience: CampaignAudience;
   steps: CampaignStep[];
   performance: CampaignPerformance;
@@ -28,7 +28,7 @@ export interface Campaign {
 }
 
 export interface CampaignAudience {
-  leadTypes: ("hot" | "warm" | "cold")[];
+  leadTypes: ('hot' | 'warm' | 'cold')[];
   sources: string[];
   qualificationScoreMin?: number;
   qualificationScoreMax?: number;
@@ -38,7 +38,7 @@ export interface CampaignAudience {
 export interface CampaignStep {
   id: string;
   order: number;
-  type: "callback" | "appointment" | "message" | "email" | "wait";
+  type: 'callback' | 'appointment' | 'message' | 'email' | 'wait';
   delayHours: number;
   content?: string;
   conditions?: CampaignCondition[];
@@ -46,7 +46,7 @@ export interface CampaignStep {
 
 export interface CampaignCondition {
   field: string;
-  operator: "equals" | "not_equals" | "greater_than" | "less_than" | "contains";
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
   value: any;
 }
 
@@ -64,14 +64,14 @@ export interface Appointment {
   id: string;
   leadId: string;
   campaignId?: string;
-  type: "consultation" | "site_visit" | "callback" | "follow_up";
+  type: 'consultation' | 'site_visit' | 'callback' | 'follow_up';
   status:
-    | "scheduled"
-    | "confirmed"
-    | "rescheduled"
-    | "cancelled"
-    | "completed"
-    | "no_show";
+    | 'scheduled'
+    | 'confirmed'
+    | 'rescheduled'
+    | 'cancelled'
+    | 'completed'
+    | 'no_show';
   scheduledAt: Date;
   duration: number; // in minutes
   location?: string;
@@ -88,7 +88,7 @@ export interface Callback {
   leadId: string;
   campaignId?: string;
   scheduledAt: Date;
-  status: "pending" | "completed" | "failed" | "cancelled";
+  status: 'pending' | 'completed' | 'failed' | 'cancelled';
   attempts: number;
   maxAttempts: number;
   notes?: string;
@@ -100,15 +100,15 @@ export interface ReminderSequence {
   id: string;
   appointmentId: string;
   reminders: Reminder[];
-  status: "active" | "completed" | "cancelled";
+  status: 'active' | 'completed' | 'cancelled';
   createdAt: Date;
 }
 
 export interface Reminder {
   id: string;
-  type: "email" | "sms" | "call";
+  type: 'email' | 'sms' | 'call';
   scheduledAt: Date;
-  status: "pending" | "sent" | "failed";
+  status: 'pending' | 'sent' | 'failed';
   content: string;
   sentAt?: Date;
 }
@@ -126,7 +126,7 @@ export class AIAppointmentWorkflowCoordinator {
   private callbacks: Map<string, Callback> = new Map();
   private reminderSequences: Map<string, ReminderSequence> = new Map();
 
-  constructor(agentId: string = "ai-appointment-workflow-coordinator") {
+  constructor(agentId: string = 'ai-appointment-workflow-coordinator') {
     this.agentId = agentId;
   }
 
@@ -135,15 +135,15 @@ export class AIAppointmentWorkflowCoordinator {
    */
   async createCampaign(
     name: string,
-    type: Campaign["type"],
+    type: Campaign['type'],
     targetAudience: CampaignAudience,
-    steps: Omit<CampaignStep, "id">[]
+    steps: Omit<CampaignStep, 'id'>[]
   ): Promise<Campaign> {
     const campaign: Campaign = {
       id: generateUUID(),
       name,
       type,
-      status: "active",
+      status: 'active',
       targetAudience,
       steps: steps.map((step, index) => ({
         ...step,
@@ -180,7 +180,7 @@ export class AIAppointmentWorkflowCoordinator {
       leadId,
       campaignId,
       scheduledAt,
-      status: "pending",
+      status: 'pending',
       attempts: 0,
       maxAttempts,
       createdAt: new Date(),
@@ -204,7 +204,7 @@ export class AIAppointmentWorkflowCoordinator {
    */
   async bookAppointment(
     leadId: string,
-    type: Appointment["type"],
+    type: Appointment['type'],
     scheduledAt: Date,
     duration: number = 60,
     location?: string,
@@ -215,7 +215,7 @@ export class AIAppointmentWorkflowCoordinator {
       leadId,
       campaignId,
       type,
-      status: "scheduled",
+      status: 'scheduled',
       scheduledAt,
       duration,
       location,
@@ -254,26 +254,26 @@ export class AIAppointmentWorkflowCoordinator {
     const reminderSequence: ReminderSequence = {
       id: generateUUID(),
       appointmentId,
-      status: "active",
+      status: 'active',
       reminders: [
         // 24 hours before
         {
           id: generateUUID(),
-          type: "email",
+          type: 'email',
           scheduledAt: new Date(
             appointment.scheduledAt.getTime() - 24 * 60 * 60 * 1000
           ),
-          status: "pending",
+          status: 'pending',
           content: `Reminder: You have an appointment scheduled for ${appointment.scheduledAt.toLocaleString()}`,
         },
         // 2 hours before
         {
           id: generateUUID(),
-          type: "sms",
+          type: 'sms',
           scheduledAt: new Date(
             appointment.scheduledAt.getTime() - 2 * 60 * 60 * 1000
           ),
-          status: "pending",
+          status: 'pending',
           content: `Reminder: Your appointment is in 2 hours at ${appointment.scheduledAt.toLocaleString()}`,
         },
       ],
@@ -298,8 +298,8 @@ export class AIAppointmentWorkflowCoordinator {
     }
 
     appointment.scheduledAt = newScheduledAt;
-    appointment.status = "rescheduled";
-    appointment.notes = reason ? `Rescheduled: ${reason}` : "Rescheduled";
+    appointment.status = 'rescheduled';
+    appointment.notes = reason ? `Rescheduled: ${reason}` : 'Rescheduled';
     appointment.updatedAt = new Date();
 
     // Update reminder sequence
@@ -309,7 +309,7 @@ export class AIAppointmentWorkflowCoordinator {
 
     if (reminderSequence) {
       // Cancel existing reminders
-      reminderSequence.status = "cancelled";
+      reminderSequence.status = 'cancelled';
 
       // Create new reminder sequence
       await this.createReminderSequence(appointmentId);
@@ -327,7 +327,7 @@ export class AIAppointmentWorkflowCoordinator {
       throw new Error(`Appointment not found: ${appointmentId}`);
     }
 
-    appointment.status = "confirmed";
+    appointment.status = 'confirmed';
     appointment.confirmationSent = true;
     appointment.updatedAt = new Date();
 
@@ -346,8 +346,8 @@ export class AIAppointmentWorkflowCoordinator {
       throw new Error(`Appointment not found: ${appointmentId}`);
     }
 
-    appointment.status = "cancelled";
-    appointment.notes = reason ? `Cancelled: ${reason}` : "Cancelled";
+    appointment.status = 'cancelled';
+    appointment.notes = reason ? `Cancelled: ${reason}` : 'Cancelled';
     appointment.updatedAt = new Date();
 
     // Cancel reminder sequence
@@ -356,7 +356,7 @@ export class AIAppointmentWorkflowCoordinator {
     );
 
     if (reminderSequence) {
-      reminderSequence.status = "cancelled";
+      reminderSequence.status = 'cancelled';
     }
 
     return appointment;
@@ -382,21 +382,21 @@ export class AIAppointmentWorkflowCoordinator {
 
     try {
       switch (step.type) {
-        case "callback":
+        case 'callback':
           const callbackTime = new Date(
             Date.now() + step.delayHours * 60 * 60 * 1000
           );
           await this.scheduleCallback(leadId, callbackTime, campaignId);
           break;
 
-        case "appointment":
+        case 'appointment':
           // For appointment steps, we schedule a consultation
           const appointmentTime = new Date(
             Date.now() + step.delayHours * 60 * 60 * 1000
           );
           await this.bookAppointment(
             leadId,
-            "consultation",
+            'consultation',
             appointmentTime,
             60,
             undefined,
@@ -404,8 +404,8 @@ export class AIAppointmentWorkflowCoordinator {
           );
           break;
 
-        case "message":
-        case "email":
+        case 'message':
+        case 'email':
           // These would integrate with communication systems
           // For now, we'll log the action
           console.log(
@@ -413,7 +413,7 @@ export class AIAppointmentWorkflowCoordinator {
           );
           break;
 
-        case "wait":
+        case 'wait':
           // Wait steps are handled by the scheduler
           console.log(
             `Wait step executed for lead ${leadId}, waiting ${step.delayHours} hours`
@@ -442,7 +442,7 @@ export class AIAppointmentWorkflowCoordinator {
     const now = new Date();
     const pendingCallbacks = Array.from(this.callbacks.values()).filter(
       (callback) =>
-        callback.status === "pending" &&
+        callback.status === 'pending' &&
         callback.scheduledAt <= now &&
         callback.attempts < callback.maxAttempts
     );
@@ -456,15 +456,15 @@ export class AIAppointmentWorkflowCoordinator {
         const success = await this.attemptCallback(callback);
 
         if (success) {
-          callback.status = "completed";
+          callback.status = 'completed';
         } else if (callback.attempts >= callback.maxAttempts) {
-          callback.status = "failed";
+          callback.status = 'failed';
         }
 
         callback.updatedAt = new Date();
       } catch (error) {
         console.error(`Failed to process callback ${callback.id}:`, error);
-        callback.status = "failed";
+        callback.status = 'failed';
         callback.updatedAt = new Date();
       }
     }
@@ -487,18 +487,18 @@ export class AIAppointmentWorkflowCoordinator {
     const now = new Date();
 
     for (const reminderSequence of this.reminderSequences.values()) {
-      if (reminderSequence.status !== "active") continue;
+      if (reminderSequence.status !== 'active') continue;
 
       const pendingReminders = reminderSequence.reminders.filter(
         (reminder) =>
-          reminder.status === "pending" && reminder.scheduledAt <= now
+          reminder.status === 'pending' && reminder.scheduledAt <= now
       );
 
       for (const reminder of pendingReminders) {
         try {
           // Send the reminder
           await this.sendReminder(reminder);
-          reminder.status = "sent";
+          reminder.status = 'sent';
           reminder.sentAt = new Date();
 
           // Update appointment reminder count
@@ -510,17 +510,17 @@ export class AIAppointmentWorkflowCoordinator {
           }
         } catch (error) {
           console.error(`Failed to send reminder ${reminder.id}:`, error);
-          reminder.status = "failed";
+          reminder.status = 'failed';
         }
       }
 
       // Check if all reminders are processed
       const allProcessed = reminderSequence.reminders.every(
-        (reminder) => reminder.status !== "pending"
+        (reminder) => reminder.status !== 'pending'
       );
 
       if (allProcessed) {
-        reminderSequence.status = "completed";
+        reminderSequence.status = 'completed';
       }
     }
   }
@@ -555,7 +555,7 @@ export class AIAppointmentWorkflowCoordinator {
    */
   getActiveCampaigns(): Campaign[] {
     return Array.from(this.campaigns.values()).filter(
-      (campaign) => campaign.status === "active"
+      (campaign) => campaign.status === 'active'
     );
   }
 
@@ -576,8 +576,8 @@ export class AIAppointmentWorkflowCoordinator {
     return Array.from(this.appointments.values())
       .filter(
         (appointment) =>
-          appointment.status === "scheduled" ||
-          appointment.status === "confirmed"
+          appointment.status === 'scheduled' ||
+          appointment.status === 'confirmed'
       )
       .filter((appointment) => appointment.scheduledAt <= cutoff)
       .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
@@ -597,10 +597,10 @@ export class AIAppointmentWorkflowCoordinator {
 
     const totalInteractions = appointments.length + callbacks.length;
     const successfulAppointments = appointments.filter(
-      (apt) => apt.status === "completed" || apt.status === "confirmed"
+      (apt) => apt.status === 'completed' || apt.status === 'confirmed'
     ).length;
     const successfulCallbacks = callbacks.filter(
-      (cb) => cb.status === "completed"
+      (cb) => cb.status === 'completed'
     ).length;
 
     const conversionRate =
@@ -637,26 +637,26 @@ export class AIAppointmentWorkflowCoordinator {
     const campaigns = Array.from(this.campaigns.values());
     const totalAppointments = Array.from(this.appointments.values()).length;
     const completedAppointments = Array.from(this.appointments.values()).filter(
-      (apt) => apt.status === "completed"
+      (apt) => apt.status === 'completed'
     ).length;
 
     if (totalAppointments > 0) {
       const completionRate = completedAppointments / totalAppointments;
       if (completionRate < 0.7) {
         suggestions.push(
-          "Consider improving appointment confirmation process to reduce no-shows"
+          'Consider improving appointment confirmation process to reduce no-shows'
         );
       }
     }
 
     const failedCallbacks = Array.from(this.callbacks.values()).filter(
-      (cb) => cb.status === "failed"
+      (cb) => cb.status === 'failed'
     ).length;
     const totalCallbacks = Array.from(this.callbacks.values()).length;
 
     if (totalCallbacks > 0 && failedCallbacks / totalCallbacks > 0.3) {
       suggestions.push(
-        "High callback failure rate - consider adjusting timing or contact methods"
+        'High callback failure rate - consider adjusting timing or contact methods'
       );
     }
 
@@ -666,7 +666,7 @@ export class AIAppointmentWorkflowCoordinator {
         campaigns.length;
       if (avgConversionRate < 0.2) {
         suggestions.push(
-          "Campaign conversion rates are low - consider A/B testing different messaging"
+          'Campaign conversion rates are low - consider A/B testing different messaging'
         );
       }
     }

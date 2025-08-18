@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 import {
   ValidationResult,
   validateData,
@@ -7,17 +7,17 @@ import {
   isValidPhone,
   isValidTimezone,
   sanitizeString,
-} from "./validation";
+} from './validation';
 
 // Lead source enum
 export const LeadSourceSchema = z.enum([
-  "gmail",
-  "meta_ads",
-  "website",
-  "slack",
-  "third_party",
-  "referral",
-  "other",
+  'gmail',
+  'meta_ads',
+  'website',
+  'slack',
+  'third_party',
+  'referral',
+  'other',
 ]);
 
 export type LeadSource = z.infer<typeof LeadSourceSchema>;
@@ -26,27 +26,27 @@ export type LeadSource = z.infer<typeof LeadSourceSchema>;
 export const ContactInfoSchema = z.object({
   name: z
     .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be less than 100 characters")
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters')
     .transform(sanitizeString),
   email: z
     .string()
-    .email("Invalid email format")
+    .email('Invalid email format')
     .optional()
     .refine((email) => !email || isValidEmail(email), {
-      message: "Invalid email format",
+      message: 'Invalid email format',
     }),
   phone: z
     .string()
     .optional()
     .refine((phone) => !phone || isValidPhone(phone), {
-      message: "Invalid phone number format",
+      message: 'Invalid phone number format',
     }),
   preferredChannel: z
-    .enum(["email", "sms", "voice", "whatsapp"])
-    .default("email"),
-  timezone: z.string().default("UTC").refine(isValidTimezone, {
-    message: "Invalid timezone",
+    .enum(['email', 'sms', 'voice', 'whatsapp'])
+    .default('email'),
+  timezone: z.string().default('UTC').refine(isValidTimezone, {
+    message: 'Invalid timezone',
   }),
 });
 
@@ -55,7 +55,7 @@ export type ContactInfo = {
   name: string;
   email?: string;
   phone?: string;
-  preferredChannel: "email" | "sms" | "voice" | "whatsapp";
+  preferredChannel: 'email' | 'sms' | 'voice' | 'whatsapp';
   timezone: string;
 };
 
@@ -66,7 +66,7 @@ export const BudgetRangeSchema = z
     max: z.number().min(0).optional(),
   })
   .refine((data) => !data.min || !data.max || data.min <= data.max, {
-    message: "Minimum budget must be less than or equal to maximum budget",
+    message: 'Minimum budget must be less than or equal to maximum budget',
   });
 
 export type BudgetRange = z.infer<typeof BudgetRangeSchema>;
@@ -91,20 +91,20 @@ export type QualificationData = {
 
 // Lead status enum
 export const LeadStatusSchema = z.enum([
-  "new",
-  "contacted",
-  "qualified",
-  "appointment_scheduled",
-  "in_progress",
-  "converted",
-  "lost",
-  "dormant",
+  'new',
+  'contacted',
+  'qualified',
+  'appointment_scheduled',
+  'in_progress',
+  'converted',
+  'lost',
+  'dormant',
 ]);
 
 export type LeadStatus = z.infer<typeof LeadStatusSchema>;
 
 // Lead type enum
-export const LeadTypeSchema = z.enum(["hot", "warm", "cold"]);
+export const LeadTypeSchema = z.enum(['hot', 'warm', 'cold']);
 
 export type LeadType = z.infer<typeof LeadTypeSchema>;
 
@@ -117,7 +117,7 @@ export const LeadSchema = z.object({
   urgencyLevel: z.number().min(1).max(10).default(1),
   intentSignals: z.array(z.string()).default([]),
   qualificationData: QualificationDataSchema,
-  status: LeadStatusSchema.default("new"),
+  status: LeadStatusSchema.default('new'),
   assignedAgent: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -149,7 +149,7 @@ export const LeadValidation = {
     return validateData(
       LeadSchema,
       data,
-      "Lead validation"
+      'Lead validation'
     ) as ValidationResult<Lead>;
   },
 
@@ -160,7 +160,7 @@ export const LeadValidation = {
     return validateData(
       CreateLeadSchema,
       data,
-      "Create lead validation"
+      'Create lead validation'
     ) as ValidationResult<CreateLead>;
   },
 
@@ -171,7 +171,7 @@ export const LeadValidation = {
     return validateData(
       UpdateLeadSchema,
       data,
-      "Update lead validation"
+      'Update lead validation'
     ) as ValidationResult<UpdateLead>;
   },
 
@@ -182,7 +182,7 @@ export const LeadValidation = {
     return validateData(
       ContactInfoSchema,
       data,
-      "Contact info validation"
+      'Contact info validation'
     ) as ValidationResult<ContactInfo>;
   },
 
@@ -195,7 +195,7 @@ export const LeadValidation = {
     return validateData(
       QualificationDataSchema,
       data,
-      "Qualification data validation"
+      'Qualification data validation'
     ) as ValidationResult<QualificationData>;
   },
 
@@ -217,7 +217,7 @@ export const LeadValidation = {
    * Check if lead is hot (urgency level >= 8)
    */
   isHotLead(lead: Lead): boolean {
-    return lead.urgencyLevel >= 8 || lead.leadType === "hot";
+    return lead.urgencyLevel >= 8 || lead.leadType === 'hot';
   },
 
   /**
@@ -228,14 +228,14 @@ export const LeadValidation = {
     newStatus: LeadStatus
   ): boolean {
     const validTransitions: Record<LeadStatus, LeadStatus[]> = {
-      new: ["contacted", "lost"],
-      contacted: ["qualified", "lost", "dormant"],
-      qualified: ["appointment_scheduled", "lost", "dormant"],
-      appointment_scheduled: ["in_progress", "lost", "dormant"],
-      in_progress: ["converted", "lost", "dormant"],
-      converted: ["dormant"], // Can become dormant for re-engagement
-      lost: ["contacted"], // Can be re-contacted
-      dormant: ["contacted"], // Can be re-activated
+      new: ['contacted', 'lost'],
+      contacted: ['qualified', 'lost', 'dormant'],
+      qualified: ['appointment_scheduled', 'lost', 'dormant'],
+      appointment_scheduled: ['in_progress', 'lost', 'dormant'],
+      in_progress: ['converted', 'lost', 'dormant'],
+      converted: ['dormant'], // Can become dormant for re-engagement
+      lost: ['contacted'], // Can be re-contacted
+      dormant: ['contacted'], // Can be re-activated
     };
 
     return validTransitions[currentStatus]?.includes(newStatus) ?? false;
@@ -340,7 +340,7 @@ export class LeadModel {
    */
   updateQualificationScore(score: number): void {
     if (score < 0 || score > 1) {
-      throw new Error("Qualification score must be between 0 and 1");
+      throw new Error('Qualification score must be between 0 and 1');
     }
 
     this._data.qualificationData.qualificationScore = score;
@@ -352,7 +352,7 @@ export class LeadModel {
    */
   addIntentSignal(signal: string): void {
     if (!signal.trim()) {
-      throw new Error("Intent signal cannot be empty");
+      throw new Error('Intent signal cannot be empty');
     }
 
     if (!this._data.intentSignals.includes(signal)) {
@@ -377,7 +377,7 @@ export class LeadModel {
    */
   assignAgent(agentId: string): void {
     if (!agentId.trim()) {
-      throw new Error("Agent ID cannot be empty");
+      throw new Error('Agent ID cannot be empty');
     }
 
     this._data.assignedAgent = agentId;
@@ -427,7 +427,7 @@ export class LeadModel {
    * Check if lead should be marked as dormant (no updates for 60+ days)
    */
   shouldBeDormant(): boolean {
-    return this.getDaysSinceUpdate() >= 60 && this._data.status !== "dormant";
+    return this.getDaysSinceUpdate() >= 60 && this._data.status !== 'dormant';
   }
 
   /**

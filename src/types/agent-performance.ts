@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { ValidationResult, validateData, generateUUID } from "./validation";
+import { z } from 'zod';
+import { ValidationResult, validateData, generateUUID } from './validation';
 
 // Date range schema
 export const DateRangeSchema = z
@@ -8,7 +8,7 @@ export const DateRangeSchema = z
     end: z.date(),
   })
   .refine((data) => data.start <= data.end, {
-    message: "Start date must be before or equal to end date",
+    message: 'Start date must be before or equal to end date',
   });
 
 export type DateRange = z.infer<typeof DateRangeSchema>;
@@ -39,7 +39,7 @@ export type PerformanceMetrics = z.infer<typeof PerformanceMetricsSchema>;
 // Agent performance schema
 export const AgentPerformanceSchema = z.object({
   id: z.string().uuid(),
-  agentId: z.string().min(1, "Agent ID is required"),
+  agentId: z.string().min(1, 'Agent ID is required'),
   period: DateRangeSchema,
   metrics: PerformanceMetricsSchema,
   scriptPerformance: z.array(ScriptMetricsSchema),
@@ -79,7 +79,7 @@ export const AgentPerformanceValidation = {
     return validateData(
       AgentPerformanceSchema,
       data,
-      "Agent performance validation"
+      'Agent performance validation'
     );
   },
 
@@ -92,7 +92,7 @@ export const AgentPerformanceValidation = {
     return validateData(
       CreateAgentPerformanceSchema,
       data,
-      "Create agent performance validation"
+      'Create agent performance validation'
     );
   },
 
@@ -105,7 +105,7 @@ export const AgentPerformanceValidation = {
     return validateData(
       UpdateAgentPerformanceSchema,
       data,
-      "Update agent performance validation"
+      'Update agent performance validation'
     );
   },
 
@@ -118,7 +118,7 @@ export const AgentPerformanceValidation = {
     return validateData(
       PerformanceMetricsSchema,
       data,
-      "Performance metrics validation"
+      'Performance metrics validation'
     );
   },
 
@@ -126,14 +126,14 @@ export const AgentPerformanceValidation = {
    * Validate script metrics
    */
   validateScriptMetrics(data: unknown): ValidationResult<ScriptMetrics> {
-    return validateData(ScriptMetricsSchema, data, "Script metrics validation");
+    return validateData(ScriptMetricsSchema, data, 'Script metrics validation');
   },
 
   /**
    * Validate date range
    */
   validateDateRange(data: unknown): ValidationResult<DateRange> {
-    return validateData(DateRangeSchema, data, "Date range validation");
+    return validateData(DateRangeSchema, data, 'Date range validation');
   },
 
   /**
@@ -199,12 +199,12 @@ export const AgentPerformanceValidation = {
    * Get performance grade based on overall score
    */
   getPerformanceGrade(overallScore: number): string {
-    if (overallScore >= 0.9) return "A+";
-    if (overallScore >= 0.8) return "A";
-    if (overallScore >= 0.7) return "B";
-    if (overallScore >= 0.6) return "C";
-    if (overallScore >= 0.5) return "D";
-    return "F";
+    if (overallScore >= 0.9) return 'A+';
+    if (overallScore >= 0.8) return 'A';
+    if (overallScore >= 0.7) return 'B';
+    if (overallScore >= 0.6) return 'C';
+    if (overallScore >= 0.5) return 'D';
+    return 'F';
   },
 };
 
@@ -360,7 +360,7 @@ export class AgentPerformanceModel {
    */
   addOptimizationSuggestion(suggestion: string): void {
     if (!suggestion.trim()) {
-      throw new Error("Optimization suggestion cannot be empty");
+      throw new Error('Optimization suggestion cannot be empty');
     }
 
     if (!this._data.optimizationSuggestions.includes(suggestion)) {
@@ -512,19 +512,19 @@ export class AgentPerformanceModel {
     const areas: string[] = [];
 
     if (!this.isResponseTimeWithinSLA()) {
-      areas.push("Response time exceeds SLA");
+      areas.push('Response time exceeds SLA');
     }
 
     if (!this.hasGoodCustomerSatisfaction()) {
-      areas.push("Customer satisfaction below target");
+      areas.push('Customer satisfaction below target');
     }
 
     if (!this.hasAcceptableBookingRate()) {
-      areas.push("Appointment booking rate too low");
+      areas.push('Appointment booking rate too low');
     }
 
     if (!this.isPerformanceAboveThreshold()) {
-      areas.push("Overall conversion rate below threshold");
+      areas.push('Overall conversion rate below threshold');
     }
 
     return areas;
