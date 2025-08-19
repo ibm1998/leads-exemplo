@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "curriculo-d1dc4"
-  }
+    "default": "curriculo-d1dc4",
+    "Y": "curriculo-d1dc4"
+  },
+  "targets": {},
+  "etags": {}
 }

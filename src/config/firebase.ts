@@ -1,32 +1,16 @@
 import * as admin from 'firebase-admin';
 import { config } from './environment';
 
-const rawJson = config.FIREBASE_SERVICE_ACCOUNT_JSON;
-if (!rawJson) {
-  console.error('❌ FIREBASE_SERVICE_ACCOUNT_JSON não definida');
-  process.exit(1);
-}
 
-
-let serviceAccount: any;
-try {
-  serviceAccount = JSON.parse(rawJson);
-  // Corrige as quebras de linha do private_key, se necessário
-  if (serviceAccount.private_key) {
-    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-    // Garante compatibilidade com o tipo do SDK
-    serviceAccount.privateKey = serviceAccount.private_key;
-  } else if (serviceAccount.privateKey) {
-    serviceAccount.privateKey = serviceAccount.privateKey.replace(/\\n/g, '\n');
-  }
-} catch (err) {
-  console.error('❌ JSON inválido em FIREBASE_SERVICE_ACCOUNT_JSON:', err);
-  process.exit(1);
+import serviceAccount from '/workspaces/leads-exemplo/curriculo-d1dc4-firebase-adminsdk-fbsvc-76f87d1233.json';
+// Corrige as quebras de linha do private_key, se necessário
+if (serviceAccount.private_key) {
+  serviceAccount.private_key = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCrzs0fECi/TLIY\nk/8nOJKC8aTtv+IbmthYRRAfSRZWiakRw2T+L11u4KSNwv3+ze1YaXbktagb7C1x\n4FaMjwSd3rBJd/gaLxymU8kiLn2U91N+NUfiFMw1JDPKw3o2Qv5vnifz+nAAlZYa\nh/Fidv4op9Cyyy+T2nSYW7Yp5HUQMghapSQHR9jIwybNLQ93vgumpl7XX+gJz+HX\n3sKHiZJ9LPEZZaudBVMhDvS/mPPWLr80wxvcRsF5wPMpITSh28YnGytISeivMbPx\nCC99w6uUtg8DoeiYFGBhMxWfZE3E6VSdlZv85luKfH3vWRg56gcqJgh99QiJupRo\nY6esBZtnAgMBAAECggEAAnRuYqoJpJux7iWSZbsQzNiRcYKZkA9pIlaKSAgntSc7\nLsr97GvWblK8+l5cE4HzVdB1jgfSb31MzbqI26VHfM7FWHQwXuw0mpb9e4S/Vc7B\nQ9jH2CeEuDwPyWJI1fGktQkreCvB4e0OCGVpqFO1U46Vesu20epmWnu+lJN0RyQj\neXtFzLcN6xaHAXjsDoDBF7OwS5sKcLcmbhN9kqVWf2+4TN13MnSQfzUBlnv+uiPp\nB0eICZFhxVbhjksUpVjAEy8DBTPjB1r8ltz5M6cJz64ArfSlIaBe3OBu1sA7ABH/\nBMGTlvJcJ9qDBF4XjOWWmuKTCiSC+TLVMfe06oYHUQKBgQDV5xS0X8pnobUaPNhr\nUtoGLmPZASxtdjDbbRGS2VMz9l7qinInMG8UFCEP2teCrJxI8YQkgdzmtwlA4KcA\nisX7jXn6wf+uRY7BE98U2OtnPfIPhoDuhScMv9L5V18UYeeVINdAWobGM7wcH3WS\n8xoWijndIxZJ2uWLLgTByZn5GwKBgQDNnuIaJFvOZLf2CWgENKKE2ls83wWJg/xt\n3B1wfaDlekdfTdb1aNMdin7KdafZjzUU1Ij3tXI8p6NUkqosGYvxjG28qLUdNAxh\nyniWXzq5QwXzQJ8YEoQ2T3E/Y4EU/6incTU92yRy8Wpo5gDZpaPJkJ5URsMZ2tiJ\ngFR8gz33pQKBgHPZpw4WP4KnQ3YFdFWUVv84Ct4SU6SpecauKPF3AShIjJnNCAyP\nn+mpCUsUBNsCb9bV7/Lx3tmaUsmvouOZRad7tZAJmFgj1jBeedlJrx2IoFymRZhp\nx3+ROUvQdW+NoybS1aJGJW6dwIkexMglIIEKtlI92amAhAhAkVT/woP3AoGBAMKC\nxojMVDyOcqfAhjFUSVk75otSvj40KRsT2pWLgiUS42l4jRxiKTQMy5xiaIIaQrCN\nzXPmpUZTnuJmS6ykDgpWOYj6Xzpc/kmT6zb0puySRpKyUs3G1mM6C3tXeciPgM/E\n/ASjxXsmfO72hV9ene4TbHN07SMML0MDruiKjpgxAoGBAIUrK3QpsfowAGn//tbT\nIc2BWECh5IHSxiryHy5+ynYqvZkhX3RzZPx2F0UA6qa47mu6egUyw7Y+MQAm6iW4\ntLVlTgNKiLVBxcY1HahRBxhyTEoCI2Ci8VoRIrXF/fRE7fKTsygQadXrVIqjGfbd\nKrt5jAQgrqz4TOdSfuzXfZuE\n-----END PRIVATE KEY-----\n"
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: config.FIREBASE_DATABASE_URL,
+  credential: admin.credential.cert(serviceAccount.private_key),
+  databaseURL: serviceAccount.token_uri,
 });
 
 export { admin };

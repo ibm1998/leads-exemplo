@@ -40,7 +40,7 @@ async function main() {
     }
   });
 
-  const port = config.API_PORT || parseInt(process.env.PORT || '4000', 10);
+  const port = process.env.PORT || 4000;
   app.listen(port, () => {
     logger.info(`API listening on http://localhost:${port}`);
   });

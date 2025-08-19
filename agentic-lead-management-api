@@ -1,0 +1,11 @@
+
+> agentic-lead-management-api@1.0.0 deploy
+> npx firebase deploy --only hosting
+
+
+=== Deploying to 'curriculo-d1dc4'...
+
+i  deploying hosting
+i  hosting[curriculo-d1dc4]: beginning deploy...
+
+Error: Directory 'next-firebase-starter/out' for Hosting does not exist.

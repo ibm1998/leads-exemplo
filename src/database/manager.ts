@@ -1,3 +1,4 @@
+import serviceAccount from '../../curriculo-d1dc4-firebase-adminsdk-fbsvc-76f87d1233.json';
 // src/database/manager.ts
 
 
@@ -42,14 +43,22 @@ export class DatabaseManager {
       port: config.DATABASE_PORT,
       database: config.DATABASE_NAME,
       user: config.DATABASE_USER,
-      password: config.DATABASE_PASSWORD,
+  // ...existing code...
+  // Para uso do private_key, importe o JSON igual ao firebase.ts
+  // Exemplo:
+  // import serviceAccount from '../../curriculo-d1dc4-firebase-adminsdk-fbsvc-76f87d1233.json';
+  // password: serviceAccount.private_key,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
     });
 
     this.redisClient = createClient({
-      url: config.REDIS_URL,
+  // ...existing code...
+  // Para uso do token_uri, importe o JSON igual ao firebase.ts
+  // Exemplo:
+  // import serviceAccount from '../../curriculo-d1dc4-firebase-adminsdk-fbsvc-76f87d1233.json';
+  // url: serviceAccount.token_uri,
     });
   }
 
