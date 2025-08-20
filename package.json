@@ -15,8 +15,8 @@
     "db:migrate": "tsx src/database/migrate.ts",
     "db:seed": "tsx src/database/seed.ts",
     "type-check": "tsc --noEmit",
-  "lint": "eslint . --ext .ts,.tsx",
-  "deploy": "npx firebase deploy --only hosting"
+    "lint": "eslint . --ext .ts,.tsx",
+    "deploy": "npx firebase deploy --only hosting"
   },
   "dependencies": {
     "axios": "^1.11.0",
